@@ -1,0 +1,261 @@
+/*!*************************************************************************************************
+ * AdjusterMonkey.▐▀█▀▌█▀▀▄ █▀▀▀ █    █    ▄▀▀▄ · · · · · · · · · · · · · · · · · · · · · · · · · ·
+ *  · · · · · · ·   █  █▄▄▀ █▀▀  █  ▄ █  ▄ █  █  · · · · · · · · · · · · · · · · · · · · · · · · · · 
+ * · · · · · · · ·  █  ▀  ▀▄▀▀▀▀ ▀▀▀  ▀▀▀   ▀▀ .css · · · · · · · · · · · · · · · · · · · · · · · ·
+ * ·································································································
+ * Make aesthetic improvements to how Trello is styled by default.
+ *
+ * Designed for use with the Stylus web browser extension. Typically applied to the Trello website using the value « trello.com » for the setting « Applies to: URLs on the Domain ↓ ».
+ *
+ * @version 0.3.0
+ *
+ * @author Daniel C. Rieck <danielcrieck@gmail.com> (https://github.com/invokeImmediately)
+ * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/CSS/AdjusterMonkey.Trello.css
+ * @license MIT - Copyright (c) 2023 Daniel C. Rieck
+ *   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *****************************************************************/
+
+/* —» Specify CSS variables «— */
+
+:root {
+  --js-card-w: 272px;
+  --js-card-gap: 8px;
+}
+
+/* —» Tweak Card Descriptions «— */
+
+.js-fill-card-detail-desc .description-content,
+.js-fill-card-detail-desc  .js-description-draft {
+  font-family: 'Source Code Pro', 'Courier New', monospace;
+}
+
+.js-fill-card-detail-desc .description-content h1,
+.js-fill-card-detail-desc .description-content h2,
+.js-fill-card-detail-desc .description-content h3,
+.js-fill-card-detail-desc .description-content h4,
+.js-fill-card-detail-desc .description-content h5,
+.js-fill-card-detail-desc .description-content h6 {
+  font-family: 'Sofia Sans', 'Arial', sans;
+}
+
+.js-fill-card-detail-desc .description-content h1 {
+  font-size: 3em;
+  font-weight: 800;
+}
+
+.js-fill-card-detail-desc .description-content h2 {
+  font-size: 2.3em;
+  font-weight: 800;
+}
+
+.js-fill-card-detail-desc .description-content h3 {
+  font-size: 1.8em;
+  font-weight: 800;
+}
+
+.js-fill-card-detail-desc .description-content h4 {
+  font-size: 1.4em;
+  font-weight: 700;
+}
+
+.js-fill-card-detail-desc .description-content h5 {
+  font-size: 1.1em;
+  font-weight: 600;
+}
+
+.js-fill-card-detail-desc  .js-description-draft {
+  font-size: .9em;
+}
+
+.js-fill-card-detail-desc .description-content p {
+  white-space: pre-wrap;
+}
+
+/* —» Tweak presentation of code elements «— */
+
+.js-fill-card-detail-desc pre,
+.js-fill-card-detail-desc code {
+  background-color: rgb( 0 0 0 / 5% );
+}
+
+.js-fill-card-detail-desc code {
+  color: #c52a16;
+}
+
+.js-fill-card-detail-desc pre code {
+  background-color: transparent;
+}
+
+/* —» Enhance active card highlighting «— */
+
+.list-card.active-card {
+  outline: 2px solid rgb( 0 0 0 / 65% );
+  outline-offset: -2px;
+}
+
+/* —» Provide design for widened card columns «— */
+
+.js-list-content {
+  padding: 20px 10px;
+  position: relative;
+}
+
+.js-list-content:after,
+.js-list-content:before {
+  background: rgba( 0 0 0 / 8% );
+  border-radius: 10px;
+  bottom: 20px;
+  content: "";
+  position: absolute;
+  top: 20px;
+  width: 2px;
+}
+
+.js-list-content:before {
+  left: 9px;
+}
+
+.js-list-content:after {
+  right: 9px;
+}
+
+.js-list--1xl-wide {
+  width: calc( var(--js-card-w) * 2);
+}
+
+.js-list--2xl-wide {
+  width: calc( var(--js-card-w) * 3);
+}
+
+.js-list--3xl-wide {
+  width: calc( var(--js-card-w) * 4);
+}
+
+/* TODO: Design a presentation with left to right column packing order. */
+/*.js-list[class*="xl-wide"] .list-cards {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}*/
+
+.js-list[class*="xl-wide"] .list-cards > .list-card,
+.js-list[class*="xl-wide"] .list-cards > .card-composer {
+  display: inline-block;
+  margin-left: calc(var(--js-card-gap) / 2);
+  margin-right: calc(var(--js-card-gap) / 2);
+  max-width: none;
+  width: 100%;
+}
+
+/* TODO: Design a presentation with left to right column packing order. */
+
+/*.js-list[class*="xl-wide"] .full-cover-list-card {
+  width: 100%
+}
+
+.js-list--1xl-wide .list-cards > .list-card,
+.js-list--1xl-wide .list-cards > .card-composer {
+  width: calc(50% - var(--js-card-gap));
+}
+
+.js-list--2xl-wide .list-cards > .list-card,
+.js-list--2xl-wide .list-cards > .card-composer {
+  width: calc(33% - var(--js-card-gap));
+}
+
+.js-list--3xl-wide .list-cards > .list-card,
+.js-list--3xl-wide .list-cards > .card-composer {
+  width: calc(25% - var(--js-card-gap));
+}*/
+
+.js-list--1xl-wide .list-cards {
+  column-count: 2;
+}
+
+.js-list--2xl-wide .list-cards {
+  column-count: 3;
+}
+
+.js-list--3xl-wide .list-cards {
+  column-count: 4;
+}
+
+/* —» Label Trello lists and cards by numerical sequence «— */
+
+.list-card {
+  margin-left: .2em;
+  margin-top: 3px;
+}
+
+.list-card::before {
+  background-color: #fff;
+  border: 1px solid black;
+  border-radius: 3px;
+  content: attr( data-card-number );
+  font-size: .8em;
+  font-weight: 700;
+  line-height: 1.5;
+  opacity: 50%;
+  padding: 0 .2em;
+  position: absolute;
+  right: 100%;
+  transform: translateX(50%);
+  top: -3px;
+}
+
+/* —» Visually demark separate Kanban sub-boards present on a Trello board «— */
+
+#board {
+  --kanban-sub-board-border-w: 2px;
+  --kanban-sub-board-border-r: 5px;
+  --kanban-sub-board-edge-w: 4px;
+}
+
+.kanban-sub-board {
+  background-image: repeating-linear-gradient(135deg,rgba(0, 0, 0, .25) 0px,rgba(0, 0, 0, .25) 18px,rgba(0, 0, 0, 0) 19px,rgba(0, 0, 0, 0) 38px);
+}
+
+.kanban-sub-board--alt {
+  background: linear-gradient(135deg, rgba(0, 0, 128, .25) 25%, transparent 25%) -25px 0,
+    linear-gradient(225deg, rgba(0, 0, 128, .25) 25%, transparent 25%) -25px 0,
+    linear-gradient(315deg, rgba(0, 0, 128, .25) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(0, 0, 128, .25) 25%, transparent 25%);
+  background-size: 50px 50px;
+  background-color: transparent;
+}
+
+.kanban-sub-board--left {
+  border: var(--kanban-sub-board-border-w) solid rgba(0,0,0,.25);
+  border-radius: var(--kanban-sub-board-border-r);
+  border-right: 0;
+}
+
+.kanban-sub-board--left > .list {
+  border-left: var(--kanban-sub-board-edge-w) solid #555;
+}
+
+.kanban-sub-board--middle {
+  background-position-y: 47px;
+  border: var(--kanban-sub-board-border-w) solid rgba(0,0,0,.25);
+  border-left: 0;
+  border-radius: 3px;
+  border-right: 0;
+}
+
+.kanban-sub-board--alt.kanban-sub-board--middle,
+.kanban-sub-board--alt.kanban-sub-board--right {
+  background-position-y: 0;
+}
+
+.kanban-sub-board--right {
+  background-position-y: 38px;
+  border: var(--kanban-sub-board-border-w) solid rgba(0,0,0,.25);
+  border-radius: var(--kanban-sub-board-border-r);
+  border-left: 0;
+}
+
+.kanban-sub-board--right > .list {
+  border-right: var(--kanban-sub-board-edge-w) solid #555;
+}
