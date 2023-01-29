@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AdjusterMonkey: Trello
 // @namespace    http://tampermonkey.net/
-// @version      0.8
+// @version      0.9
 // @description  Enhance Trello workflows with adjustments to CSS and JS.
 // @author       Daniel Rieck <danielcrieck@gmail.com> (https://github.com/invokeImmediately)
 // @match        https://trello.com/*
@@ -18,7 +18,7 @@
  * ·································································································
  * Tampermonkey script designed to enhance Trello workflows with adjustments to CSS and JS.
  *
- * @version 0.8.1
+ * @version 0.9.0
  *
  * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/JS/AdjusterMonkey.Trello.js
@@ -246,21 +246,33 @@
         if ( !shouldClickWidenList( cardList, event ) ) {
           return;
         }
+        if ( event.shiftKey ) {
+          resetWideningOnOtherLists( cardList );
+        }
         if( event.ctrlKey ) {
           resetWidenedList( cardList );
           return;
         }
-        if (
-          cardList.classList.contains( "js-list--1xl-wide" ) ||
-          cardList.classList.contains( "js-list--2xl-wide" ) ||
-          cardList.classList.contains( "js-list--3xl-wide" )
-        ) {
+        const listHasBeenWidened = cardList.classList.contains( "js-list--1xl-wide" ) || cardList.classList.contains( "js-list--2xl-wide" ) || cardList.classList.contains( "js-list--3xl-wide" );
+        if ( listHasBeenWidened ) {
           cycleWidenedList( cardList );
         } else {
           widenNewList( cardList );
         }
       } );
     } );
+  }
+
+  function resetWideningOnOtherLists( cardList ) {
+    const allCardLists = document.querySelectorAll( '.js-list' );
+    cardList.dataset.protectFromWideningReset = "true";
+    allCardLists.forEach( ( otherList ) => {
+      if ( 'protectFromWideningReset' in otherList.dataset ) {
+        return;
+      }
+      resetWidenedList( otherList );
+    } );
+    delete cardList.dataset.protectFromWideningReset;
   }
 
   function shouldClickWidenList( cardList, event ) {
@@ -279,10 +291,6 @@
   }
 
   function widenNewList( cardList ) {
-    const otherCardLists = document.querySelectorAll( '.js-list' );
-    otherCardLists.forEach( ( otherList ) => {
-      resetWidenedList( otherList );
-    } );
     cardList.classList.add( "js-list--1xl-wide" );
   }
 
