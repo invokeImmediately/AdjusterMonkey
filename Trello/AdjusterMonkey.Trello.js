@@ -72,6 +72,16 @@
     setupCardNumbering();
   }
 
+  function iifeMain() {
+    window.addEventListener( 'load', ( event ) => {
+      loadCustomFontFromGoogle();
+      monitorTrelloLocation();
+      monitorForCustomTrelloHotkeys();
+      window.setTimeout( enhanceTrello, 1000 );
+      window.setTimeout( monitorBoard, 1000 );
+    } );
+  }
+
   function loadCustomFontFromGoogle() {
     const newLink = document.createElement( 'link' );
     newLink.type = 'text/css';
@@ -196,9 +206,9 @@
 
   function setupCardNumbering() {
     console.log( 'AdjusterMonkey is setting up numbering of cards.' );
-    const cardLists = document.querySelectorAll( '.js-list' );
+    const cardLists = document.querySelectorAll( iifeSettings.selectors.cardLists );
     cardLists.forEach( ( cardList ) => {
-      const cards = cardList.querySelectorAll( '.list-card' );
+      const cards = cardList.querySelectorAll( iifeSettings.selectors.cards );
       addNumbersToCards( cards );
       monitorListForCardChanges( cardList );
     } );
@@ -206,13 +216,13 @@
 
   function setupKanbanSubBoards() {
     console.log( 'AdjusterMonkey is setting up Kanban sub-boards.' );
-    const cardLists = document.querySelectorAll( '.js-list' );
+    const cardLists = document.querySelectorAll( iifeSettings.selectors.cardLists );
     const upcomingRegEx = /Upcoming §.+ Tasks/;
     const inProgressRegEx = /In Progress §.+ Tasks/;
     const completedRegEx = /Completed §.+ Tasks/;
     cardLists.forEach( ( cardList ) => {
       cardList.classList.remove( 'kanban-sub-board', 'kanban-sub-board--alt', 'kanban-sub-board--left', 'kanban-sub-board--middle', 'kanban-sub-board--right' );
-      const listHeading = cardList.querySelector( '.list-header-name-assist' ).textContent;
+      const listHeading = cardList.querySelector( iifeSettings.selectors.listHeading ).textContent;
       if( listHeading.match( upcomingRegEx ) ) {
         cardList.classList.add( 'kanban-sub-board', 'kanban-sub-board--left' );
       } else if ( listHeading.match( inProgressRegEx ) ) {
@@ -235,7 +245,7 @@
 
   function setupListWidening() {
     console.log( 'AdjusterMonkey is setting up list widening.' );
-    const cardLists = document.querySelectorAll( '.js-list' );
+    const cardLists = document.querySelectorAll( iifeSettings.selectors.cardLists );
     cardLists.forEach( ( cardList ) => {
       if ( cardList.dataset.hasListWidening === 'yes' ) {
         return;
@@ -264,7 +274,7 @@
   }
 
   function shouldClickWidenList( cardList, event ) {
-    const cardContent = cardList.querySelector( '.js-list-content' );
+    const cardContent = cardList.querySelector( iifeSettings.selectors.cardContent );
     const listRect = cardContent.getBoundingClientRect();
     const triggerBottom = listRect.bottom;
     const triggerLeft = listRect.left + iifeSettings.cardListPadding;
@@ -274,7 +284,7 @@
   }
 
   function windowOverlayIsActive() {
-    const windowOverlay = document.querySelector( '.window-overlay > .window' );
+    const windowOverlay = document.querySelector( iifeSettings.selectors.windowOverlay );
     return window.getComputedStyle( windowOverlay ).getPropertyValue('display') != 'none';
   }
 
@@ -286,13 +296,14 @@
     cardList.classList.add( "js-list--1xl-wide" );
   }
 
-  window.addEventListener( 'load', ( event ) => {
-    loadCustomFontFromGoogle();
-    monitorTrelloLocation();
-    monitorForCustomTrelloHotkeys();
-    window.setTimeout( enhanceTrello, 1000 );
-    window.setTimeout( monitorBoard, 1000 );
-  } );
+  iifeMain();
 } )( {
   cardListPadding: 10,
+  selectors: {
+    cardContent: '.js-list-content',
+    cards: '.list-card',
+    cardLists: '.js-list',
+    listHeading: '.list-header-name-assist',
+    windowOverlay: '.window-overlay > .window',
+  }
 } );
