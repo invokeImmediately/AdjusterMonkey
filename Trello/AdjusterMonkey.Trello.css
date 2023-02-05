@@ -1,13 +1,13 @@
 /*!*************************************************************************************************
  * AdjusterMonkey.▐▀█▀▌█▀▀▄ █▀▀▀ █    █    ▄▀▀▄ · · · · · · · · · · · · · · · · · · · · · · · · · ·
- *  · · · · · · ·   █  █▄▄▀ █▀▀  █  ▄ █  ▄ █  █  · · · · · · · · · · · · · · · · · · · · · · · · · · 
+ *  · · · · · · ·   █  █▄▄▀ █▀▀  █  ▄ █  ▄ █  █  · · · · · · · · · · · · · · · · · · · · · · · · · ·
  * · · · · · · · ·  █  ▀  ▀▄▀▀▀▀ ▀▀▀  ▀▀▀   ▀▀ .css · · · · · · · · · · · · · · · · · · · · · · · ·
  * ·································································································
  * Make aesthetic improvements to how Trello is styled by default.
  *
  * Designed for use with the Stylus web browser extension. Typically applied to the Trello website using the value « trello.com » for the setting « Applies to: URLs on the Domain ↓ ».
  *
- * @version 0.3.0
+ * @version 0.3.2
  *
  * @author Daniel C. Rieck <danielcrieck@gmail.com> (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/CSS/AdjusterMonkey.Trello.css
@@ -38,6 +38,13 @@
 .js-fill-card-detail-desc .description-content h5,
 .js-fill-card-detail-desc .description-content h6 {
   font-family: 'Sofia Sans', 'Arial', sans;
+}
+
+.js-fill-card-detail-desc .description-content h3,
+.js-fill-card-detail-desc .description-content h4,
+.js-fill-card-detail-desc .description-content h5,
+.js-fill-card-detail-desc .description-content h6 {
+  line-height: 1.25;
 }
 
 .js-fill-card-detail-desc .description-content h1 {
@@ -133,42 +140,14 @@
   width: calc( var(--js-card-w) * 4);
 }
 
-/* TODO: Design a presentation with left to right column packing order. */
-/*.js-list[class*="xl-wide"] .list-cards {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-}*/
-
 .js-list[class*="xl-wide"] .list-cards > .list-card,
-.js-list[class*="xl-wide"] .list-cards > .card-composer {
+.js-list[class*="xl-wide"] .list-cards > .card-composer:not(.hide) {
   display: inline-block;
   margin-left: calc(var(--js-card-gap) / 2);
   margin-right: calc(var(--js-card-gap) / 2);
   max-width: none;
   width: 100%;
 }
-
-/* TODO: Design a presentation with left to right column packing order. */
-
-/*.js-list[class*="xl-wide"] .full-cover-list-card {
-  width: 100%
-}
-
-.js-list--1xl-wide .list-cards > .list-card,
-.js-list--1xl-wide .list-cards > .card-composer {
-  width: calc(50% - var(--js-card-gap));
-}
-
-.js-list--2xl-wide .list-cards > .list-card,
-.js-list--2xl-wide .list-cards > .card-composer {
-  width: calc(33% - var(--js-card-gap));
-}
-
-.js-list--3xl-wide .list-cards > .list-card,
-.js-list--3xl-wide .list-cards > .card-composer {
-  width: calc(25% - var(--js-card-gap));
-}*/
 
 .js-list--1xl-wide .list-cards {
   column-count: 2;
@@ -181,6 +160,8 @@
 .js-list--3xl-wide .list-cards {
   column-count: 4;
 }
+
+/* TODO: Design a flexbox- or grid-based presentation with left-to-right column packing order? */
 
 /* —» Label Trello lists and cards by numerical sequence «— */
 

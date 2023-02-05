@@ -5,4 +5,4 @@ Scripts written for use with the [Tampermonkey](https://www.tampermonkey.net/) a
 
 ## Enhancements by Website
 
-- **Trello:** Card numbering, list widening, visualization of Kanban sub-boards
+- **Trello:** Card numbering, list widening, custom hotkeys, visualization of Kanban sub-boards, and typographic customizations
