@@ -18,7 +18,7 @@
  * ·································································································
  * Tampermonkey script designed to enhance Trello workflows with adjustments to CSS and JS.
  *
- * @version 0.9.1
+ * @version 0.9.2
  *
  * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/JS/AdjusterMonkey.Trello.js
@@ -38,19 +38,6 @@
     cards.forEach( ( card ) => {
       card.dataset.cardNumber = cardNumber.toString();
       cardNumber++;
-//      const existingNumberMarker = card.querySelector( '.list-card__number-marker' );
-//      if( existingNumberMarker !== null ) {
-//        if( existingNumberMarker.innerText != cardNumber.toString() ) {
-//          existingNumberMarker.innerText = cardNumber.toString();
-//        }
-//        cardNumber++;
-//        return;
-//      }
-//      const cardNumberIndicator = document.createElement( 'div' );
-//      cardNumberIndicator.className = 'list-card__number-marker';
-//      const cardNumberText = document.createTextNode( cardNumber.toString() );
-//      cardNumberIndicator.appendChild( cardNumberText );
-//      card.prepend( cardNumberIndicator );
     } );
   }
 
