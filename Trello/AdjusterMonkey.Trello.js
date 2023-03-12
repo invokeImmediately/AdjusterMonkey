@@ -18,7 +18,7 @@
  * ·································································································
  * Tampermonkey script designed to enhance Trello workflows with adjustments to CSS and JS.
  *
- * @version 0.9.0
+ * @version 0.9.1
  *
  * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/JS/AdjusterMonkey.Trello.js
@@ -217,27 +217,40 @@
   function setupKanbanSubBoards() {
     console.log( 'AdjusterMonkey is setting up Kanban sub-boards.' );
     const cardLists = document.querySelectorAll( iifeSettings.selectors.cardLists );
-    const upcomingRegEx = /Upcoming §.+ Tasks/;
-    const inProgressRegEx = /In Progress §.+ Tasks/;
-    const completedRegEx = /Completed §.+ Tasks/;
+    const upcomingRegEx = /Upcoming §(.+) Tasks/;
+    const inProgressRegEx = /In Progress §(.+) Tasks/;
+    const completedRegEx = /Completed §(.+) Tasks/;
     cardLists.forEach( ( cardList ) => {
+      // Start with a clean slate by removing classes that could have been applied to the list in a previous Kanban sub board process.
       cardList.classList.remove( 'kanban-sub-board', 'kanban-sub-board--alt', 'kanban-sub-board--left', 'kanban-sub-board--middle', 'kanban-sub-board--right' );
+
+      // Identify what role the list plays in its kanban sub board.
       const listHeading = cardList.querySelector( iifeSettings.selectors.listHeading ).textContent;
+      let subBoardTopic = undefined;
       if( listHeading.match( upcomingRegEx ) ) {
         cardList.classList.add( 'kanban-sub-board', 'kanban-sub-board--left' );
+        subBoardTopic = listHeading.match( upcomingRegEx )[ 1 ];
       } else if ( listHeading.match( inProgressRegEx ) ) {
         cardList.classList.add( 'kanban-sub-board', 'kanban-sub-board--middle' );
+        subBoardTopic = listHeading.match( inProgressRegEx )[ 1 ];
       } else if ( listHeading.match( completedRegEx ) ) {
         cardList.classList.add( 'kanban-sub-board', 'kanban-sub-board--right' );
+        subBoardTopic = listHeading.match( completedRegEx )[ 1 ];
       }
+
+      // Set up alternating backgrounds between sequential kanban sub boards.
       const prevCardList = cardList.previousElementSibling;
       const prevListHeading = prevCardList !== null ? prevCardList.querySelector( '.list-header-name-assist' ).textContent : null;
       const prevListIsKanbanSubBoard = prevCardList !== null && prevCardList.classList.contains( 'kanban-sub-board' );
-      if ( prevListIsKanbanSubBoard && prevListHeading.match( /Completed §.+ Tasks/ ) && !prevCardList.classList.contains( 'kanban-sub-board--alt' )) {
-        cardList.classList.add( 'kanban-sub-board--alt' );
+      let prevSubBoardTopic = undefined;
+      if( prevListHeading && prevListHeading.match( upcomingRegEx ) ) {
+        prevSubBoardTopic = prevListHeading.match( upcomingRegEx )[ 1 ];
+      } else if ( prevListHeading && prevListHeading.match( inProgressRegEx ) ) {
+        prevSubBoardTopic = prevListHeading.match( inProgressRegEx )[ 1 ];
+      } else if ( prevListHeading && prevListHeading.match( completedRegEx ) ) {
+        prevSubBoardTopic = prevListHeading.match( completedRegEx )[ 1 ];
       }
-      const prevListIsAltKanbanSubBoard = prevCardList !== null && prevCardList.classList.contains( 'kanban-sub-board--alt' );
-      if ( prevListIsAltKanbanSubBoard && ( prevListHeading.match( upcomingRegEx ) || prevListHeading.match( inProgressRegEx ) ) ) {
+      if ( prevListIsKanbanSubBoard && subBoardTopic !== undefined && ( ( subBoardTopic != prevSubBoardTopic && !prevCardList.classList.contains( 'kanban-sub-board--alt' ) ) || ( subBoardTopic == prevSubBoardTopic && prevCardList.classList.contains( 'kanban-sub-board--alt' ) ) ) ) {
         cardList.classList.add( 'kanban-sub-board--alt' );
       }
     } );
