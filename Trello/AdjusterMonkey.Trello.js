@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AdjusterMonkey: Trello
 // @namespace    http://tampermonkey.net/
-// @version      0.9
+// @version      0.10
 // @description  Enhance Trello workflows with adjustments to CSS and JS.
 // @author       Daniel Rieck <danielcrieck@gmail.com> (https://github.com/invokeImmediately)
 // @match        https://trello.com/*
@@ -18,7 +18,7 @@
  * ·································································································
  * Tampermonkey script designed to enhance Trello workflows with adjustments to CSS and JS.
  *
- * @version 0.9.3
+ * @version 0.10.0
  *
  * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/JS/AdjusterMonkey.Trello.js
@@ -41,15 +41,27 @@
     } );
   }
 
+  function convertListNameToLocalStorageKey( cardList ) {
+    const boardName = getBoardNameFromDOMViaCardList( cardList );
+    if ( boardName === null ) {
+      return null;
+    }
+    const listHeading = getCardListHeadingFromDOM( cardList );
+    return iifeSettings.localStorageKeyPrefix + '.' + boardName + '.' + listHeading;
+  }
+
   function cycleWidenedList( cardList ) {
-    if ( cardList.classList.contains( "js-list--1xl-wide" ) ) {
-      cardList.classList.remove( "js-list--1xl-wide" )
-      cardList.classList.add( "js-list--2xl-wide" )
-    } else if ( cardList.classList.contains( "js-list--2xl-wide" ) ) {
-      cardList.classList.remove( "js-list--2xl-wide" )
-      cardList.classList.add( "js-list--3xl-wide" )
+    if ( cardList.classList.contains( iifeSettings.listWideningClasses.width1x ) ) {
+      cardList.classList.remove( iifeSettings.listWideningClasses.width1x );
+      cardList.classList.add( iifeSettings.listWideningClasses.width2x );
+      window.localStorage.setItem( convertListNameToLocalStorageKey( cardList ), iifeSettings.listWideningClasses.width2x );
+    } else if ( cardList.classList.contains( iifeSettings.listWideningClasses.width2x ) ) {
+      cardList.classList.remove( iifeSettings.listWideningClasses.width2x );
+      cardList.classList.add( iifeSettings.listWideningClasses.width3x );
+      window.localStorage.setItem( convertListNameToLocalStorageKey( cardList ), iifeSettings.listWideningClasses.width3x );
     } else if ( cardList.classList.contains( "js-list--3xl-wide" ) ) {
-      cardList.classList.remove( "js-list--3xl-wide" )
+      cardList.classList.remove( "js-list--3xl-wide" );
+      window.localStorage.removeItem( convertListNameToLocalStorageKey( cardList ) );
     }
   }
 
@@ -57,6 +69,18 @@
     setUpCardNumbering();
     setUpListWidening();
     setUpKanbanSubBoards();
+  }
+
+  function getBoardNameFromDOMViaCardList( cardList ) {
+    const boardContentContainer = cardList.closest( iifeSettings.selectors.boardContent );
+    if ( boardContentContainer === null ) {
+      return null;
+    }
+    return boardContentContainer.querySelector( iifeSettings.selectors.boardHeader ).textContent;
+  }
+
+  function getCardListHeadingFromDOM( cardList ) {
+    return cardList.querySelector( iifeSettings.selectors.listHeading ).textContent;
   }
 
   function iifeMain() {
@@ -188,7 +212,20 @@
   }
 
   function resetWidenedList( cardList ) {
-      cardList.classList.remove( "js-list--1xl-wide", "js-list--2xl-wide", "js-list--3xl-wide" );
+    cardList.classList.remove(
+      iifeSettings.listWideningClasses.width1x,
+      iifeSettings.listWideningClasses.width2x,
+      iifeSettings.listWideningClasses.width3x
+    );
+    window.localStorage.removeItem( convertListNameToLocalStorageKey( cardList ) );
+  }
+
+  function setListWideningStateFromLocalStorage( cardList ) {
+    const wideningClassToApply = window.localStorage.getItem( convertListNameToLocalStorageKey( cardList ) );
+    if ( wideningClassToApply === null || cardList.classList.contains( wideningClassToApply ) ) {
+      return;
+    }
+    cardList.classList.add( wideningClassToApply );
   }
 
   function setUpCardNumbering() {
@@ -212,7 +249,7 @@
       cardList.classList.remove( 'kanban-sub-board', 'kanban-sub-board--alt', 'kanban-sub-board--left', 'kanban-sub-board--middle', 'kanban-sub-board--right' );
 
       // Identify what role the list plays in its kanban sub board.
-      const listHeading = cardList.querySelector( iifeSettings.selectors.listHeading ).textContent;
+      const listHeading =  getCardListHeadingFromDOM( cardList );
       let subBoardTopic = undefined;
       if( listHeading.match( upcomingRegEx ) ) {
         cardList.classList.add( 'kanban-sub-board', 'kanban-sub-board--left' );
@@ -252,6 +289,7 @@
       } else {
         cardList.dataset.hasListWidening = 'yes';
       }
+      setListWideningStateFromLocalStorage( cardList );
       cardList.addEventListener( 'click', ( event ) => {
         if ( !shouldClickWidenList( cardList, event ) ) {
           return;
@@ -263,7 +301,7 @@
           resetWidenedList( cardList );
           return;
         }
-        const listHasBeenWidened = cardList.classList.contains( "js-list--1xl-wide" ) || cardList.classList.contains( "js-list--2xl-wide" ) || cardList.classList.contains( "js-list--3xl-wide" );
+        const listHasBeenWidened = cardList.classList.contains( iifeSettings.listWideningClasses.width1x ) || cardList.classList.contains( iifeSettings.listWideningClasses.width2x ) || cardList.classList.contains( iifeSettings.listWideningClasses.width3x );
         if ( listHasBeenWidened ) {
           cycleWidenedList( cardList );
         } else {
@@ -301,14 +339,22 @@
   }
 
   function widenNewList( cardList ) {
-    cardList.classList.add( "js-list--1xl-wide" );
+    cardList.classList.add( iifeSettings.listWideningClasses.width1x );
+    window.localStorage.setItem( convertListNameToLocalStorageKey( cardList ), iifeSettings.listWideningClasses.width1x );
   }
 
   iifeMain();
 } )( {
   cardListPadding: 10,
+  listWideningClasses: {
+    width1x: 'js-list--1xl-wide',
+    width2x: 'js-list--2xl-wide',
+    width3x: 'js-list--3xl-wide',
+  },
   localStorageKeyPrefix: 'AdjusterMonkey.Trello.js',
   selectors: {
+    boardContent: '#content',
+    boardHeader: '.board-header h1.board-header-btn-text',
     cardContent: '.js-list-content',
     cards: '.list-card',
     cardLists: '.js-list',
