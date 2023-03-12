@@ -18,7 +18,7 @@
  * ·································································································
  * Tampermonkey script designed to enhance Trello workflows with adjustments to CSS and JS.
  *
- * @version 0.9.2
+ * @version 0.9.3
  *
  * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/JS/AdjusterMonkey.Trello.js
@@ -54,9 +54,9 @@
   }
 
   function enhanceTrello() {
-    setupListWidening();
-    setupKanbanSubBoards();
-    setupCardNumbering();
+    setUpCardNumbering();
+    setUpListWidening();
+    setUpKanbanSubBoards();
   }
 
   function iifeMain() {
@@ -191,7 +191,7 @@
       cardList.classList.remove( "js-list--1xl-wide", "js-list--2xl-wide", "js-list--3xl-wide" );
   }
 
-  function setupCardNumbering() {
+  function setUpCardNumbering() {
     console.log( 'AdjusterMonkey is setting up numbering of cards.' );
     const cardLists = document.querySelectorAll( iifeSettings.selectors.cardLists );
     cardLists.forEach( ( cardList ) => {
@@ -201,7 +201,7 @@
     } );
   }
 
-  function setupKanbanSubBoards() {
+  function setUpKanbanSubBoards() {
     console.log( 'AdjusterMonkey is setting up Kanban sub-boards.' );
     const cardLists = document.querySelectorAll( iifeSettings.selectors.cardLists );
     const upcomingRegEx = /Upcoming §(.+) Tasks/;
@@ -243,7 +243,7 @@
     } );
   }
 
-  function setupListWidening() {
+  function setUpListWidening() {
     console.log( 'AdjusterMonkey is setting up list widening.' );
     const cardLists = document.querySelectorAll( iifeSettings.selectors.cardLists );
     cardLists.forEach( ( cardList ) => {
@@ -307,6 +307,7 @@
   iifeMain();
 } )( {
   cardListPadding: 10,
+  localStorageKeyPrefix: 'AdjusterMonkey.Trello.js',
   selectors: {
     cardContent: '.js-list-content',
     cards: '.list-card',
