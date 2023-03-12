@@ -7,7 +7,7 @@
  *
  * Designed for use with the Stylus web browser extension. Typically applied to the Trello website using the value « trello.com » for the setting « Applies to: URLs on the Domain ↓ ».
  *
- * @version 0.3.2
+ * @version 0.3.3
  *
  * @author Daniel C. Rieck <danielcrieck@gmail.com> (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/CSS/AdjusterMonkey.Trello.css
@@ -17,14 +17,14 @@
  *   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *****************************************************************/
 
-/* —» Specify CSS variables «— */
+/* ---—» Specify CSS variables «—--- */
 
 :root {
   --js-card-w: 272px;
   --js-card-gap: 8px;
 }
 
-/* —» Tweak Card Descriptions «— */
+/* ---—» Tweak Card Descriptions «—--- */
 
 .js-fill-card-detail-desc .description-content,
 .js-fill-card-detail-desc  .js-description-draft {
@@ -80,7 +80,7 @@
   white-space: pre-wrap;
 }
 
-/* —» Tweak presentation of code elements «— */
+/* ---—» Tweak presentation of code elements «—--- */
 
 .js-fill-card-detail-desc pre,
 .js-fill-card-detail-desc code {
@@ -95,14 +95,14 @@
   background-color: transparent;
 }
 
-/* —» Enhance active card highlighting «— */
+/* ---—» Enhance active card highlighting «—--- */
 
 .list-card.active-card {
   outline: 2px solid rgb( 0 0 0 / 65% );
   outline-offset: -2px;
 }
 
-/* —» Provide design for widened card columns «— */
+/* ---—» Provide design for widened card columns «—--- */
 
 .js-list-content {
   padding: 20px 10px;
@@ -163,7 +163,7 @@
 
 /* TODO: Design a flexbox- or grid-based presentation with left-to-right column packing order? */
 
-/* —» Label Trello lists and cards by numerical sequence «— */
+/* ---—» Label Trello lists and cards by numerical sequence «—--- */
 
 .list-card {
   margin-left: .2em;
@@ -186,7 +186,7 @@
   top: -3px;
 }
 
-/* —» Visually demark separate Kanban sub-boards present on a Trello board «— */
+/* ---—» Visually demark separate Kanban sub-boards present on a Trello board «—--- */
 
 #board {
   --kanban-sub-board-border-w: 2px;
@@ -220,9 +220,9 @@
 .kanban-sub-board--middle {
   background-position-y: 47px;
   border: var(--kanban-sub-board-border-w) solid rgba(0,0,0,.25);
-  border-left: 0;
+  border-left-width: 0;
   border-radius: 3px;
-  border-right: 0;
+  border-right-width: 0;
 }
 
 .kanban-sub-board--alt.kanban-sub-board--middle,
@@ -234,7 +234,7 @@
   background-position-y: 38px;
   border: var(--kanban-sub-board-border-w) solid rgba(0,0,0,.25);
   border-radius: var(--kanban-sub-board-border-r);
-  border-left: 0;
+  border-left-width: 0;
 }
 
 .kanban-sub-board--right > .list {
