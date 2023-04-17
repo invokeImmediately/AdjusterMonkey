@@ -35,6 +35,7 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
       if ( typeof guiSettings !== 'undefined' ) {
         this.#applySettingsToGui( guiSettings );
       }
+      this.#setUndefinedElementIds();
       if ( typeof document !== 'undefined' ) {
         this.#insertGuiIntoDom();
       }
@@ -45,13 +46,30 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
       if ( 'bemCssClasses' in settings ) {
         this.#setBemCssClasses( settings.bemCssClasses );
       }
-      this.guiVersion.gui = this.#setPropertySafely( settings.guiVersion, this.guiVersion );
+      this.guiVersion = this.#setPropertySafely( settings.guiVersion, this.guiVersion );
       this.targetApplication = this.#setPropertySafely( settings.targetApplication, this.targetApplication );
+    }
+
+    #convertCamelcaseToSnakeCase( inputString ) {
+      if ( typeof inputString !== 'string' ) {
+        return null;
+      }
+      if ( inputString == "" ) {
+        return inputString;
+      }
+      let output = inputString[0].toLowerCase();
+      for ( let i = 1; i < inputString.length; i++ ) {
+        if ( this.#isCharacterUppercase( inputString[ i ] ) && ( !this.#isCharacterUppercase( inputString[ i - 1 ] ) || ( i < inputString.length - 1 && !this.#isCharacterUppercase( inputString[ i + 1 ] ) ) ) ) {
+          output += '-';
+        }
+        output += inputString[ i ].toLowerCase();
+      }
+      return output;
     }
 
     #createGuiElement() {
       const $gui = document.createElement( 'form' );
-      $gui.id = this.elementIds.adjusterMonkeyGui.id;
+      $gui.id = this.elementIds.adjusterMonkeyGui;
       $gui.classList.add( this.bemCssClasses.guiBlock );
       $gui.innerHTML = this.#generateInnerHtmlForGui();
       // TODO: Generate selectors to internal DOM Elements // this.#generateElementSelectors();
@@ -92,6 +110,14 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
       this.#parentElement.append( this.#guiElements.gui );
     }
 
+    #isCharacterUppercase( character ) {
+      if ( typeof character !== 'string' || character.length !== 1 ) {
+        return null;
+      }
+      const regExTest = /[A-Z]/;
+      return character.match( regExTest );
+    }
+
     #setBemCssClasses( bemCssClasses ) {
       this.bemCssClasses.guiBlock = this.#setPropertySafely( bemCssClasses.guiBlock, this.bemCssClasses.guiBlock );
       if( 'guiElements' in bemCssClasses && typeof bemCssClasses.guiElements === 'object' ) {
@@ -126,9 +152,22 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
       return prospectiveSetting ? prospectiveSetting : safeSetting;
     }
 
+    #setUndefinedElementIds() {
+      let guiId = '';
+      for( let key in this.elementIds ) {
+        if ( key == 'adjusterMonkeyGui' ) {
+          this.elementIds[ key ] = this.#convertCamelcaseToSnakeCase( key );
+          guiId = this.elementIds[ key ];
+        } else {
+          this.elementIds[ key ] = guiId + '_' + this.#convertCamelcaseToSnakeCase( key );
+        }
+        console.log( this.elementIds[ key ] );
+      }
+    }
+
     printGuiSettings() {
       console.log(
-`Settings for instance of AdjusterMonkeyGui are as follows:
+/*`Settings for instance of AdjusterMonkeyGui are as follows:
   ├─bemCssClasses:
   │ ├─.guiBlock: ${this.bemCssClasses.guiBlock}
   │ ├─.guiElements
@@ -165,8 +204,10 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
   │ └─.url: ${this.logoDetails.url}
   ├─selectors:
   │ └─.domInsertionPoint: ${this.selectors.domInsertionPoint}
-  └─targetApplication: ${this.targetApplication}
-` );
+  └─targetApplication: ${this.targetApplication}`*/
+  `Settings for instance of AdjusterMonkeyGui are as follows:
+${JSON.stringify(this)}`
+  );
     }
   }
 
@@ -221,11 +262,11 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
 
 // NODE.JS TEST CODE:
 
-// const gui = new AdjusterMonkeyGui( {
-//   domInsertionPointSelector: 'body',
-//   bemCssClasses: {
-//     gui: 'adjuster-monkey-trello-gui',
-//   },
-// } );
+const gui = new AdjusterMonkeyGui( {
+  domInsertionPointSelector: 'body',
+  bemCssClasses: {
+    gui: 'adjuster-monkey-trello-gui',
+  },
+} );
 
-// gui.printGuiSettings();
+gui.printGuiSettings();
