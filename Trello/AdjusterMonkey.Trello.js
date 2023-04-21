@@ -18,7 +18,7 @@
  * ·································································································
  * Tampermonkey script designed to enhance Trello workflows with adjustments to CSS and JS.
  *
- * @version 0.10.1
+ * @version 0.10.2
  *
  * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
  * @link https://github.com/invokeImmediately/AdjusterMonkey/blob/main/Trello/AdjusterMonkey.Trello.js
@@ -354,7 +354,7 @@
   localStorageKeyPrefix: 'AdjusterMonkey.Trello.js',
   selectors: {
     boardContent: '#content',
-    boardHeader: '.board-header h1.board-header-btn-text',
+    boardHeader: '.board-header h1[data-testid="board-name-display"]',
     cardContent: '.js-list-content',
     cards: '.list-card',
     cardLists: '.js-list',
