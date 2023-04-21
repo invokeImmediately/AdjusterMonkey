@@ -18,10 +18,10 @@
  * ·································································································
  * Tampermonkey script designed to enhance Trello workflows with adjustments to CSS and JS.
  *
- * @version 0.10.0
+ * @version 0.10.1
  *
  * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
- * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/JS/AdjusterMonkey.Trello.js
+ * @link https://github.com/invokeImmediately/AdjusterMonkey/blob/main/Trello/AdjusterMonkey.Trello.js
  * @license MIT - Copyright (c) 2023 Daniel C. Rieck
  *   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
