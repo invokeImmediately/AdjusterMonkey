@@ -11,7 +11,7 @@
  *  development of a site. Utilities include a CSS scanner that can quickly
  *  identify a website's linked stylesheets.
  *
- * @version 0.0.0
+ * @version 0.0.1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -68,17 +68,19 @@ const adj4rMnkyCmdLn = ( function() {
     }
 
     printLinkedCssFiles() {
-      console.table( this.linkedCssFiles, [ 'htmlId', 'ssUrl' ] );
+      console.table( this.linkedCssFiles, [ 'htmlId', 'section', 'ssUrl' ] );
     }
 
     scanForCssFiles() {
       const linkedCssFiles = document.querySelectorAll(
-        'head link[rel="stylesheet"]'
+        'link[rel="stylesheet"]'
       );
       const scanResults = [];
       const linksAttrsList = new Set();
       linkedCssFiles.forEach( ( link, index ) => {
         this.#extractAttrsFromSsLink( link, linksAttrsList );
+
+        // Find the source URL for the linked CSS file
         let hrefVal = link.href;
         if ( hrefVal == '' ) {
           hrefVal = link.dataset.href;
@@ -86,11 +88,22 @@ const adj4rMnkyCmdLn = ( function() {
         if ( hrefVal == '' ) {
           return;
         }
+
+        // Determine the section of the DOM, head or body, of the link
+        let domSection = 'neither';
+        if ( link.closest( 'head' ) !== null ) {
+          domSection = 'head';
+        } else if ( link.closest( 'body' ) !== null ) {
+          domSection = 'body';
+        }
+
+        // Store scan results for later
         scanResults.push( {
           htmlId: link.id,
+          section: domSection,
           ssUrl: hrefVal,
         } );
-      } )
+      } );
       this.linksAttrsList = this.#sortAttrsFromSsLinks( linksAttrsList );
       this.linkedCssFiles = scanResults;
     }
