@@ -11,7 +11,7 @@
  *  development of a site. Utilities include a CSS scanner that can quickly
  *  identify a website's linked stylesheets.
  *
- * @version 0.0.1
+ * @version 0.1.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -39,6 +39,8 @@
  */
 
 const adj4rMnkyCmdLn = ( function() {
+  'use strict';
+
   class Adj4rMnkyCmdLn {
     constructor() {
       this.cssScanner = new CssScanner();
@@ -50,6 +52,9 @@ const adj4rMnkyCmdLn = ( function() {
 
   class CssScanner {
     constructor() {
+      this.classesUsedInPage = undefined;
+      this.linkedCssFiles = undefined;
+      this.linksAttrsList = undefined;
       this.scanForCssFiles();
       console.log(
 `New CSS Scanner created for an Adjuster Monkey command line interface.`
@@ -63,12 +68,35 @@ const adj4rMnkyCmdLn = ( function() {
       }
     }
 
+    #extractClassesUsedInPage() {
+      const cssClassSet = new Set();
+      const bodyElems = document.querySelectorAll( 'body, body *' );
+      bodyElems.forEach( ( elem, index ) => {
+        for ( let index = 0; index < elem.classList.length; index++ ) {
+          cssClassSet.add( elem.classList.item( index ) );
+        }
+      } );
+      return cssClassSet;
+    }
+
+    printClassesUsedInPage() {
+      if ( this.classesUsedInPage === undefined ) {
+        this.scanForClassesUsedInPage();
+      }
+      console.log( this.classesUsedInPage );
+    }
+
     printLinksAttrsList() {
       console.log( this.linksAttrsList );
     }
 
     printLinkedCssFiles() {
       console.table( this.linkedCssFiles, [ 'htmlId', 'section', 'ssUrl' ] );
+    }
+
+    scanForClassesUsedInPage() {
+      const cssClassSet = this.#extractClassesUsedInPage();
+      this.classesUsedInPage = Array.from( cssClassSet ).toSorted();
     }
 
     scanForCssFiles() {
