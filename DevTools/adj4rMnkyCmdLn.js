@@ -11,7 +11,7 @@
  *  development of a site. Utilities include a CSS scanner that can quickly
  *  identify a website's linked stylesheets.
  *
- * @version 0.1.1
+ * @version 0.2.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -51,10 +51,11 @@ const adj4rMnkyCmdLn = ( function() {
   }
 
   class CssScanner {
+    #classesUsedInPage;
+    #linkedCssFiles;
+    #linksAttrsList;
+
     constructor() {
-      this.classesUsedInPage = undefined;
-      this.linkedCssFiles = undefined;
-      this.linksAttrsList = undefined;
       this.scanForCssFiles();
       console.log(
 `New CSS Scanner created for an Adjuster Monkey command line interface.`
@@ -79,33 +80,40 @@ const adj4rMnkyCmdLn = ( function() {
       return cssClassSet;
     }
 
-    printClassesUsedInPage() {
-      if ( this.classesUsedInPage === undefined ) {
+    get classesUsedInPage() {
+      if ( this.#classesUsedInPage === undefined ) {
         this.scanForClassesUsedInPage();
       }
-      console.log( this.classesUsedInPage );
+      return this.#classesUsedInPage.join( '\n' );
+    }
+
+    printClassesUsedInPage() {
+      if ( this.#classesUsedInPage === undefined ) {
+        this.scanForClassesUsedInPage();
+      }
+      console.log( this.#classesUsedInPage );
     }
 
     printLinksAttrsList() {
-      console.log( this.linksAttrsList );
+      console.log( this.#linksAttrsList );
     }
 
     printLinkedCssFiles() {
-      console.table( this.linkedCssFiles, [ 'htmlId', 'section', 'ssUrl' ] );
+      console.table( this.#linkedCssFiles, [ 'htmlId', 'section', 'ssUrl' ] );
     }
 
     scanForClassesUsedInPage() {
       const cssClassSet = this.#extractClassesUsedInPage();
-      this.classesUsedInPage = Array.from( cssClassSet ).toSorted();
+      this.#classesUsedInPage = Array.from( cssClassSet ).toSorted();
     }
 
     scanForCssFiles() {
-      const linkedCssFiles = document.querySelectorAll(
+      const cssFileLinks = document.querySelectorAll(
         'link[rel="stylesheet"]'
       );
       const scanResults = [];
       const linksAttrsList = new Set();
-      linkedCssFiles.forEach( ( link, index ) => {
+      cssFileLinks.forEach( ( link, index ) => {
         this.#extractAttrsFromSsLink( link, linksAttrsList );
 
         // Find the source URL for the linked CSS file
@@ -132,8 +140,8 @@ const adj4rMnkyCmdLn = ( function() {
           ssUrl: hrefVal,
         } );
       } );
-      this.linksAttrsList = this.#sortAttrsFromSsLinks( linksAttrsList );
-      this.linkedCssFiles = scanResults;
+      this.#linksAttrsList = this.#sortAttrsFromSsLinks( linksAttrsList );
+      this.#linkedCssFiles = scanResults;
     }
 
     #sortAttrsFromSsLinks( attrsSet ) {
