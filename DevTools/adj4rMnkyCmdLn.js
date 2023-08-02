@@ -11,7 +11,7 @@
  *  development of a site. Utilities include a CSS scanner that can quickly
  *  identify a website's linked stylesheets.
  *
- * @version 0.1.0
+ * @version 0.1.1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -20,7 +20,7 @@
  * @link https://github.com/invokeImmediately/WSU-DAESA-JS…
  *  …/blob/main/Chrome-Snippets/github-extract-wds-constituents.js
  *
- * @license MIT — Copyright 2021. by Washington State University
+ * @license MIT — Copyright 2023 by Daniel C. Rieck.
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the "Software"), to
  *   deal in the Software without restriction, including without limitation the
