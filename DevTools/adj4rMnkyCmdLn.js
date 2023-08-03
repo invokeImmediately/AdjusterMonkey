@@ -11,7 +11,7 @@
  *  development of a site. Utilities include a CSS scanner that can quickly
  *  identify a website's linked stylesheets.
  *
- * @version 0.2.0
+ * @version 0.2.1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -84,7 +84,7 @@ const adj4rMnkyCmdLn = ( function() {
       if ( this.#classesUsedInPage === undefined ) {
         this.scanForClassesUsedInPage();
       }
-      return this.#classesUsedInPage.join( '\n' );
+      return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
     }
 
     printClassesUsedInPage() {
@@ -103,8 +103,7 @@ const adj4rMnkyCmdLn = ( function() {
     }
 
     scanForClassesUsedInPage() {
-      const cssClassSet = this.#extractClassesUsedInPage();
-      this.#classesUsedInPage = Array.from( cssClassSet ).toSorted();
+      this.#classesUsedInPage = this.#extractClassesUsedInPage();
     }
 
     scanForCssFiles() {
