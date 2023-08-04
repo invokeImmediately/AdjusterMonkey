@@ -63,13 +63,6 @@ const adj4rMnkyCmdLn = ( function() {
       );
     }
 
-    get classesUsedInPage() {
-      if ( this.#classesUsedInPage === undefined ) {
-        this.scanForClassesUsedInPage();
-      }
-      return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
-    }
-
     #extractAttrsFromSsLink( link, attrsSet ) {
       const numAttrs = link.attributes.length;
       for( let index = 0; index < numAttrs; index++ ) {
@@ -86,6 +79,49 @@ const adj4rMnkyCmdLn = ( function() {
         }
       } );
       return cssClassSet;
+    }
+
+    async #fetchStylesheetCode( url ) {
+      let finalResponse = null;
+      if ( !(
+        typeof url == 'string' &&
+        url.match( /^https?:\/\/.+\.css(?:\?.+)?$/i )
+      ) ) {
+        throw new TypeError(
+`When attempting to fetch stylesheet code, a URL I was given for a stylesheet:
+ « ${url} »
+ does not take the expected form.`
+        );
+      }
+      // TODO: Add error catching for situations including CORS violations.
+      await fetch( url, { headers: { 'Content-Type': 'text/css' } } )
+        .then( ( response ) => {
+          if ( !response.ok ) {
+            throw new Error(
+`Unable to access resource « ${url} ». Status returned was ${response.status}.`
+            );
+          }
+          return response.text();
+        } )
+        .then( ( response ) => {
+          finalResponse = response;
+        } );
+      return finalResponse;
+    }
+
+    #sortAttrsFromSsLinks( attrsSet ) {
+      const attrs = [];
+      for( const attr of attrsSet ) {
+        attrs.push( attr );
+      }
+      return attrs.toSorted();
+    }
+
+    get classesUsedInPage() {
+      if ( this.#classesUsedInPage === undefined ) {
+        this.scanForClassesUsedInPage();
+      }
+      return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
     }
 
     printClassesUsedInPage() {
@@ -144,12 +180,36 @@ const adj4rMnkyCmdLn = ( function() {
       this.#linkedCssFiles = scanResults;
     }
 
-    #sortAttrsFromSsLinks( attrsSet ) {
-      const attrs = [];
-      for( const attr of attrsSet ) {
-        attrs.push( attr );
+    async scanCssFile( whichFile ) {
+      if ( !(
+        typeof whichFile === 'string' || typeof whichFile === 'number'
+      ) ) {
+        throw new TypeError(
+`I was given the following input for scanning a CSS file:
+ « ${whichFile} »
+ This input was not a string or number as expected.`
+        );
       }
-      return attrs.toSorted();
+      if ( typeof whichFile === 'string' &&
+        !Number.isNaN( parseInt( whichFile ) )
+      ) {
+        whichFile = parseInt( whichFile );
+      }
+      if ( typeof whichFile === 'number' && (
+        whichFile < 0 || whichFile >= this.#linkedCssFiles.length
+      ) ) {
+        throw new RangeError(
+`I was given the following index as input for scanning a CSS file:
+ « ${whichFile} »
+ This index is out of range with respect to the number of linked CSS files
+ loaded by this page.`
+        );
+      }
+      if ( typeof whichFile === 'number' ) {
+        whichFile = this.#linkedCssFiles[ whichFile ].ssUrl;
+      }
+      this.#scannedCssFile = this.#fetchStylesheetCode( whichFile );
+      return this.#scannedCssFile;
     }
   }
 
