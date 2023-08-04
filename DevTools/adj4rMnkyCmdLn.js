@@ -11,7 +11,7 @@
  *  development of a site. Utilities include a CSS scanner that can quickly
  *  identify a website's linked stylesheets.
  *
- * @version 0.2.1
+ * @version 0.2.2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -54,12 +54,20 @@ const adj4rMnkyCmdLn = ( function() {
     #classesUsedInPage;
     #linkedCssFiles;
     #linksAttrsList;
+    #scannedCssFile;
 
     constructor() {
       this.scanForCssFiles();
       console.log(
 `New CSS Scanner created for an Adjuster Monkey command line interface.`
       );
+    }
+
+    get classesUsedInPage() {
+      if ( this.#classesUsedInPage === undefined ) {
+        this.scanForClassesUsedInPage();
+      }
+      return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
     }
 
     #extractAttrsFromSsLink( link, attrsSet ) {
@@ -78,13 +86,6 @@ const adj4rMnkyCmdLn = ( function() {
         }
       } );
       return cssClassSet;
-    }
-
-    get classesUsedInPage() {
-      if ( this.#classesUsedInPage === undefined ) {
-        this.scanForClassesUsedInPage();
-      }
-      return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
     }
 
     printClassesUsedInPage() {
