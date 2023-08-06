@@ -11,7 +11,7 @@
  *  development of a site. Utilities include a CSS scanner that can quickly
  *  identify a website's linked stylesheets.
  *
- * @version 0.2.2
+ * @version 0.3.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -45,7 +45,8 @@ const adj4rMnkyCmdLn = ( function() {
     constructor() {
       this.cssScanner = new CssScanner();
       console.log(
-`New Adjuster Monkey command line interface created.`
+`( 🐵🛠️ AdjusterMonkey Notice ) => New instance of AdjusterMonkey DevTools
+ command-line utility created.`
       );
     }
   }
@@ -59,7 +60,8 @@ const adj4rMnkyCmdLn = ( function() {
     constructor() {
       this.scanForCssFiles();
       console.log(
-`New CSS Scanner created for an Adjuster Monkey command line interface.`
+`( 🐵🛠️ AdjusterMonkey Notice ) => New CSS Scanner added to an AdjusterMonkey
+ DevTools command-line utility.`
       );
     }
 
@@ -88,7 +90,8 @@ const adj4rMnkyCmdLn = ( function() {
         url.match( /^https?:\/\/.+\.css(?:\?.+)?$/i )
       ) ) {
         throw new TypeError(
-`When attempting to fetch stylesheet code, a URL I was given for a stylesheet:
+`( 🐵🛠️ AdjusterMonkey Notice ) => When attempting to fetch stylesheet code, a
+ URL I was given for a stylesheet:
  « ${url} »
  does not take the expected form.`
         );
@@ -98,7 +101,10 @@ const adj4rMnkyCmdLn = ( function() {
         .then( ( response ) => {
           if ( !response.ok ) {
             throw new Error(
-`Unable to access resource « ${url} ». Status returned was ${response.status}.`
+`( 🐵🛠️ AdjusterMonkey Notice ) => Unable to access resource:
+ « ${url} »
+ Status returned was:
+ « ${response.status} »`
             );
           }
           return response.text();
@@ -128,7 +134,7 @@ const adj4rMnkyCmdLn = ( function() {
       if ( this.#classesUsedInPage === undefined ) {
         this.scanForClassesUsedInPage();
       }
-      console.log( this.#classesUsedInPage );
+      console.log( Array.from( this.#classesUsedInPage ).toSorted() );
     }
 
     printLinksAttrsList() {
@@ -199,7 +205,8 @@ const adj4rMnkyCmdLn = ( function() {
         whichFile < 0 || whichFile >= this.#linkedCssFiles.length
       ) ) {
         throw new RangeError(
-`I was given the following index as input for scanning a CSS file:
+`( 🐵🛠️ AdjusterMonkey Notice ) => I was given the following index as input for
+ scanning a CSS file:
  « ${whichFile} »
  This index is out of range with respect to the number of linked CSS files
  loaded by this page.`
@@ -215,6 +222,21 @@ const adj4rMnkyCmdLn = ( function() {
 
   function main() {
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
+    if ( window.adj4rMnkyCmdLn === undefined ) {
+      window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
+      console.log(
+`( 🐵🛠️ AdjusterMonkey Notice ) => An instance of the AdjusterMonkkey DevTools
+ command-line utility has been added to the window object for use with the
+ DevTools console.`
+      );
+    } else {
+      console.log(
+`( 🐵🛠️ AdjusterMonkey Notice ) => When attempting to add an instance of the
+ AdjusterMonkkey DevTools command-line utility to the window object for use with
+ the DevTools console, it was found that the adj4rMnkyCmdLn property was already
+ present. Consequently, the instance was not added.`
+      );
+    }
     return adj4rMnkyCmdLn;
   }
 
