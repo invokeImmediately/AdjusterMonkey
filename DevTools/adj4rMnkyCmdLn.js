@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.3.1
+ * @version 0.3.2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -43,26 +43,40 @@ const adj4rMnkyCmdLn = ( function() {
   'use strict';
 
   class Adj4rMnkyCmdLn {
+    #prefix4Msgs = '( 🐵 AdjusterMonkey 🛠️ ) =>';
+
     constructor() {
-      this.cssScanner = new CssScanner();
+      this.cssScanner = new CssScanner( this );
       console.log(
 `( 🐵 AdjusterMonkey 🛠️ ) => A new instance of AdjusterMonkey for use with the
  DevTools command-line interface has been created.`
       );
     }
+
+    getLabeledMsg( msg ) {
+      return `${this.#prefix4Msgs} ${msg}`;
+    }
+
+    logMsg( msgText ) {
+      console.log( this.getLabeledMsg( msgText ) );
+    }
   }
 
   class CssScanner {
+    #adj4rMnkyCmdLn;
     #classesUsedInPage;
     #linkedCssFiles;
     #linksAttrsList;
     #scannedCssFile;
 
-    constructor() {
+    constructor( adj4rMnkyCmdLn ) {
+      this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
       this.scanForCssFiles();
+      this.#adj4rMnkyCmdLn.logMsg(
+`New CSS Scanner added to the AdjusterMonkey instance used with the DevTools
+ command-line interface.`
+      );
       console.log(
-`( 🐵 AdjusterMonkey 🛠️ ) => New CSS Scanner added to the AdjusterMonkey
- instance used with the DevTools command-line interface.`
       );
     }
 
@@ -90,23 +104,22 @@ const adj4rMnkyCmdLn = ( function() {
         typeof url == 'string' &&
         url.match( /^https?:\/\/.+\.css(?:\?.+)?$/i )
       ) ) {
-        throw new TypeError(
-`( 🐵 AdjusterMonkey 🛠️ ) => When attempting to fetch stylesheet code, a URL I
- was given for a stylesheet:
+        throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
+`When attempting to fetch stylesheet code, a URL I was given for a stylesheet:
  « ${url} »
  does not take the expected form.`
-        );
+        ) );
       }
       // TODO: Add error catching for situations including CORS violations.
       await fetch( url, { headers: { 'Content-Type': 'text/css' } } )
         .then( ( response ) => {
           if ( !response.ok ) {
-            throw new Error(
-`( 🐵 AdjusterMonkey 🛠️ ) => Unable to access resource:
+            throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
+`Unable to access resource:
  « ${url} »
  Status returned was:
  « ${response.status} »`
-            );
+            ) );
           }
           return response.text();
         } )
@@ -191,12 +204,11 @@ const adj4rMnkyCmdLn = ( function() {
       if ( !(
         typeof whichFile === 'string' || typeof whichFile === 'number'
       ) ) {
-        throw new TypeError(
-`( 🐵 AdjusterMonkey 🛠️ ) => I was given the following input for scanning a CSS
- file:
+        throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
+`I was given the following input for scanning a CSS file:
  « ${whichFile} »
  This input was not a string or number as expected.`
-        );
+        ) );
       }
       if ( typeof whichFile === 'string' &&
         !Number.isNaN( parseInt( whichFile ) )
@@ -206,13 +218,12 @@ const adj4rMnkyCmdLn = ( function() {
       if ( typeof whichFile === 'number' && (
         whichFile < 0 || whichFile >= this.#linkedCssFiles.length
       ) ) {
-        throw new RangeError(
-`( 🐵 AdjusterMonkey 🛠️ ) => I was given the following index as input for
- scanning a CSS file:
+        throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
+`I was given the following index as input for scanning a CSS file:
  « ${whichFile} »
  This index is out of range with respect to the number of linked CSS files
  loaded by this page.`
-        );
+        ) );
       }
       if ( typeof whichFile === 'number' ) {
         whichFile = this.#linkedCssFiles[ whichFile ].ssUrl;
@@ -226,16 +237,16 @@ const adj4rMnkyCmdLn = ( function() {
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
     if ( window.adj4rMnkyCmdLn === undefined ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
-      console.log(
-`( 🐵 AdjusterMonkey 🛠️ ) => An AdjusterMonkey instance for use with the
- DevTools command-line has been added to the window object.`
+      adj4rMnkyCmdLn.logMsg(
+`An AdjusterMonkey instance for use with the DevTools command-line has been
+ added to the window object.`
       );
     } else {
-      console.log(
-`( 🐵 AdjusterMonkey 🛠️ ) => When attempting to add an AdjusterMonkey instance
- for use with the DevTools command-line interface to the window object, it was
- found that the adj4rMnkyCmdLn property was already present. Consequently, the
- instance was not added to the window object.`
+      adj4rMnkyCmdLn.logMsg(
+`When attempting to add an AdjusterMonkey instance for use with the DevTools
+ command-line interface to the window object, it was found that the
+ adj4rMnkyCmdLn property was already present. Consequently, the instance was not
+ added to the window object.`
       );
     }
     return adj4rMnkyCmdLn;
