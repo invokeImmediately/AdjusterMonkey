@@ -3,22 +3,23 @@
  * ▓▓▒▒▒▒▒▒▒▒▒▒▒  █    █ ▀ ▌█  █ █  ▄ █  ▐  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓
  * ▓▒▒▒▒▒▒▒▒▒▒▒▒▒  ▀▀▀ █   ▀▀▀▀  ▀▀▀  ▀  ▐.js ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓
  *
- * Web browser DevTools code snippet that implements a command line interface
- *  for the JS console that provides Adjuster Monkey utilities to a front-end
- *  web developer.
+ * Web browser DevTools code snippet that implements a utility interface for
+ *  use with a web browser's JS console's command line or the TamperMonkey web
+ *  browser extension to provide enhanced tools for front-end web development.
  *
- * Utilities are intended to be utilized alongside DevTools when working on the
- *  development of a site. Utilities include a CSS scanner that can quickly
- *  identify a website's linked stylesheets.
+ * Utilities offered by the script are intended to be utilized alongside
+ *  DevTools when working on the development of a site. Utilities include a CSS
+ *  scanner that can quickly compare what is available in a website's
+ *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.3.0
+ * @version 0.3.1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
  *  (https://github.com/invokeImmediately)
  *
- * @link https://github.com/invokeImmediately/WSU-DAESA-JS…
- *  …/blob/main/Chrome-Snippets/github-extract-wds-constituents.js
+ * @link https://github.com/invokeImmediately/AdjusterMonkey…
+ *  …/blob/main/DevTools/adj4rMnkyCmdLn.js
  *
  * @license MIT — Copyright 2023 by Daniel C. Rieck.
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -45,8 +46,8 @@ const adj4rMnkyCmdLn = ( function() {
     constructor() {
       this.cssScanner = new CssScanner();
       console.log(
-`( 🐵🛠️ AdjusterMonkey Notice ) => New instance of AdjusterMonkey DevTools
- command-line utility created.`
+`( 🐵 AdjusterMonkey 🛠️ ) => A new instance of AdjusterMonkey for use with the
+ DevTools command-line interface has been created.`
       );
     }
   }
@@ -60,8 +61,8 @@ const adj4rMnkyCmdLn = ( function() {
     constructor() {
       this.scanForCssFiles();
       console.log(
-`( 🐵🛠️ AdjusterMonkey Notice ) => New CSS Scanner added to an AdjusterMonkey
- DevTools command-line utility.`
+`( 🐵 AdjusterMonkey 🛠️ ) => New CSS Scanner added to the AdjusterMonkey
+ instance used with the DevTools command-line interface.`
       );
     }
 
@@ -90,8 +91,8 @@ const adj4rMnkyCmdLn = ( function() {
         url.match( /^https?:\/\/.+\.css(?:\?.+)?$/i )
       ) ) {
         throw new TypeError(
-`( 🐵🛠️ AdjusterMonkey Notice ) => When attempting to fetch stylesheet code, a
- URL I was given for a stylesheet:
+`( 🐵 AdjusterMonkey 🛠️ ) => When attempting to fetch stylesheet code, a URL I
+ was given for a stylesheet:
  « ${url} »
  does not take the expected form.`
         );
@@ -101,7 +102,7 @@ const adj4rMnkyCmdLn = ( function() {
         .then( ( response ) => {
           if ( !response.ok ) {
             throw new Error(
-`( 🐵🛠️ AdjusterMonkey Notice ) => Unable to access resource:
+`( 🐵 AdjusterMonkey 🛠️ ) => Unable to access resource:
  « ${url} »
  Status returned was:
  « ${response.status} »`
@@ -191,7 +192,8 @@ const adj4rMnkyCmdLn = ( function() {
         typeof whichFile === 'string' || typeof whichFile === 'number'
       ) ) {
         throw new TypeError(
-`I was given the following input for scanning a CSS file:
+`( 🐵 AdjusterMonkey 🛠️ ) => I was given the following input for scanning a CSS
+ file:
  « ${whichFile} »
  This input was not a string or number as expected.`
         );
@@ -205,7 +207,7 @@ const adj4rMnkyCmdLn = ( function() {
         whichFile < 0 || whichFile >= this.#linkedCssFiles.length
       ) ) {
         throw new RangeError(
-`( 🐵🛠️ AdjusterMonkey Notice ) => I was given the following index as input for
+`( 🐵 AdjusterMonkey 🛠️ ) => I was given the following index as input for
  scanning a CSS file:
  « ${whichFile} »
  This index is out of range with respect to the number of linked CSS files
@@ -225,16 +227,15 @@ const adj4rMnkyCmdLn = ( function() {
     if ( window.adj4rMnkyCmdLn === undefined ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
       console.log(
-`( 🐵🛠️ AdjusterMonkey Notice ) => An instance of the AdjusterMonkkey DevTools
- command-line utility has been added to the window object for use with the
- DevTools console.`
+`( 🐵 AdjusterMonkey 🛠️ ) => An AdjusterMonkey instance for use with the
+ DevTools command-line has been added to the window object.`
       );
     } else {
       console.log(
-`( 🐵🛠️ AdjusterMonkey Notice ) => When attempting to add an instance of the
- AdjusterMonkkey DevTools command-line utility to the window object for use with
- the DevTools console, it was found that the adj4rMnkyCmdLn property was already
- present. Consequently, the instance was not added.`
+`( 🐵 AdjusterMonkey 🛠️ ) => When attempting to add an AdjusterMonkey instance
+ for use with the DevTools command-line interface to the window object, it was
+ found that the adj4rMnkyCmdLn property was already present. Consequently, the
+ instance was not added to the window object.`
       );
     }
     return adj4rMnkyCmdLn;
