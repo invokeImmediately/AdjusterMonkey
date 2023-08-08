@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.3.2
+ * @version 0.4.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -47,9 +47,9 @@ const adj4rMnkyCmdLn = ( function() {
 
     constructor() {
       this.cssScanner = new CssScanner( this );
-      console.log(
-`( 🐵 AdjusterMonkey 🛠️ ) => A new instance of AdjusterMonkey for use with the
- DevTools command-line interface has been created.`
+      this.logMsg( 
+`A new instance of AdjusterMonkey for use with the DevTools command-line
+ interface has been created.`
       );
     }
 
@@ -75,8 +75,6 @@ const adj4rMnkyCmdLn = ( function() {
       this.#adj4rMnkyCmdLn.logMsg(
 `New CSS Scanner added to the AdjusterMonkey instance used with the DevTools
  command-line interface.`
-      );
-      console.log(
       );
     }
 
@@ -106,27 +104,62 @@ const adj4rMnkyCmdLn = ( function() {
       ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
 `When attempting to fetch stylesheet code, a URL I was given for a stylesheet:
- « ${url} »
- does not take the expected form.`
+ « ${url} » does not take the expected form.`
         ) );
       }
-      // TODO: Add error catching for situations including CORS violations.
       await fetch( url, { headers: { 'Content-Type': 'text/css' } } )
         .then( ( response ) => {
           if ( !response.ok ) {
             throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`Unable to access resource:
- « ${url} »
- Status returned was:
- « ${response.status} »`
+`Unable to access resource: « ${url} ». Status returned was: «
+ ${response.status} ».`
             ) );
           }
           return response.text();
         } )
         .then( ( response ) => {
           finalResponse = response;
+        } )
+        .catch( ( error ) => {
+          console.error( error.message );
+          this.#adj4rMnkyCmdLn.logMsg(
+`Since I was unable to use the fetch API to request the stylesheet, I will
+now reconstruct it using « document.styleSheets ».`
+          );
+          finalResponse = this.#recon5tCssFromDoc( url );
         } );
       return finalResponse;
+    }
+
+    #findDocSSIndexFromURL( urlOfSS ) {
+      let scanner = 0;
+      let foundIndex = null;
+      while( scanner < document.styleSheets.length && foundIndex === null ) {
+          if( document.styleSheets.item( scanner ).href == urlOfSS ) {
+              foundIndex = scanner;
+          }
+          scanner++;
+      }
+      return foundIndex;
+    }
+
+    #recon5tCssFromDoc( urlOfCssSrc ) {
+      let allCssText = '';
+      try {
+        const indexOfSS = this.#findDocSSIndexFromURL( urlOfCssSrc );
+        const docSSRules = document.styleSheets.item( indexOfSS ).cssRules;
+        for( let index = 0; index < docSSRules.length; index++ ) {
+          allCssText += docSSRules.item( index ).cssText;
+        }
+      } catch( error ) {
+        console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
+        this.#adj4rMnkyCmdLn.logMsg(
+`Since I was unable to reconstruct the stylesheet from « document.styleSheets »,
+I suggest you manually load the stylesheet code for further analysis into my
+list of dynamically loaded reference style sheets.`
+        );
+      }
+      return allCssText;
     }
 
     #sortAttrsFromSsLinks( attrsSet ) {
@@ -219,10 +252,9 @@ const adj4rMnkyCmdLn = ( function() {
         whichFile < 0 || whichFile >= this.#linkedCssFiles.length
       ) ) {
         throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was given the following index as input for scanning a CSS file:
- « ${whichFile} »
- This index is out of range with respect to the number of linked CSS files
- loaded by this page.`
+`I was given the following index as input for scanning a CSS file: «
+ ${whichFile} ». This index is out of range with respect to the number of linked
+ CSS files loaded by this page.`
         ) );
       }
       if ( typeof whichFile === 'number' ) {
