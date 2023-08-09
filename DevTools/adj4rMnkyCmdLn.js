@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.4.0
+ * @version 0.5.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -47,7 +47,7 @@ const adj4rMnkyCmdLn = ( function() {
 
     constructor() {
       this.cssScanner = new CssScanner( this );
-      this.logMsg( 
+      this.logMsg(
 `A new instance of AdjusterMonkey for use with the DevTools command-line
  interface has been created.`
       );
@@ -67,6 +67,7 @@ const adj4rMnkyCmdLn = ( function() {
     #classesUsedInPage;
     #linkedCssFiles;
     #linksAttrsList;
+    #referenceCssFiles = [];
     #scannedCssFile;
 
     constructor( adj4rMnkyCmdLn ) {
@@ -170,6 +171,25 @@ list of dynamically loaded reference style sheets.`
       return attrs.toSorted();
     }
 
+    async addReferenceCssFile( urlOrCssText ) {
+      if ( typeof urlOrCssText !== 'string' ) {
+        return;
+      }
+      if ( urlOrCssText.match( /https?:\/\/.*/ ) ) {
+        urlOrCssText = await this.#fetchStylesheetCode( urlOrCssText );
+      }
+      if ( urlOrCssText == '' ) {
+        return;
+      }
+      const newSS = new CSSStyleSheet();
+      newSS.replaceSync( urlOrCssText );
+      this.#referenceCssFiles.push( newSS );
+      this.#adj4rMnkyCmdLn.logMsg(
+`Reference CSS stylesheet added at index ${this.#referenceCssFiles.length - 1}
+ with ${ newSS.cssRules.length } accepted style rules.`,
+      );
+    }
+
     get classesUsedInPage() {
       if ( this.#classesUsedInPage === undefined ) {
         this.scanForClassesUsedInPage();
@@ -186,6 +206,23 @@ list of dynamically loaded reference style sheets.`
 
     printLinksAttrsList() {
       console.log( this.#linksAttrsList );
+    }
+
+    printDocSSList() {
+      const docSSDetails = [];
+      for( let index = 0; index < document.styleSheets.length; index++ ) {
+        docSSDetails.push( {
+          href: document.styleSheets.item( index ).href,
+          tagName: document.styleSheets.item( index ).ownerNode.tagName,
+          tagID: document.styleSheets.item( index ).ownerNode.id,
+          innerTextHead: document.styleSheets.item( index )
+            .ownerNode.innerText.substring( 0, 64 ),
+        } );
+        if ( docSSDetails[ index ].innerTextHead.length == 64 ) {
+          docSSDetails[ index ].innerTextHead += "…";
+        }
+      }
+      console.table( docSSDetails, [ 'href', 'tagName', 'tagID', 'innerTextHead' ] );
     }
 
     printLinkedCssFiles() {
@@ -267,11 +304,12 @@ list of dynamically loaded reference style sheets.`
 
   function main() {
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
-    if ( window.adj4rMnkyCmdLn === undefined ) {
+    if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
       adj4rMnkyCmdLn.logMsg(
 `An AdjusterMonkey instance for use with the DevTools command-line has been
- added to the window object.`
+ added to the window object associated with the document
+ “${window.document.title}” at location “${window.location}.”`
       );
     } else {
       adj4rMnkyCmdLn.logMsg(
