@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.5.0
+ * @version 0.6.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -86,6 +86,7 @@ const adj4rMnkyCmdLn = ( function() {
       }
     }
 
+
     #extractClassesUsedInPage() {
       const cssClassSet = new Set();
       const bodyElems = document.querySelectorAll( 'body, body *' );
@@ -132,6 +133,32 @@ now reconstruct it using « document.styleSheets ».`
       return finalResponse;
     }
 
+    #findClassesUsedInMediaRule( mediaRule, setOfClasses ) {
+      const cssRules = mediaRule.cssRules
+      for ( let i = 0; i < cssRules.length; i++ ) {
+        if ( cssRules.item( i ) instanceof CSSStyleRule ) {
+          this.#findClassesUsedInStyleRule(
+            cssRules.item( i ),
+            setOfClasses
+          );
+        }
+      }
+    }
+
+    #findClassesUsedInStyleRule( styleRule, setOfClasses ) {
+      if ( styleRule.selectorText === undefined ) {
+        return;
+      }
+      const classesFound = styleRule.selectorText
+        .match( /\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g );
+      if( classesFound === null ) {
+        return;
+      }
+      classesFound.forEach( ( match ) => {
+        setOfClasses.add( match.substring( 1, match.length ) );
+      } );
+    }
+
     #findDocSSIndexFromURL( urlOfSS ) {
       let scanner = 0;
       let foundIndex = null;
@@ -148,6 +175,11 @@ now reconstruct it using « document.styleSheets ».`
       let allCssText = '';
       try {
         const indexOfSS = this.#findDocSSIndexFromURL( urlOfCssSrc );
+        if( indexOfSS === null ) {
+          throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
+`I was unable to find the requested stylesheet among those loaded on the page.`
+          ) );
+        }
         const docSSRules = document.styleSheets.item( indexOfSS ).cssRules;
         for( let index = 0; index < docSSRules.length; index++ ) {
           allCssText += docSSRules.item( index ).cssText;
@@ -155,7 +187,7 @@ now reconstruct it using « document.styleSheets ».`
       } catch( error ) {
         console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
         this.#adj4rMnkyCmdLn.logMsg(
-`Since I was unable to reconstruct the stylesheet from « document.styleSheets »,
+`Since I was unable to reconstruct the stylesheet from «document.styleSheets»,
 I suggest you manually load the stylesheet code for further analysis into my
 list of dynamically loaded reference style sheets.`
         );
@@ -195,6 +227,30 @@ list of dynamically loaded reference style sheets.`
         this.scanForClassesUsedInPage();
       }
       return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
+    }
+
+    getClassesUsedInReferenceSS( index ) {
+      if ( index < 0 || index >= this.#referenceCssFiles.length ) {
+        return null;
+      }
+      const setOfClassesInSS = new Set();
+      const cssRules = this.#referenceCssFiles[ index ].cssRules;
+      // TODO: Make this more robust in handling media queries
+      for ( let i = 0; i < cssRules.length; i++ ) {
+        if ( cssRules.item( i ) instanceof CSSStyleRule ) {
+          this.#findClassesUsedInStyleRule(
+            cssRules.item( i ),
+            setOfClassesInSS
+          );
+        }
+        if ( cssRules.item( i ) instanceof CSSMediaRule ) {
+          this.#findClassesUsedInMediaRule(
+            cssRules.item( i ),
+            setOfClassesInSS
+          );
+        }
+      }
+      return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
     }
 
     printClassesUsedInPage() {
