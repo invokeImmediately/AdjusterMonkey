@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.6.0
+ * @version 0.6.1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -102,14 +102,14 @@ const adj4rMnkyCmdLn = ( function() {
       let finalResponse = null;
       if ( !(
         typeof url == 'string' &&
-        url.match( /^https?:\/\/.+\.css(?:\?.+)?$/i )
+        url.match( /^https?:\/\/.+\.css(?:\?.+)?\/?$/i )
       ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
 `When attempting to fetch stylesheet code, a URL I was given for a stylesheet:
  « ${url} » does not take the expected form.`
         ) );
       }
-      await fetch( url, { headers: { 'Content-Type': 'text/css' } } )
+      await fetch( url )
         .then( ( response ) => {
           if ( !response.ok ) {
             throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
