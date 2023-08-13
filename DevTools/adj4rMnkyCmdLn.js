@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.6.3
+ * @version 0.7.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -59,6 +59,25 @@ const adj4rMnkyCmdLn = ( function() {
 
     logMsg( msgText ) {
       console.log( this.getLabeledMsg( msgText ) );
+    }
+
+    async waitForDoc4tFocus() {
+      const checkDoc4tFocus = ( resolve ) => {
+        if ( document.hasFocus() ) {
+          resolve();
+        } else {
+          setTimeout( () => checkDoc4tFocus( resolve ), 250 );
+        }
+      }
+      return new Promise( checkDoc4tFocus );
+    }
+
+    waitForTime( timeInMs ) {
+      return new Promise( ( resolve ) => {
+        setTimeout( () => {
+          resolve( '' );
+        }, timeInMs );
+      } );
     }
   }
 
@@ -126,7 +145,7 @@ const adj4rMnkyCmdLn = ( function() {
           console.error( error.message );
           this.#adj4rMnkyCmdLn.logMsg(
 `Since I was unable to use the fetch API to request the stylesheet, I will
-now reconstruct it using « document.styleSheets ».`
+ now reconstruct it using « document.styleSheets ».`
           );
           finalResponse = this.#recon5tCssFromDoc( url );
         } );
@@ -188,8 +207,8 @@ now reconstruct it using « document.styleSheets ».`
         console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
         this.#adj4rMnkyCmdLn.logMsg(
 `Since I was unable to reconstruct the stylesheet from «document.styleSheets»,
-I suggest you manually load the stylesheet code for further analysis into my
-list of dynamically loaded reference style sheets.`
+ I suggest you manually load the stylesheet code for further analysis into my
+ list of dynamically loaded reference style sheets.`
         );
       }
       return allCssText;
@@ -203,7 +222,7 @@ list of dynamically loaded reference style sheets.`
       return attrs.toSorted();
     }
 
-    async addReferenceCssFile( urlOrCssText ) {
+    async addRefStyleSheet( urlOrCssText ) {
       if ( typeof urlOrCssText !== 'string' ) {
         return;
       }
@@ -220,6 +239,24 @@ list of dynamically loaded reference style sheets.`
 `Reference CSS stylesheet added at index ${this.#referenceCssFiles.length - 1}
  with ${ newSS.cssRules.length } accepted style rules.`,
       );
+    }
+
+    async addRefStyleSheetFromClipboard() {
+      this.adj4rMnkyCmdLn.logMsg(
+`Ready to load the text on the clipboard as a reference style sheet. Please
+ close DevTools and focus on the document when you are ready.`
+      );
+      await this.adj4rMnkyCmdLn.waitForDoc4tFocus();
+      await navigator.clipboard
+        .readText()
+        .then( ( clipboardText ) => {
+          this.addRefStyleSheet( clipboardText );
+        } );
+      window.alert( this.adj4rMnkyCmdLn.getLabeledMsg(
+`The CSS code on the clipboard has been added as a reference
+ style sheet and will be available for further analysis via
+ the DevTools command line.`
+      ) );
     }
 
     get classesUsedInPage() {
