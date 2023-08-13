@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.6.2
+ * @version 0.6.3
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -278,7 +278,8 @@ list of dynamically loaded reference style sheets.`
           docSSDetails[ index ].innerTextHead += "…";
         }
       }
-      console.table( docSSDetails, [ 'href', 'tagName', 'tagID', 'innerTextHead' ] );
+      console.table( docSSDetails, [ 'href', 'tagName', 'tagID',
+        'innerTextHead' ] );
     }
 
     printLinkedCssFiles() {
@@ -298,7 +299,7 @@ list of dynamically loaded reference style sheets.`
       cssFileLinks.forEach( ( link, index ) => {
         this.#extractAttrsFromSsLink( link, linksAttrsList );
 
-        // Find the source URL for the linked CSS file
+        // ·> Find the source URL for the linked CSS file.                    <·
         let hrefVal = link.href;
         if ( hrefVal == '' ) {
           hrefVal = link.dataset.href;
@@ -307,7 +308,7 @@ list of dynamically loaded reference style sheets.`
           return;
         }
 
-        // Determine the section of the DOM, head or body, of the link
+        // ·> Determine the section of the DOM, head or body, of the link.    <·
         let domSection = 'neither';
         if ( link.closest( 'head' ) !== null ) {
           domSection = 'head';
@@ -315,7 +316,7 @@ list of dynamically loaded reference style sheets.`
           domSection = 'body';
         }
 
-        // Store scan results for later
+        // ·> Store scan results for later.                                   <·
         scanResults.push( {
           htmlId: link.id,
           section: domSection,
@@ -359,6 +360,18 @@ list of dynamically loaded reference style sheets.`
   }
 
   function main() {
+    // ·> Only proceed with loading AdjusterMonkey if the window represents a  ·
+    // ·  web page the user is actively browsing.                             <·
+    if (
+      typeof document == 'undefined' ||
+      typeof document.hasFocus != 'function' ||
+      !document.hasFocus()
+    ) {
+      return;
+    }
+
+    // ·> Create instance of the AdjusterMonkey command-line utility inter-    ·
+    // ·  face and add it safely to the window object for global access.      <·
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
     if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
