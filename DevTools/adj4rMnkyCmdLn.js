@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.6.1
+ * @version 0.6.2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -207,7 +207,7 @@ list of dynamically loaded reference style sheets.`
       if ( typeof urlOrCssText !== 'string' ) {
         return;
       }
-      if ( urlOrCssText.match( /https?:\/\/.*/ ) ) {
+      if ( urlOrCssText.match( /^https?:\/\/.*/ ) ) {
         urlOrCssText = await this.#fetchStylesheetCode( urlOrCssText );
       }
       if ( urlOrCssText == '' ) {
