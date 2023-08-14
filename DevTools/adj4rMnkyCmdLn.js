@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.7.0
+ * @version 0.8.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -53,12 +53,70 @@ const adj4rMnkyCmdLn = ( function() {
       );
     }
 
-    getLabeledMsg( msg ) {
-      return `${this.#prefix4Msgs} ${msg}`;
+    #wrapMsgByAtCharLen( msg, len ) {
+      if ( typeof len == 'undefined' ) {
+        len = 80;
+      }
+      if ( typeof len != 'number' && Number.isNaN( parseInt( len ) ) ) {
+        return msg;
+      } else if ( typeof len != 'number' ) {
+        len = parseInt( len );
+      }
+      if ( len < 40 ) {
+        len = 40;
+      } else if ( len > 100 ) {
+        len = 100;
+      }
+      while(
+        msg.length > 0 &&
+        ( msg.match( /[ \n]+\n/gi ) !== null ||
+        msg.match( /\n[ \n]+/gi ) !== null )
+      ) {
+        msg = msg.replaceAll( /[ \n]+\n/gi, ' ' );
+        msg = msg.replaceAll( /\n[ \n]+/gi, ' ' );
+      }
+      msg = msg.replaceAll( /\n+/gi, ' ' );
+      if ( msg.length < len ) {
+        return msg;
+      }
+      let newMsg = '';
+      let i_start = 0;
+      let j_scan;
+      while( i_start < msg.length ) {
+        j_scan = i_start + len;
+        while(
+          j_scan < msg.length && j_scan > i_start &&
+          msg.charAt( j_scan ).match( /[- \/\\«»\(\)]/ ) === null
+        ) {
+          j_scan--;
+        }
+        if ( j_scan == i_start ) {
+          j_scan = j_scan + len;
+        } else if ( j_scan > msg.length ) {
+          j_scan = msg.length;
+        }
+        if (
+          msg.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null ||
+          j_scan == i_start + len
+        ) {
+          msg = msg.substring( 0, j_scan ) + " "
+            + msg.substring( j_scan, msg.length );
+        }
+        if ( i_start != 0 ) {
+          newMsg += '\n';
+        }
+        newMsg += msg.substring( i_start, j_scan );
+        i_start = j_scan;
+      }
+      return newMsg;
     }
 
-    logMsg( msgText ) {
-      console.log( this.getLabeledMsg( msgText ) );
+    getLabeledMsg( msg, wrapLen ) {
+      return this.#wrapMsgByAtCharLen( `${this.#prefix4Msgs} ${msg}`, wrapLen );
+    }
+
+    logMsg( msgText, wrapLen ) {
+      console.log( this.getLabeledMsg( msgText, wrapLen ) );
     }
 
     async waitForDoc4tFocus() {
@@ -124,7 +182,7 @@ const adj4rMnkyCmdLn = ( function() {
         url.match( /^https?:\/\/.+\.css(?:\?.+)?\/?$/i )
       ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`When attempting to fetch stylesheet code, a URL I was given for a stylesheet:
+`When attempting to fetch style sheet code, a URL I was given for a style sheet:
  « ${url} » does not take the expected form.`
         ) );
       }
@@ -144,7 +202,7 @@ const adj4rMnkyCmdLn = ( function() {
         .catch( ( error ) => {
           console.error( error.message );
           this.#adj4rMnkyCmdLn.logMsg(
-`Since I was unable to use the fetch API to request the stylesheet, I will
+`Since I was unable to use the fetch API to request the style sheet, I will
  now reconstruct it using « document.styleSheets ».`
           );
           finalResponse = this.#recon5tCssFromDoc( url );
@@ -196,7 +254,7 @@ const adj4rMnkyCmdLn = ( function() {
         const indexOfSS = this.#findDocSSIndexFromURL( urlOfCssSrc );
         if( indexOfSS === null ) {
           throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was unable to find the requested stylesheet among those loaded on the page.`
+`I was unable to find the requested style sheet among those loaded on the page.`
           ) );
         }
         const docSSRules = document.styleSheets.item( indexOfSS ).cssRules;
@@ -206,8 +264,8 @@ const adj4rMnkyCmdLn = ( function() {
       } catch( error ) {
         console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
         this.#adj4rMnkyCmdLn.logMsg(
-`Since I was unable to reconstruct the stylesheet from «document.styleSheets»,
- I suggest you manually load the stylesheet code for further analysis into my
+`Since I was unable to reconstruct the style sheet from «document.styleSheets»,
+ I suggest you manually load the style sheet code for further analysis into my
  list of dynamically loaded reference style sheets.`
         );
       }
@@ -236,26 +294,25 @@ const adj4rMnkyCmdLn = ( function() {
       newSS.replaceSync( urlOrCssText );
       this.#referenceCssFiles.push( newSS );
       this.#adj4rMnkyCmdLn.logMsg(
-`Reference CSS stylesheet added at index ${this.#referenceCssFiles.length - 1}
+`Reference CSS style sheet added at index ${this.#referenceCssFiles.length - 1}
  with ${ newSS.cssRules.length } accepted style rules.`,
       );
     }
 
     async addRefStyleSheetFromClipboard() {
-      this.adj4rMnkyCmdLn.logMsg(
+      this.#adj4rMnkyCmdLn.logMsg(
 `Ready to load the text on the clipboard as a reference style sheet. Please
  close DevTools and focus on the document when you are ready.`
       );
-      await this.adj4rMnkyCmdLn.waitForDoc4tFocus();
+      await this.#adj4rMnkyCmdLn.waitForDoc4tFocus();
       await navigator.clipboard
         .readText()
         .then( ( clipboardText ) => {
           this.addRefStyleSheet( clipboardText );
         } );
-      window.alert( this.adj4rMnkyCmdLn.getLabeledMsg(
-`The CSS code on the clipboard has been added as a reference
- style sheet and will be available for further analysis via
- the DevTools command line.`
+      window.alert( this.#adj4rMnkyCmdLn.getLabeledMsg(
+`The CSS code on the clipboard has been added as a reference style sheet and
+ will be available for further analysis via the DevTools command line.`, 60
       ) );
     }
 
