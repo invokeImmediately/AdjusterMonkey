@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.0
+ * @version 0.8.1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -67,13 +67,16 @@ const adj4rMnkyCmdLn = ( function() {
       } else if ( len > 100 ) {
         len = 100;
       }
+      let iterCount = 0;
       while(
         msg.length > 0 &&
         ( msg.match( /[ \n]+\n/gi ) !== null ||
-        msg.match( /\n[ \n]+/gi ) !== null )
+        msg.match( /\n[ \n]+/gi ) !== null ) &&
+        iterCount < 1024
       ) {
         msg = msg.replaceAll( /[ \n]+\n/gi, ' ' );
         msg = msg.replaceAll( /\n[ \n]+/gi, ' ' );
+        iterCount++
       }
       msg = msg.replaceAll( /\n+/gi, ' ' );
       if ( msg.length < len ) {
@@ -82,7 +85,8 @@ const adj4rMnkyCmdLn = ( function() {
       let newMsg = '';
       let i_start = 0;
       let j_scan;
-      while( i_start < msg.length ) {
+      let iterCount2 = 0;
+      while( i_start < msg.length && iterCount2 < 1024) {
         j_scan = i_start + len;
         while(
           j_scan < msg.length && j_scan > i_start &&
@@ -96,17 +100,39 @@ const adj4rMnkyCmdLn = ( function() {
           j_scan = msg.length;
         }
         if (
-          msg.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null ||
-          j_scan == i_start + len
+          msg.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null &&
+          i_start == 0
         ) {
-          msg = msg.substring( 0, j_scan ) + " "
-            + msg.substring( j_scan, msg.length );
+          msg = msg.substring( 0, j_scan + 1 ) + " "
+            + msg.substring( j_scan + 1, msg.length );
+          j_scan++;
+        } else if (
+          msg.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null
+        ) {
+          msg = msg.substring( 0, j_scan + 1 ) + " "
+            + msg.substring( j_scan + 1, msg.length );
+          j_scan++;
+          msg = msg.substring( 0, i_start ) + " "
+            + msg.substring( i_start, msg.length );
+          j_scan++;
+        }
+        if ( j_scan == i_start + len && msg.charAt( i_start ) != ' ' ) {
+          msg = msg.substring( 0, i_start ) + " "
+            + msg.substring( i_start, msg.length );
+        }
+        if ( j_scan == msg.length && msg.charAt(i_start) != ' ' ) {
+          msg = msg.substring( 0, i_start + 1 ) + " "
+            + msg.substring( i_start, msg.length );
+          j_scan = j_scan - i_start < len ?
+            j_scan + 1 :
+            j_scan;
         }
         if ( i_start != 0 ) {
           newMsg += '\n';
         }
         newMsg += msg.substring( i_start, j_scan );
         i_start = j_scan;
+        iterCount2++;
       }
       return newMsg;
     }
@@ -426,9 +452,8 @@ const adj4rMnkyCmdLn = ( function() {
         typeof whichFile === 'string' || typeof whichFile === 'number'
       ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was given the following input for scanning a CSS file:
- « ${whichFile} »
- This input was not a string or number as expected.`
+`I was given the following input for scanning a CSS file: «${whichFile}». This
+ input was not a string or number as expected.`
         ) );
       }
       if ( typeof whichFile === 'string' &&
@@ -440,8 +465,8 @@ const adj4rMnkyCmdLn = ( function() {
         whichFile < 0 || whichFile >= this.#linkedCssFiles.length
       ) ) {
         throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was given the following index as input for scanning a CSS file: «
- ${whichFile} ». This index is out of range with respect to the number of linked
+`I was given the following index as input for scanning a CSS file:
+ «${whichFile}». This index is out of range with respect to the number of linked
  CSS files loaded by this page.`
         ) );
       }
@@ -469,10 +494,14 @@ const adj4rMnkyCmdLn = ( function() {
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
     if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
+//      adj4rMnkyCmdLn.logMsg(
+//`An AdjusterMonkey instance for use with the DevTools command-line has been
+// added to the window object associated with the document
+// “${window.document.title}” at location “${window.location}.”`
       adj4rMnkyCmdLn.logMsg(
 `An AdjusterMonkey instance for use with the DevTools command-line has been
  added to the window object associated with the document
- “${window.document.title}” at location “${window.location}.”`
+ “${document.title}” at location “${window.location.hostname}.”`
       );
     } else {
       adj4rMnkyCmdLn.logMsg(
