@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.1-rc3
+ * @version 0.8.1-rc4
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -411,7 +411,7 @@ const adj4rMnkyCmdLn = ( function() {
       }
       adj4rMnkyCmdLn.logMsg(
 `Opening document style sheet «${whichStyleSheet}» with href
- ${document.styleSheets.item( whichStyleSheet ).href} in a new window.`
+ «${document.styleSheets.item( whichStyleSheet ).href}» in a new window.`
       );
       window.open(
         `${document.styleSheets.item( whichStyleSheet ).href}`,
