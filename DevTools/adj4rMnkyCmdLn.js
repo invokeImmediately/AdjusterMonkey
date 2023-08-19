@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.1-rc2
+ * @version 0.8.1-rc3
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -101,7 +101,7 @@ const adj4rMnkyCmdLn = ( function() {
         }
         if (
           msg.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null &&
-          i_start == 0
+          ( i_start == 0 || msg.charAt( i_start ) == ' ' )
         ) {
           msg = msg.substring( 0, j_scan + 1 ) + " "
             + msg.substring( j_scan + 1, msg.length );
@@ -116,7 +116,10 @@ const adj4rMnkyCmdLn = ( function() {
             + msg.substring( i_start, msg.length );
           j_scan++;
         }
-        if ( j_scan == i_start + len && msg.charAt( i_start ) != ' ' ) {
+        if (
+          j_scan == i_start + len && msg.charAt( i_start ) != ' ' &&
+          i_start != 0
+        ) {
           msg = msg.substring( 0, i_start ) + " "
             + msg.substring( i_start, msg.length );
         }
