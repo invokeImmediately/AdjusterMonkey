@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.1-rc1
+ * @version 0.8.1-rc2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -372,6 +372,48 @@ const adj4rMnkyCmdLn = ( function() {
         }
       }
       return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
+    }
+
+    openDocSSInNewWindow( whichStyleSheet ) {
+      if(
+        typeof whichStyleSheet == 'string' &&
+        !Number.isNaN( parseInt( whichStyleSheet, 10 ) )
+      ) {
+        whichStyleSheet = parseInt( whichStyleSheet, 10 );
+      }
+      if( typeof whichStyleSheet != 'number' ) {
+        adj4rMnkyCmdLn.logMsg(
+`If you want me to open a document style sheet, please give me the index of
+ the desired style sheet in «document.styleSheets». The argument you gave me was
+ «${whichStyleSheet}».`
+        );
+        return;
+      }
+      if (
+        whichStyleSheet < 0 ||
+        whichStyleSheet >= document.styleSheets.length
+      ) {
+        adj4rMnkyCmdLn.logMsg(
+`The index you gave me for the document style sheet to open of
+ «${whichStyleSheet}» falls outside the range of accepted indices.`
+        );
+        return;
+      }
+      if( document.styleSheets.item( whichStyleSheet ).href === null ) {
+        adj4rMnkyCmdLn.logMsg(
+`The index you gave me for the document style sheet to open of
+ «${whichStyleSheet}» represents an internal style sheet.`
+        );
+        return;
+      }
+      adj4rMnkyCmdLn.logMsg(
+`Opening document style sheet «${whichStyleSheet}» with href
+ ${document.styleSheets.item( whichStyleSheet ).href} in a new window.`
+      );
+      window.open(
+        `${document.styleSheets.item( whichStyleSheet ).href}`,
+        '_blank'
+      ).focus();
     }
 
     printClassesUsedInPage() {
