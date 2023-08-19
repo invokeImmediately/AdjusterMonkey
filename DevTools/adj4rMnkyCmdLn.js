@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.1
+ * @version 0.8.1-rc1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -134,6 +134,7 @@ const adj4rMnkyCmdLn = ( function() {
         i_start = j_scan;
         iterCount2++;
       }
+      newMsg.replaceAll( /^¶/g, '\n' );
       return newMsg;
     }
 
@@ -209,15 +210,15 @@ const adj4rMnkyCmdLn = ( function() {
       ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
 `When attempting to fetch style sheet code, a URL I was given for a style sheet:
- « ${url} » does not take the expected form.`
+ ^¶«${url}»^¶ does not take the expected form.`
         ) );
       }
       await fetch( url )
         .then( ( response ) => {
           if ( !response.ok ) {
             throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`Unable to access resource: « ${url} ». Status returned was: «
- ${response.status} ».`
+`Unable to access resource: ^¶« ${url} »^¶ Status returned was:
+ «${response.status}».`
             ) );
           }
           return response.text();
@@ -229,7 +230,7 @@ const adj4rMnkyCmdLn = ( function() {
           console.error( error.message );
           this.#adj4rMnkyCmdLn.logMsg(
 `Since I was unable to use the fetch API to request the style sheet, I will
- now reconstruct it using « document.styleSheets ».`
+ now reconstruct it using «document.styleSheets».`
           );
           finalResponse = this.#recon5tCssFromDoc( url );
         } );
@@ -452,8 +453,8 @@ const adj4rMnkyCmdLn = ( function() {
         typeof whichFile === 'string' || typeof whichFile === 'number'
       ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was given the following input for scanning a CSS file: «${whichFile}». This
- input was not a string or number as expected.`
+`I was given the following input for scanning a CSS file: ^¶«${whichFile}».
+ ^¶ This input was not a string or number as expected.`
         ) );
       }
       if ( typeof whichFile === 'string' &&
@@ -466,8 +467,8 @@ const adj4rMnkyCmdLn = ( function() {
       ) ) {
         throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
 `I was given the following index as input for scanning a CSS file:
- «${whichFile}». This index is out of range with respect to the number of linked
- CSS files loaded by this page.`
+ ^¶ «${whichFile}»^¶ This index is out of range with respect to the number of
+ linked CSS files loaded by this page.`
         ) );
       }
       if ( typeof whichFile === 'number' ) {
