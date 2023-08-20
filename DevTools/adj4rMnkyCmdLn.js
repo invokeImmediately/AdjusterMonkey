@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.1-rc5
+ * @version 0.8.1-rc6
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -229,7 +229,7 @@ const adj4rMnkyCmdLn = ( function() {
       return cssClassSet;
     }
 
-    async #fetchStylesheetCode( url ) {
+    async #fetchStyleSheetCode( url ) {
       let finalResponse = null;
       if ( !this.isUrlStringToCss( url ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
@@ -336,7 +336,7 @@ const adj4rMnkyCmdLn = ( function() {
         return;
       }
       if ( urlOrCssText.match( /^https?:\/\/.*/ ) ) {
-        urlOrCssText = await this.#fetchStylesheetCode( urlOrCssText );
+        urlOrCssText = await this.#fetchStyleSheetCode( urlOrCssText );
       }
       if ( urlOrCssText == '' ) {
         return;
@@ -524,7 +524,7 @@ const adj4rMnkyCmdLn = ( function() {
       this.#linkedCssFiles = scanResults;
     }
 
-    async scanCssFile( whichFile ) {
+    async scanLinkedCssFile( whichFile ) {
       if ( !(
         typeof whichFile === 'string' || typeof whichFile === 'number'
       ) ) {
@@ -550,7 +550,7 @@ const adj4rMnkyCmdLn = ( function() {
       if ( typeof whichFile === 'number' ) {
         whichFile = this.#linkedCssFiles[ whichFile ].ssUrl;
       }
-      this.#scannedCssFile = this.#fetchStylesheetCode( whichFile );
+      this.#scannedCssFile = this.#fetchStyleSheetCode( whichFile );
       return this.#scannedCssFile;
     }
   }
