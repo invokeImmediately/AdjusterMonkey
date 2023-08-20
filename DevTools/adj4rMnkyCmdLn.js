@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc1
+ * @version 0.9.0-rc2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -406,6 +406,23 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
     }
 
+    getRefStyleSheet( index ) {
+      if (
+        typeof index == 'string' &&
+        !Number.isNaN( parseInt( index, 10 ) )
+      ) {
+        index = parseInt( index, 10 );
+      }
+      if (
+        typeof index != 'number' ||
+        index < 0 ||
+        index >= this.#referenceCssFiles.length
+      ) {
+        return null;
+      }
+      return this.#referenceCssFiles[ index ].styleSheet;
+    }
+
     isUrlStringToCss( value ) {
       return (
         typeof value == 'string' &&
@@ -597,5 +614,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0',
+  version: '0.9.0-rc2',
 } );
