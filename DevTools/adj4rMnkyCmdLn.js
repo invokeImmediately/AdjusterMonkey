@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.1-rc6
+ * @version 0.8.1-rc7
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -39,7 +39,7 @@
  *   DEALINGS IN THE SOFTWARE.
  */
 
-const adj4rMnkyCmdLn = ( function() {
+const adj4rMnkyCmdLn = ( function( iife ) {
   'use strict';
 
   class Adj4rMnkyCmdLn {
@@ -47,10 +47,6 @@ const adj4rMnkyCmdLn = ( function() {
 
     constructor() {
       this.cssScanner = new CssScanner( this );
-      this.logMsg(
-`A new instance of AdjusterMonkey for use with the DevTools command-line
- interface has been created.`
-      );
     }
 
     #wrapMsgByAtCharLen( msg, len ) {
@@ -204,10 +200,6 @@ const adj4rMnkyCmdLn = ( function() {
     constructor( adj4rMnkyCmdLn ) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
       this.scanForCssFiles();
-      this.#adj4rMnkyCmdLn.logMsg(
-`New CSS Scanner added to the AdjusterMonkey instance used with the DevTools
- command-line interface.`
-      );
     }
 
     #extractAttrsFromSsLink( link, attrsSet ) {
@@ -571,25 +563,23 @@ const adj4rMnkyCmdLn = ( function() {
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
     if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
-//      adj4rMnkyCmdLn.logMsg(
-//`An AdjusterMonkey instance for use with the DevTools command-line has been
-// added to the window object associated with the document
-// “${window.document.title}” at location “${window.location}.”`
       adj4rMnkyCmdLn.logMsg(
-`An AdjusterMonkey instance for use with the DevTools command-line has been
- added to the window object associated with the document
+`An AdjusterMonkey instance (v${iife.version}) for use with the DevTools
+ command-line has been added to the window object associated with the document
  “${document.title}” at location “${window.location.hostname}.”`
       );
     } else {
       adj4rMnkyCmdLn.logMsg(
-`When attempting to add an AdjusterMonkey instance for use with the DevTools
- command-line interface to the window object, it was found that the
- adj4rMnkyCmdLn property was already present. Consequently, the instance was not
- added to the window object.`
+`When attempting to add an AdjusterMonkey instance (v${iife.version}) for use
+ with the DevTools command-line interface to the window object, it was found
+ that the adj4rMnkyCmdLn property was already present. Consequently, the
+ instance was not added to the window object.`
       );
     }
     return adj4rMnkyCmdLn;
   }
 
   return main();
-} )();
+} )( {
+  version: '0.8.1-rc7',
+} );
