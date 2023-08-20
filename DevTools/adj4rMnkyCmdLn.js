@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc2
+ * @version 0.9.0-rc3
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -340,7 +340,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       ) {
         docSSIndex = null;
       }
-      if ( urlOrCssText.match( /^https?:\/\/.*/ ) ) {
+      if ( this.isUrlStringToCss( urlOrCssText ) ) {
         urlOrCssText = await this.#fetchStyleSheetCode( urlOrCssText );
       }
       if ( urlOrCssText == '' ) {
@@ -350,6 +350,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       newSS.replaceSync( urlOrCssText );
       this.#referenceCssFiles.push( {
         styleSheet: newSS,
+        cssText: urlOrCssText,
         docSSIndex: docSSIndex,
       } );
       this.#adj4rMnkyCmdLn.logMsg(
@@ -404,6 +405,23 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         }
       }
       return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
+    }
+
+    getRefCssText( index ) {
+      if (
+        typeof index == 'string' &&
+        !Number.isNaN( parseInt( index, 10 ) )
+      ) {
+        index = parseInt( index, 10 );
+      }
+      if (
+        typeof index != 'number' ||
+        index < 0 ||
+        index >= this.#referenceCssFiles.length
+      ) {
+        return null;
+      }
+      return this.#referenceCssFiles[ index ].cssText;
     }
 
     getRefStyleSheet( index ) {
@@ -614,5 +632,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0-rc2',
+  version: '0.9.0-rc3',
 } );
