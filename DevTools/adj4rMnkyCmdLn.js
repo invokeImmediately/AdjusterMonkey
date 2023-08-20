@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0
+ * @version 0.9.0-rc1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -323,9 +323,22 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       return attrs.toSorted();
     }
 
-    async addRefStyleSheet( urlOrCssText ) {
-      if ( typeof urlOrCssText !== 'string' ) {
+    async addRefStyleSheet( urlOrCssText, docSSIndex ) {
+      if ( typeof urlOrCssText != 'string' ) {
         return;
+      }
+      if (
+        typeof docSSIndex == 'string' &&
+        !Number.isNaN( parseInt( docSSIndex, 10 ) )
+      ) {
+        docSSIndex = parseInt( docSSIndex, 10 );
+      }
+      if (
+        typeof docSSIndex != 'number' ||
+        docSSIndex < 0 ||
+        docSSIndex >= document.styleSheets.length
+      ) {
+        docSSIndex = null;
       }
       if ( urlOrCssText.match( /^https?:\/\/.*/ ) ) {
         urlOrCssText = await this.#fetchStyleSheetCode( urlOrCssText );
@@ -335,14 +348,17 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       }
       const newSS = new CSSStyleSheet();
       newSS.replaceSync( urlOrCssText );
-      this.#referenceCssFiles.push( newSS );
+      this.#referenceCssFiles.push( {
+        styleSheet: newSS,
+        docSSIndex: docSSIndex,
+      } );
       this.#adj4rMnkyCmdLn.logMsg(
 `Reference CSS style sheet added at index ${this.#referenceCssFiles.length - 1}
  with ${ newSS.cssRules.length } accepted style rules.`,
       );
     }
 
-    async addRefStyleSheetFromClipboard() {
+    async addRefStyleSheetFromClipboard( docSSIndex ) {
       this.#adj4rMnkyCmdLn.logMsg(
 `Ready to load the text on the clipboard as a reference style sheet. Please
  close DevTools and focus on the document when you are ready.`
@@ -351,7 +367,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       await navigator.clipboard
         .readText()
         .then( ( clipboardText ) => {
-          this.addRefStyleSheet( clipboardText );
+          this.addRefStyleSheet( clipboardText, docSSIndex );
         } );
       window.alert( this.#adj4rMnkyCmdLn.getLabeledMsg(
 `The CSS code on the clipboard has been added as a reference style sheet and
@@ -371,7 +387,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         return null;
       }
       const setOfClassesInSS = new Set();
-      const cssRules = this.#referenceCssFiles[ index ].cssRules;
+      const cssRules = this.#referenceCssFiles[ index ].styleSheet.cssRules;
       // TODO: Make this more robust in handling media queries
       for ( let i = 0; i < cssRules.length; i++ ) {
         if ( cssRules.item( i ) instanceof CSSStyleRule ) {
