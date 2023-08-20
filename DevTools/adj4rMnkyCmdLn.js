@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.8.1-rc4
+ * @version 0.8.1-rc5
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -141,12 +141,36 @@ const adj4rMnkyCmdLn = ( function() {
       return newMsg;
     }
 
+    isUrlString( value ) {
+      return (
+        typeof value == 'string' &&
+        value.match(
+          new RegExp( '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Z' +
+            'a-z0-9]+(?:\/.*)?$' )
+        ) !== null
+      );
+    }
+
     getLabeledMsg( msg, wrapLen ) {
       return this.#wrapMsgByAtCharLen( `${this.#prefix4Msgs} ${msg}`, wrapLen );
     }
 
     logMsg( msgText, wrapLen ) {
       console.log( this.getLabeledMsg( msgText, wrapLen ) );
+    }
+
+    openUrlInNewWindow( url ) {
+      if( !this.isUrlString( url ) ) {
+        adj4rMnkyCmdLn.logMsg(
+`If you want me to open a document style sheet, please give me a string
+ containing URL. The argument you gave me was «${whichStyleSheet}».`
+        );
+        return;
+      }
+      window.open(
+        url,
+        '_blank'
+      ).focus();
     }
 
     async waitForDoc4tFocus() {
@@ -207,10 +231,7 @@ const adj4rMnkyCmdLn = ( function() {
 
     async #fetchStylesheetCode( url ) {
       let finalResponse = null;
-      if ( !(
-        typeof url == 'string' &&
-        url.match( /^https?:\/\/.+\.css(?:\?.+)?\/?$/i )
-      ) ) {
+      if ( !this.isUrlStringToCss( url ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
 `When attempting to fetch style sheet code, a URL I was given for a style sheet:
  ^¶«${url}»^¶ does not take the expected form.`
@@ -233,9 +254,9 @@ const adj4rMnkyCmdLn = ( function() {
           console.error( error.message );
           this.#adj4rMnkyCmdLn.logMsg(
 `Since I was unable to use the fetch API to request the style sheet, I will
- now reconstruct it using «document.styleSheets».`
+ now open it in a new tab.`
           );
-          finalResponse = this.#recon5tCssFromDoc( url );
+          this.#adj4rMnkyCmdLn.openUrlInNewWindow( url );
         } );
       return finalResponse;
     }
@@ -375,6 +396,16 @@ const adj4rMnkyCmdLn = ( function() {
         }
       }
       return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
+    }
+
+    isUrlStringToCss( value ) {
+      return (
+        typeof value == 'string' &&
+        value.match(
+          new RegExp( '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Z' +
+            'a-z0-9]+\/.+\\.css(?:\\?.+)?\/?$' )
+        ) !== null
+      );
     }
 
     openDocSSInNewWindow( whichStyleSheet ) {
