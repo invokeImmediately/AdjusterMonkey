@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc4
+ * @version 0.9.0-rc5
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -194,6 +194,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     #classesUsedInPage;
     #linkedCssFiles;
     #linksAttrsList;
+    #localStoragePrefix = 'adj4rMnkyCmdLn.cssScanner.referenceCssFiles.';
     #referenceCssFiles = [];
     #scannedCssFile;
 
@@ -243,7 +244,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
           finalResponse = response;
         } )
         .catch( ( error ) => {
-          console.error( error.message );
+          console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
           this.#adj4rMnkyCmdLn.logMsg(
 `Since I was unable to use the fetch API to request the style sheet, I will
  now open it in a new tab.`
@@ -385,7 +386,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
     clearRefSSFromLocalStorage() {
       let i = 0;
-      let key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
+      let key = `${this.#localStoragePrefix}${i}`;
       let value = window.localStorage.getItem( key );
       const iter4nLimit = 1024;
       while( i < iter4nLimit && value !== null ) {
@@ -614,13 +615,17 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       try {
         for( let i = 0; i < this.#referenceCssFiles.length; i++ ) {
           window.localStorage.setItem(
-            `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`,
+            `${this.#localStoragePrefix}${i}`,
             JSON.stringify( {
               cssText: this.#referenceCssFiles[ i ].cssText,
               docSSIndex: this.#referenceCssFiles[ i ].docSSIndex,
             } ),
           );
         }
+        this.#adj4rMnkyCmdLn.logMsg(
+`A total of ${ i > 0 ? i - 1 : 0 } reference style sheets were placed in to
+ local storage using the key pattern '${this.#localStoragePrefix}n'.`
+        );
       } catch( error ) {
         this.#adj4rMnkyCmdLn.logMsg( error.message );
       }
@@ -661,5 +666,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0-rc4'
+  version: '0.9.0-rc5'
 } );
