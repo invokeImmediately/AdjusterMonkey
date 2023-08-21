@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc5
+ * @version 0.9.0-rc6
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -341,6 +341,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       ) {
         docSSIndex = null;
       }
+      let htmlId = null;
+      if ( docSSIndex !== null ) {
+        htmlId = document.styleSheets.item( docSSIndex ).ownerNode.id;
+      }
       if ( this.isUrlStringToCss( urlOrCssText ) ) {
         urlOrCssText = await this.#fetchStyleSheetCode( urlOrCssText );
       }
@@ -353,6 +357,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         styleSheet: newSS,
         cssText: urlOrCssText,
         docSSIndex: docSSIndex,
+        htmlId: htmlId,
       } );
       this.#adj4rMnkyCmdLn.logMsg(
 `Reference CSS style sheet added at index ${this.#referenceCssFiles.length - 1}
@@ -395,6 +400,9 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
         value = window.localStorage.getItem( key );
       }
+      this.#adj4rMnkyCmdLn.logMsg(
+`A total of ${i} reference style sheets were cleared from local storage.`
+      );
     }
 
     getClassesUsedInReferenceSS( index ) {
@@ -619,12 +627,14 @@ const adj4rMnkyCmdLn = ( function( iife ) {
             JSON.stringify( {
               cssText: this.#referenceCssFiles[ i ].cssText,
               docSSIndex: this.#referenceCssFiles[ i ].docSSIndex,
+              htmlId: this.#referenceCssFiles[ i ].htmlId,
             } ),
           );
         }
         this.#adj4rMnkyCmdLn.logMsg(
-`A total of ${ i > 0 ? i - 1 : 0 } reference style sheets were placed in to
- local storage using the key pattern '${this.#localStoragePrefix}n'.`
+`A total of ${ this.#referenceCssFiles.length } reference style sheets were
+ placed in to local storage using the key pattern
+ '${this.#localStoragePrefix}n'.`
         );
       } catch( error ) {
         this.#adj4rMnkyCmdLn.logMsg( error.message );
@@ -666,5 +676,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0-rc5'
+  version: '0.9.0-rc6'
 } );
