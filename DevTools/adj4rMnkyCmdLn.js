@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc3
+ * @version 0.9.0-rc4
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -383,6 +383,19 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
     }
 
+    clearRefSSFromLocalStorage() {
+      let i = 0;
+      let key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
+      let value = window.localStorage.getItem( key );
+      const iter4nLimit = 1024;
+      while( i < iter4nLimit && value !== null ) {
+        window.localStorage.removeItem( key );
+        i++;
+        key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
+        value = window.localStorage.getItem( key );
+      }
+    }
+
     getClassesUsedInReferenceSS( index ) {
       if ( index < 0 || index >= this.#referenceCssFiles.length ) {
         return null;
@@ -596,6 +609,22 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       this.#scannedCssFile = this.#fetchStyleSheetCode( whichFile );
       return this.#scannedCssFile;
     }
+
+    storeRefStyleSheetsLocally() {
+      try {
+        for( let i = 0; i < this.#referenceCssFiles.length; i++ ) {
+          window.localStorage.setItem(
+            `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`,
+            JSON.stringify( {
+              cssText: this.#referenceCssFiles[ i ].cssText,
+              docSSIndex: this.#referenceCssFiles[ i ].docSSIndex,
+            } ),
+          );
+        }
+      } catch( error ) {
+        this.#adj4rMnkyCmdLn.logMsg( error.message );
+      }
+    }
   }
 
   function main() {
@@ -632,5 +661,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0-rc3',
+  version: '0.9.0-rc4'
 } );
