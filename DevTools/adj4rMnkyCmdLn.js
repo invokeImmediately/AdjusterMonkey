@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc6
+ * @version 0.9.0-rc7
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -548,6 +548,28 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       console.table( this.#linkedCssFiles, [ 'htmlId', 'section', 'ssUrl' ] );
     }
 
+    restoreRefSSFromStorage() {
+      let i = 0;
+      let key = `${this.#localStoragePrefix}${i}`;
+      let value = window.localStorage.getItem( key );
+      let styleSheetData;
+      const iter4nLimit = 1024;
+      while( i < iter4nLimit && value !== null ) {
+        styleSheetData = JSON.parse( value );
+        // TODO: Add check against htmlId
+        this.addRefStyleSheet(
+          styleSheetData.cssText,
+          styleSheetData.docSSIndex
+        );
+        i++;
+        key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
+        value = window.localStorage.getItem( key );
+      }
+      this.#adj4rMnkyCmdLn.logMsg(
+`A total of ${i} reference style sheets were restored from local storage.`
+      );
+    }
+
     scanForClassesUsedInPage() {
       this.#classesUsedInPage = this.#extractClassesUsedInPage();
     }
@@ -676,5 +698,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0-rc6'
+  version: '0.9.0-rc7'
 } );
