@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc8
+ * @version 0.9.0-rc9
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -203,13 +203,29 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       this.scanForCssFiles();
     }
 
+    #checkDocSSIndex( docSSIndex ) {
+      if (
+        typeof docSSIndex == 'string' &&
+        !Number.isNaN( parseInt( docSSIndex, 10 ) )
+      ) {
+        docSSIndex = parseInt( docSSIndex, 10 );
+      }
+      if (
+        typeof docSSIndex != 'number' ||
+        docSSIndex < 0 ||
+        docSSIndex >= document.styleSheets.length
+      ) {
+        docSSIndex = null;
+      }
+      return docSSIndex;
+    }
+
     #extractAttrsFromSsLink( link, attrsSet ) {
       const numAttrs = link.attributes.length;
       for( let index = 0; index < numAttrs; index++ ) {
         attrsSet.add( link.attributes[ index ].name );
       }
     }
-
 
     #extractClassesUsedInPage() {
       const cssClassSet = new Set();
@@ -324,38 +340,31 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       return attrs.toSorted();
     }
 
-    async addRefStyleSheet( urlOrCssText, docSSIndex ) {
+    async addRefStyleSheet( urlOrCssText, docSSIndex, cssTextSrc ) {
       if ( typeof urlOrCssText != 'string' ) {
         return;
       }
-      if (
-        typeof docSSIndex == 'string' &&
-        !Number.isNaN( parseInt( docSSIndex, 10 ) )
-      ) {
-        docSSIndex = parseInt( docSSIndex, 10 );
-      }
-      if (
-        typeof docSSIndex != 'number' ||
-        docSSIndex < 0 ||
-        docSSIndex >= document.styleSheets.length
-      ) {
-        docSSIndex = null;
-      }
+      docSSIndex = this.#checkDocSSIndex( docSSIndex );
       let htmlId = null;
       if ( docSSIndex !== null ) {
         htmlId = document.styleSheets.item( docSSIndex ).ownerNode.id;
       }
       if ( this.isUrlStringToCss( urlOrCssText ) ) {
+        cssTextSrc = urlOrCssText;
         urlOrCssText = await this.#fetchStyleSheetCode( urlOrCssText );
       }
       if ( urlOrCssText == '' ) {
         return;
+      }
+      if ( !this.isUrlStringToCss( cssTextSrc ) ) {
+        cssTextSrc = '';
       }
       const newSS = new CSSStyleSheet();
       newSS.replaceSync( urlOrCssText );
       this.#referenceCssFiles.push( {
         styleSheet: newSS,
         cssText: urlOrCssText,
+        cssTextSrc: cssTextSrc,
         docSSIndex: docSSIndex,
         htmlId: htmlId,
       } );
@@ -365,7 +374,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       );
     }
 
-    async addRefStyleSheetFromClipboard( docSSIndex ) {
+    async addRefStyleSheetFromClipboard( docSSIndex, cssTextSrc ) {
       this.#adj4rMnkyCmdLn.logMsg(
 `Ready to load the text on the clipboard as a reference style sheet. Please
  close DevTools and focus on the document when you are ready.`
@@ -374,7 +383,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       await navigator.clipboard
         .readText()
         .then( ( clipboardText ) => {
-          this.addRefStyleSheet( clipboardText, docSSIndex );
+          this.addRefStyleSheet( clipboardText, docSSIndex, cssTextSrc );
         } );
       window.alert( this.#adj4rMnkyCmdLn.getLabeledMsg(
 `The CSS code on the clipboard has been added as a reference style sheet and
@@ -419,19 +428,14 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       }
       const setOfClassesInSS = new Set();
       const cssRules = this.#referenceCssFiles[ index ].styleSheet.cssRules;
-      // TODO: Make this more robust in handling media queries
       for ( let i = 0; i < cssRules.length; i++ ) {
         if ( cssRules.item( i ) instanceof CSSStyleRule ) {
-          this.#findClassesUsedInStyleRule(
-            cssRules.item( i ),
-            setOfClassesInSS
-          );
+          this.#findClassesUsedInStyleRule( cssRules.item( i ),
+            setOfClassesInSS );
         }
         if ( cssRules.item( i ) instanceof CSSMediaRule ) {
-          this.#findClassesUsedInMediaRule(
-            cssRules.item( i ),
-            setOfClassesInSS
-          );
+          this.#findClassesUsedInMediaRule( cssRules.item( i ),
+            setOfClassesInSS );
         }
       }
       return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
@@ -479,6 +483,23 @@ const adj4rMnkyCmdLn = ( function( iife ) {
             'a-z0-9]+\/.+\\.css(?:\\?.+)?\/?$' )
         ) !== null
       );
+    }
+
+    matchDocSSIndexToSS( docSSIndex, cssTextSrc ) {
+      docSSIndex = this.#checkDocSSIndex( docSSIndex );
+      if ( docSSIndex === null ||
+        document.styleSheets[ docSSIndex ].href != cssTextSrc
+      ) {
+        for( let i = 0; i < document.styleSheets.length; i++ ) {
+          if ( document.styleSheets[ i ].href == cssTextSrc ) {
+            docSSIndex = i;
+            break;
+          } else if ( i == document.styleSheets.length - 1 ) {
+            docSSIndex = null;
+          }
+        }
+      }
+      return docSSIndex;
     }
 
     openDocSSInNewWindow( whichStyleSheet ) {
@@ -564,11 +585,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       const iter4nLimit = 1024;
       while( i < iter4nLimit && value !== null ) {
         styleSheetData = JSON.parse( value );
-        // TODO: Add check against htmlId
-        this.addRefStyleSheet(
-          styleSheetData.cssText,
-          styleSheetData.docSSIndex
-        );
+        styleSheetData.docSSIndex = this.matchDocSSIndexToSS(
+          styleSheetData.docSSIndex, styleSheetData.cssTextSrc );
+        this.addRefStyleSheet( styleSheetData.cssText,
+          styleSheetData.docSSIndex, styleSheetData.cssTextSrc );
         i++;
         key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
         value = window.localStorage.getItem( key );
@@ -656,10 +676,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
             `${this.#localStoragePrefix}${i}`,
             JSON.stringify( {
               cssText: this.#referenceCssFiles[ i ].cssText,
+              cssTextSrc: this.#referenceCssFiles[ i ].cssTextSrc,
               docSSIndex: this.#referenceCssFiles[ i ].docSSIndex,
               htmlId: this.#referenceCssFiles[ i ].htmlId,
-            } ),
-          );
+            } ) );
         }
         this.#adj4rMnkyCmdLn.logMsg(
 `A total of ${ this.#referenceCssFiles.length } reference style sheets were
@@ -706,5 +726,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0-rc8'
+  version: '0.9.0-rc9'
 } );
