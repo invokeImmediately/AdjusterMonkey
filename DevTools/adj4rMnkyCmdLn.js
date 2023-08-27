@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.9.0-rc9
+ * @version 0.10.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -726,5 +726,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.9.0-rc9'
+  version: '0.10.0'
 } );
