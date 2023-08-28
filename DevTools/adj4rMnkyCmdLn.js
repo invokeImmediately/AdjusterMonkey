@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.10.0
+ * @version 0.10.0-rc1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -49,7 +49,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       this.cssScanner = new CssScanner( this );
     }
 
-    #wrapMsgByAtCharLen( msg, len ) {
+    #wrapMsgAtCharLen( msg, len ) {
       if ( typeof len == 'undefined' ) {
         len = 80;
       }
@@ -148,7 +148,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     }
 
     getLabeledMsg( msg, wrapLen ) {
-      return this.#wrapMsgByAtCharLen( `${this.#prefix4Msgs} ${msg}`, wrapLen );
+      return this.#wrapMsgAtCharLen( `${this.#prefix4Msgs} ${msg}`, wrapLen );
     }
 
     logMsg( msgText, wrapLen ) {
@@ -157,9 +157,9 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
     openUrlInNewWindow( url ) {
       if( !this.isUrlString( url ) ) {
-        adj4rMnkyCmdLn.logMsg(
-`If you want me to open a document style sheet, please give me a string
- containing URL. The argument you gave me was «${whichStyleSheet}».`
+        adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
+          please give me a string containing URL. The argument you gave me was
+          «${whichStyleSheet}».`
         );
         return;
       }
@@ -242,16 +242,16 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       let finalResponse = null;
       if ( !this.isUrlStringToCss( url ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`When attempting to fetch style sheet code, a URL I was given for a style sheet:
- ^¶«${url}»^¶ does not take the expected form.`
+          `When attempting to fetch style sheet code, a URL I was given for a
+          style sheet: ^¶«${url}»^¶ does not take the expected form.`
         ) );
       }
       await fetch( url )
         .then( ( response ) => {
           if ( !response.ok ) {
             throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`Unable to access resource: ^¶« ${url} »^¶ Status returned was:
- «${response.status}».`
+              `Unable to access resource: ^¶« ${url} »^¶ Status returned was:
+              «${response.status}».`
             ) );
           }
           return response.text();
@@ -261,9 +261,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         } )
         .catch( ( error ) => {
           console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
-          this.#adj4rMnkyCmdLn.logMsg(
-`Since I was unable to use the fetch API to request the style sheet, I will
- now open it in a new tab.`
+          this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to use the fetch API
+            to request the style sheet, I will now open it in a new tab.`
           );
           this.#adj4rMnkyCmdLn.openUrlInNewWindow( url );
         } );
@@ -313,9 +312,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       try {
         const indexOfSS = this.#findDocSSIndexFromURL( urlOfCssSrc );
         if( indexOfSS === null ) {
-          throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was unable to find the requested style sheet among those loaded on the page.`
-          ) );
+          throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was unable to
+            find the requested style sheet among those loaded on the page.` ) );
         }
         const docSSRules = document.styleSheets.item( indexOfSS ).cssRules;
         for( let index = 0; index < docSSRules.length; index++ ) {
@@ -323,11 +321,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         }
       } catch( error ) {
         console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
-        this.#adj4rMnkyCmdLn.logMsg(
-`Since I was unable to reconstruct the style sheet from «document.styleSheets»,
- I suggest you manually load the style sheet code for further analysis into my
- list of dynamically loaded reference style sheets.`
-        );
+        this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to reconstruct the
+          style sheet from «document.styleSheets», I suggest you manually load
+          the style sheet code for further analysis into my list of dynamically
+          loaded reference style sheets.` );
       }
       return allCssText;
     }
@@ -368,27 +365,24 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         docSSIndex: docSSIndex,
         htmlId: htmlId,
       } );
-      this.#adj4rMnkyCmdLn.logMsg(
-`Reference CSS style sheet added at index ${this.#referenceCssFiles.length - 1}
- with ${ newSS.cssRules.length } accepted style rules.`,
-      );
+      this.#adj4rMnkyCmdLn.logMsg( `Reference CSS style sheet added at index
+        ${this.#referenceCssFiles.length - 1} with ${ newSS.cssRules.length }
+        accepted style rules.` );
     }
 
     async addRefStyleSheetFromClipboard( docSSIndex, cssTextSrc ) {
-      this.#adj4rMnkyCmdLn.logMsg(
-`Ready to load the text on the clipboard as a reference style sheet. Please
- close DevTools and focus on the document when you are ready.`
-      );
+      this.#adj4rMnkyCmdLn.logMsg( `Ready to load the text on the clipboard as a
+        reference style sheet. Please close DevTools and focus on the document
+        when you are ready.` );
       await this.#adj4rMnkyCmdLn.waitForDoc4tFocus();
       await navigator.clipboard
         .readText()
         .then( ( clipboardText ) => {
           this.addRefStyleSheet( clipboardText, docSSIndex, cssTextSrc );
         } );
-      window.alert( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`The CSS code on the clipboard has been added as a reference style sheet and
- will be available for further analysis via the DevTools command line.`, 60
-      ) );
+      window.alert( this.#adj4rMnkyCmdLn.getLabeledMsg( `The CSS code on the
+        clipboard has been added as a reference style sheet and will be
+        available for further analysis via the DevTools command line.`, 60 ) );
     }
 
     get classesUsedInPage() {
@@ -401,9 +395,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     clearRefSS() {
       const refSSCount = this.#referenceCssFiles.length;
       this.#referenceCssFiles.splice( 0 );
-      this.#adj4rMnkyCmdLn.logMsg(
-`A total of ${refSSCount} reference style sheets have been cleared.`
-      );
+      this.#adj4rMnkyCmdLn.logMsg( `A total of ${refSSCount} reference style
+        sheets have been cleared.` );
     }
 
     clearRefSSFromLocalStorage() {
@@ -417,9 +410,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
         value = window.localStorage.getItem( key );
       }
-      this.#adj4rMnkyCmdLn.logMsg(
-`A total of ${i} reference style sheets were cleared from local storage.`
-      );
+      this.#adj4rMnkyCmdLn.logMsg( `A total of ${i} reference style sheets were
+        cleared from local storage.` );
     }
 
     getClassesUsedInReferenceSS( index ) {
@@ -510,34 +502,30 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         whichStyleSheet = parseInt( whichStyleSheet, 10 );
       }
       if( typeof whichStyleSheet != 'number' ) {
-        adj4rMnkyCmdLn.logMsg(
-`If you want me to open a document style sheet, please give me the index of
- the desired style sheet in «document.styleSheets». The argument you gave me was
- «${whichStyleSheet}».`
-        );
+        adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
+          please give me the index of the desired style sheet in
+          «document.styleSheets». The argument you gave me was
+          «${whichStyleSheet}».` );
         return;
       }
       if (
         whichStyleSheet < 0 ||
         whichStyleSheet >= document.styleSheets.length
       ) {
-        adj4rMnkyCmdLn.logMsg(
-`The index you gave me for the document style sheet to open of
- «${whichStyleSheet}» falls outside the range of accepted indices.`
-        );
+        adj4rMnkyCmdLn.logMsg( `The index you gave me for the document style
+          sheet to open of «${whichStyleSheet}» falls outside the range of
+          accepted indices.` );
         return;
       }
       if( document.styleSheets.item( whichStyleSheet ).href === null ) {
-        adj4rMnkyCmdLn.logMsg(
-`The index you gave me for the document style sheet to open of
- «${whichStyleSheet}» represents an internal style sheet.`
-        );
+        adj4rMnkyCmdLn.logMsg( `The index you gave me for the document style
+          sheet to open of «${whichStyleSheet}» represents an internal style
+          sheet.` );
         return;
       }
-      adj4rMnkyCmdLn.logMsg(
-`Opening document style sheet «${whichStyleSheet}» with href
- «${document.styleSheets.item( whichStyleSheet ).href}» in a new window.`
-      );
+      adj4rMnkyCmdLn.logMsg( `Opening document style sheet «${whichStyleSheet}»
+        with href «${document.styleSheets.item( whichStyleSheet ).href}» in a
+        new window.` );
       window.open(
         `${document.styleSheets.item( whichStyleSheet ).href}`,
         '_blank'
@@ -593,9 +581,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
         value = window.localStorage.getItem( key );
       }
-      this.#adj4rMnkyCmdLn.logMsg(
-`A total of ${i} reference style sheets were restored from local storage.`
-      );
+      this.#adj4rMnkyCmdLn.logMsg( `A total of ${i} reference style sheets were
+        restored from local storage.` );
     }
 
     scanForClassesUsedInPage() {
@@ -643,10 +630,9 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       if ( !(
         typeof whichFile === 'string' || typeof whichFile === 'number'
       ) ) {
-        throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was given the following input for scanning a CSS file: ^¶«${whichFile}».
- ^¶ This input was not a string or number as expected.`
-        ) );
+        throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was given
+          the following input for scanning a CSS file: ^¶«${whichFile}». ^¶ This
+          input was not a string or number as expected.` ) );
       }
       if ( typeof whichFile === 'string' &&
         !Number.isNaN( parseInt( whichFile ) )
@@ -656,11 +642,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       if ( typeof whichFile === 'number' && (
         whichFile < 0 || whichFile >= this.#linkedCssFiles.length
       ) ) {
-        throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-`I was given the following index as input for scanning a CSS file:
- ^¶ «${whichFile}»^¶ This index is out of range with respect to the number of
- linked CSS files loaded by this page.`
-        ) );
+        throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was given
+          the following index as input for scanning a CSS file: ^¶
+          «${whichFile}»^¶ This index is out of range with respect to the number
+          of linked CSS files loaded by this page.` ) );
       }
       if ( typeof whichFile === 'number' ) {
         whichFile = this.#linkedCssFiles[ whichFile ].ssUrl;
@@ -681,11 +666,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
               htmlId: this.#referenceCssFiles[ i ].htmlId,
             } ) );
         }
-        this.#adj4rMnkyCmdLn.logMsg(
-`A total of ${ this.#referenceCssFiles.length } reference style sheets were
- placed in to local storage using the key pattern
- '${this.#localStoragePrefix}n'.`
-        );
+        this.#adj4rMnkyCmdLn.logMsg( `A total of
+          ${ this.#referenceCssFiles.length } reference style sheets were placed
+          in to local storage using the key pattern
+          '${this.#localStoragePrefix}n'.` );
       } catch( error ) {
         this.#adj4rMnkyCmdLn.logMsg( error.message );
       }
@@ -708,23 +692,21 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
     if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
-      adj4rMnkyCmdLn.logMsg(
-`An AdjusterMonkey instance (v${iife.version}) for use with the DevTools
- command-line has been added to the window object associated with the document
- “${document.title}” at location “${window.location.hostname}.”`
-      );
+      adj4rMnkyCmdLn.logMsg( `An AdjusterMonkey instance (v${iife.version}) for
+        use with the DevTools command-line has been added to the window object
+        associated with the document “${document.title}” at location
+        “${window.location.hostname}.”` );
     } else {
-      adj4rMnkyCmdLn.logMsg(
-`When attempting to add an AdjusterMonkey instance (v${iife.version}) for use
- with the DevTools command-line interface to the window object, it was found
- that the adj4rMnkyCmdLn property was already present. Consequently, the
- instance was not added to the window object.`
-      );
+      adj4rMnkyCmdLn.logMsg( `When attempting to add an AdjusterMonkey instance
+        (v${iife.version}) for use with the DevTools command-line interface to
+        the window object, it was found that the adj4rMnkyCmdLn property was
+        already present. Consequently, the instance was not added to the window
+        object.` );
     }
     return adj4rMnkyCmdLn;
   }
 
   return main();
 } )( {
-  version: '0.10.0'
+  version: '0.10.0-rc1'
 } );
