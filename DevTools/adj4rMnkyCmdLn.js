@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.10.0-rc1
+ * @version 0.10.0-rc2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -50,19 +50,29 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     }
 
     #wrapMsgAtCharLen( msg, len ) {
+      // ·> Use a default line wrapping length.                               <·
       if ( typeof len == 'undefined' ) {
         len = 80;
       }
+
+      // ·> Convert the line wrapping length to a number if possible.         <·
       if ( typeof len != 'number' && Number.isNaN( parseInt( len ) ) ) {
         return msg;
       } else if ( typeof len != 'number' ) {
         len = parseInt( len );
       }
+
+      // ·> Enforce minimum and maximum line wrapping lengths to ensure a      ·
+      // ·  clean looking result.                                             <·
       if ( len < 40 ) {
         len = 40;
       } else if ( len > 100 ) {
         len = 100;
       }
+
+      // ·> Re-indent the original message to allow template literals to be    ·
+      // ·  used following clean coding practices when specifying the argu-    ·
+      // ·  ment.                                                             <·
       let iterCount = 0;
       while(
         msg.length > 0 &&
@@ -78,6 +88,13 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       if ( msg.length < len ) {
         return msg;
       }
+
+      // ·> Replace a special tab escape sequence with indentation at this     ·
+      // ·  later point following re-indentation so it correctly persists      ·
+      // ·  into the final line-wrapped message.                              <·
+      msg.replaceAll( /^⇥/g, '  ' );
+
+      // ·> Apply line wrapping to the message.                               <·
       let newMsg = '';
       let i_start = 0;
       let j_scan;
@@ -133,7 +150,12 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         i_start = j_scan;
         iterCount2++;
       }
+
+      // ·> Process a special newline escape sequence following re-indenta-    ·
+      // ·  tion so it correctly persists into the final line-wrapped mess-    ·
+      // ·  age.                                                              <·
       newMsg.replaceAll( /^¶/g, '\n' );
+
       return newMsg;
     }
 
@@ -708,5 +730,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.10.0-rc1'
+  version: '0.10.0-rc2'
 } );
