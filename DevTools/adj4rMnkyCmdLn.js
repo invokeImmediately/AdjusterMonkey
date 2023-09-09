@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.10.0-rc2
+ * @version 0.10.0-rc3
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -92,7 +92,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·> Replace a special tab escape sequence with indentation at this     ·
       // ·  later point following re-indentation so it correctly persists      ·
       // ·  into the final line-wrapped message.                              <·
-      msg.replaceAll( /^⇥/g, '  ' );
+      msg.replaceAll( /\^↹/g, '  ' );
 
       // ·> Apply line wrapping to the message.                               <·
       let newMsg = '';
@@ -154,7 +154,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·> Process a special newline escape sequence following re-indenta-    ·
       // ·  tion so it correctly persists into the final line-wrapped mess-    ·
       // ·  age.                                                              <·
-      newMsg.replaceAll( /^¶/g, '\n' );
+      newMsg.replaceAll( /\^¶/g, '\n' );
 
       return newMsg;
     }
@@ -265,14 +265,14 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       if ( !this.isUrlStringToCss( url ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
           `When attempting to fetch style sheet code, a URL I was given for a
-          style sheet: ^¶«${url}»^¶ does not take the expected form.`
+          style sheet: ^¶⇥«${url}»^¶ does not take the expected form.`
         ) );
       }
       await fetch( url )
         .then( ( response ) => {
           if ( !response.ok ) {
             throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
-              `Unable to access resource: ^¶« ${url} »^¶ Status returned was:
+              `Unable to access resource: ^¶⇥« ${url} »^¶ Status returned was:
               «${response.status}».`
             ) );
           }
@@ -653,8 +653,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         typeof whichFile === 'string' || typeof whichFile === 'number'
       ) ) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was given
-          the following input for scanning a CSS file: ^¶«${whichFile}». ^¶ This
-          input was not a string or number as expected.` ) );
+          the following input for scanning a CSS file: ^¶⇥«${whichFile}».
+          ^¶ This input was not a string or number as expected.` ) );
       }
       if ( typeof whichFile === 'string' &&
         !Number.isNaN( parseInt( whichFile ) )
@@ -666,8 +666,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       ) ) {
         throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was given
           the following index as input for scanning a CSS file: ^¶
-          «${whichFile}»^¶ This index is out of range with respect to the number
-          of linked CSS files loaded by this page.` ) );
+          ⇥«${whichFile}»^¶ This index is out of range with respect to the
+          number of linked CSS files loaded by this page.` ) );
       }
       if ( typeof whichFile === 'number' ) {
         whichFile = this.#linkedCssFiles[ whichFile ].ssUrl;
@@ -730,5 +730,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.10.0-rc2'
+  version: '0.10.0-rc3'
 } );
