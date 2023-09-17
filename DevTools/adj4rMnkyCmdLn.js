@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.11.0
+ * @version 0.11.0-rc1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -329,6 +329,27 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       return foundIndex;
     }
 
+    #getClassesUsedInSS( styleSheet ) {
+      if ( !(
+        typeof styleSheet == 'object' &&
+        styleSheet instanceof CSSStyleSheet
+       ) ) {
+        return null;
+      }
+      const setOfClassesInSS = new Set();
+      for ( let i = 0; i < styleSheet.cssRules.length; i++ ) {
+        if ( styleSheet.cssRules.item( i ) instanceof CSSStyleRule ) {
+          this.#findClassesUsedInStyleRule( styleSheet.cssRules.item( i ),
+            setOfClassesInSS );
+        }
+        if ( styleSheet.cssRules.item( i ) instanceof CSSMediaRule ) {
+          this.#findClassesUsedInMediaRule( styleSheet.cssRules.item( i ),
+            setOfClassesInSS );
+        }
+      }
+      return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
+    }
+
     #recon5tCssFromDoc( urlOfCssSrc ) {
       let allCssText = '';
       try {
@@ -436,23 +457,19 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         cleared from local storage.` );
     }
 
+    getClassesUsedInDocSS( index ) {
+      if ( index < 0 || index >= document.styleSheets.length ) {
+        return null;
+      }
+      return this.#getClassesUsedInSS( document.styleSheets[ index ] );
+    }
+
     getClassesUsedInReferenceSS( index ) {
       if ( index < 0 || index >= this.#referenceCssFiles.length ) {
         return null;
       }
-      const setOfClassesInSS = new Set();
-      const cssRules = this.#referenceCssFiles[ index ].styleSheet.cssRules;
-      for ( let i = 0; i < cssRules.length; i++ ) {
-        if ( cssRules.item( i ) instanceof CSSStyleRule ) {
-          this.#findClassesUsedInStyleRule( cssRules.item( i ),
-            setOfClassesInSS );
-        }
-        if ( cssRules.item( i ) instanceof CSSMediaRule ) {
-          this.#findClassesUsedInMediaRule( cssRules.item( i ),
-            setOfClassesInSS );
-        }
-      }
-      return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
+      return this.#getClassesUsedInSS( this.#referenceCssFiles[ index ]
+        .styleSheet );
     }
 
     getRefCssText( index ) {
@@ -730,5 +747,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0'
+  version: '0.11.0-rc1'
 } );
