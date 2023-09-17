@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.10.0-rc3
+ * @version 0.11.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -92,7 +92,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·> Replace a special tab escape sequence with indentation at this     ·
       // ·  later point following re-indentation so it correctly persists      ·
       // ·  into the final line-wrapped message.                              <·
-      msg.replaceAll( /\^↹/g, '  ' );
+      msg = msg.replaceAll( /\^↹/g, '  ' );
 
       // ·> Apply line wrapping to the message.                               <·
       let newMsg = '';
@@ -154,7 +154,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·> Process a special newline escape sequence following re-indenta-    ·
       // ·  tion so it correctly persists into the final line-wrapped mess-    ·
       // ·  age.                                                              <·
-      newMsg.replaceAll( /\^¶/g, '\n' );
+      newMsg = newMsg.replaceAll( /\^¶/g, '\n' );
 
       return newMsg;
     }
@@ -730,5 +730,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.10.0-rc3'
+  version: '0.11.0'
 } );
