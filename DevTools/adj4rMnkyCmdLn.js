@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.11.0-rc1
+ * @version 0.11.0-rc2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -472,6 +472,29 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         .styleSheet );
     }
 
+    getDocSSRulesBySelectorMatching( sSIndex, regExpNeedle ) {
+      // ·> TO-DO: Check if sSIndex is an array and, if so, process multiple   ·
+      // ·  stylesheets with a single call.                                   <·
+      if ( sSIndex < 0 || sSIndex >= document.styleSheets.length ) {
+        return null;
+      }
+      const results = [];
+      const rules = document.styleSheets[ sSIndex ].cssRules;
+      for ( let i = 0; i < styleSheet.cssRules.length; i++ ) {
+        if (
+          rules.item( i ) instanceof CSSStyleRule &&
+          rules.item( i ).selectorText.match( regExpNeedle )
+        ) {
+          results.push( rules.item( i ).cssText );
+        }
+        // ·> To-do: Handle case where a media rule is encountered.           <·
+        // if ( rules.item( i ) instanceof CSSMediaRule ) {
+        //   … rules.item( i ).conditionText…
+        // }
+      }
+      return results;
+    }
+
     getRefCssText( index ) {
       if (
         typeof index == 'string' &&
@@ -747,5 +770,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc1'
+  version: '0.11.0-rc2'
 } );
