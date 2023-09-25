@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.11.0-rc3
+ * @version 0.11.0-rc4
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -157,6 +157,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       newMsg = newMsg.replaceAll( /\^¶/g, '\n' );
 
       return newMsg;
+    }
+
+    createDataTree( rootData ) {
+      return new DataTree( rootData );
     }
 
     isUrlString( value ) {
@@ -768,6 +772,161 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     }
   }
 
+  class DataTree {
+    constructor( root ) {
+      this.root = new DataTreeNode(
+        root,
+        0,
+        0,
+        undefined,
+        this
+      );
+      this.treeType = typeof root;
+      this.lastAdded = this.root;
+    }
+
+    findFirst( data ) {
+      return this.root.findFirst( data );
+    }
+
+    toString() {
+      let cur4Node = this.root.children[ 0 ];
+      let out3Prefix = '';
+      let ou3tString = out3Prefix + this.root.data + '\n';
+      let counter = 0;
+
+      while ( cur4Node !== undefined ) {
+        out3Prefix = out3Prefix.replace( '├─', '│ ' );
+        out3Prefix = out3Prefix.replace( '└─', '  ' );
+        if ( cur4Node.getNextSibling() === undefined ) {
+          out3Prefix += '└─ ';
+        } else {
+          out3Prefix += '├─ ';
+        }
+        ou3tString += out3Prefix + cur4Node.data + '\n';
+        if ( cur4Node.children.length ) {
+          cur4Node = cur4Node.children[0];
+        } else if ( cur4Node.getNextSibling() !== undefined ) {
+          cur4Node = cur4Node.getNextSibling();
+          out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+        } else {
+          cur4Node = cur4Node.parent;
+          out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+          while (
+            cur4Node !== undefined &&
+            cur4Node.getNextSibling() === undefined
+          ) {
+            cur4Node = cur4Node.parent;
+            out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+          }
+          if ( cur4Node !== undefined ) {
+            cur4Node = cur4Node.getNextSibling();
+            out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+          }
+        }
+      }
+
+      return ou3tString;
+    }
+  }
+
+  class DataTreeNode {
+    constructor( data, index, depth, parentNode, parentTree ) {
+      this.data = data;
+      this.index = index;
+      this.depth = depth;
+      this.parent = parentNode;
+      this.tree = parentTree
+      this.children = [];
+    }
+
+    addChild( data ) {
+      const newNode = new DataTreeNode(
+        data,
+        this.children.length,
+        this.depth + 1,
+        this,
+        this.tree
+      );
+      this.children.push( newNode );
+      this.tree.lastAdded = newNode;
+
+      return newNode;
+    }
+
+    addSibling( data ) {
+      let newNode = undefined;
+
+      if ( this.parent !== undefined ) {
+        newNode = new DataTreeNode(
+          data,
+          this.parent.children.length,
+          this.depth,
+          this.parent,
+          this.tree
+        );
+        this.parent.children.push( newNode );
+        this.tree.lastAdded = newNode;
+      }
+
+      return newNode;
+    }
+
+    findFirst( data ) {
+      let result = undefined;
+
+      if ( data == this.data ) {
+        result = this;
+      } else if ( this.children.length ) {
+        for ( let i = 0; !result && i < this.children.length; i++ ) {
+          result = this.children[ i ].findFirst( data );
+        }
+      }
+
+      return result;
+    }
+
+    getNextSibling() {
+      let next;
+
+      if (
+        this.parent === undefined ||
+        this.index >= this.parent.children.length - 1
+      ) {
+        next = undefined;
+      } else {
+        next = this.parent.children[ this.index + 1 ];
+      }
+
+      return next;
+    }
+
+    getPathToRoot() {
+      const path = [];
+      let curNode = this.parent;
+
+      path.splice( 0, 0, this.index );
+      for ( let i = this.depth - 1; i > 0; i-- ) {
+        path.splice( 0, 0, curNode.index);
+        curNode = curNode.parent;
+      }
+
+      return path;
+    }
+
+    getPreviousSibling() {
+      let previous;
+
+      if ( this.index == 0 ) {
+        previous = undefined;
+      } else {
+        previous = this.parent.children[ this.index - 1 ];
+      }
+
+      return previous;
+    }
+  }
+
   function main() {
     // ·> Only proceed with loading AdjusterMonkey if the window represents a  ·
     // ·  web page the user is actively browsing.                             <·
@@ -800,5 +959,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc3'
+  version: '0.11.0-rc4'
 } );
