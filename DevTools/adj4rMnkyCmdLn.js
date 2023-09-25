@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.11.0-rc2
+ * @version 0.11.0-rc3
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -240,6 +240,47 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         docSSIndex = null;
       }
       return docSSIndex;
+    }
+
+    #copyMediaRuleCSSToArrayBySel4rMat4g(
+      mediaRule, array, regExpNeedle
+    ) {
+      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
+      const rules = mediaRule.cssRules;
+      let results = [];
+      for ( let i = 0; i < rules.length; i++ ) {
+        if (
+          rules.item( i ) instanceof CSSStyleRule &&
+          rules.item( i ).selectorText.match( regExpNeedle )
+        ) {
+          results.push( rules.item( i ).cssText );
+        }
+      }
+      if ( results.length > 0 ) {
+        results = results.join( '\n' );
+        results = results.replace( /^(?!$)/gm, "  " );
+        results = "@media " + mediaRule.conditionText + " {\n" + results
+          + "\n}";
+        array.push( results );
+      }
+    }
+
+    #copyRulesCSSToArrayBySel4rMat4g( cssRules, array, regExpNeedle ) {
+      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
+      for ( let i = 0; i < cssRules.length; i++ ) {
+        if (
+          cssRules.item( i ) instanceof CSSStyleRule &&
+          cssRules.item( i ).selectorText.match( regExpNeedle )
+        ) {
+          array.push( cssRules.item( i ).cssText );
+        }
+        if (
+          cssRules.item( i ) instanceof CSSMediaRule
+        ) {
+          this.#copyMediaRuleCSSToArrayBySel4rMat4g( cssRules.item( i ),
+            array, regExpNeedle );
+        }
+      }
     }
 
     #extractAttrsFromSsLink( link, attrsSet ) {
@@ -474,24 +515,13 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
     getDocSSRulesBySelectorMatching( sSIndex, regExpNeedle ) {
       // ·> TO-DO: Check if sSIndex is an array and, if so, process multiple   ·
-      // ·  stylesheets with a single call.                                   <·
+      // ·  style sheets with a single call.                                  <·
       if ( sSIndex < 0 || sSIndex >= document.styleSheets.length ) {
         return null;
       }
       const results = [];
       const rules = document.styleSheets[ sSIndex ].cssRules;
-      for ( let i = 0; i < styleSheet.cssRules.length; i++ ) {
-        if (
-          rules.item( i ) instanceof CSSStyleRule &&
-          rules.item( i ).selectorText.match( regExpNeedle )
-        ) {
-          results.push( rules.item( i ).cssText );
-        }
-        // ·> To-do: Handle case where a media rule is encountered.           <·
-        // if ( rules.item( i ) instanceof CSSMediaRule ) {
-        //   … rules.item( i ).conditionText…
-        // }
-      }
+      this.#copyRulesCSSToArrayBySel4rMat4g( rules, results, regExpNeedle );
       return results;
     }
 
@@ -770,5 +800,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc2'
+  version: '0.11.0-rc3'
 } );
