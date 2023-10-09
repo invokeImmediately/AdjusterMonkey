@@ -12,7 +12,7 @@
  *  scanner that can quickly compare what is available in a website's
  *  stylesheets with the CSS classes it actually uses.
  *
- * @version 0.11.0-rc4
+ * @version 0.11.0-rc5
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -47,6 +47,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
     constructor() {
       this.cssScanner = new CssScanner( this );
+      this.domScanner = new DomScanner( this );
     }
 
     #wrapMsgAtCharLen( msg, len ) {
@@ -772,6 +773,130 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     }
   }
 
+  class DomScanner {
+    #adj4rMnkyCmdLn;
+
+    constructor( adj4rMnkyCmdLn ) {
+      this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
+    }
+
+    printHeadingTextTree() {
+      // const h5gArray = [ ...document.querySelectorAll( 'h1, h2, h3, h4, h5,
+      //   h6' ) ].map( ( h5g ) => `«${h5g.tagName}» ${h5g.textContent}` );
+      const h5gs = [ ...document.querySelectorAll( 'h1, h2, h3, h4, h5, h6' ) ];
+      // ·> TO-DO: Use DataTree to translate the array into a tree and print   ·
+      // ·         out to the console.                                        <·
+      const h5gTree = this.#createTextTreeFromH5gArray( h5gs );
+      console.log( h5gTree.toString() );
+    }
+
+    #compareH5gsParents( rootI3x, p5sRef5e, p5sCur3t ) {
+      let i, j;
+      for ( i = rootI3x; i < p5sRef5e.length; i++ ) {
+        for ( j = 0; j < p5sCur3t.length; j++ ) {
+          if ( p5sRef5e[ i ] == p5sCur3t[ j ] ) {
+            break;
+          }
+        }
+        if ( j == p5sCur3t.length ) {
+          continue;
+        }
+        if ( i != rootI3x ) {
+          rootI3x = i;
+        }
+        break;
+      }
+
+      return rootI3x;
+    }
+
+    #createTextTreeFromH5gArray( h5gs ) {
+      if ( h5gs.length == 0 ) {
+        return null;
+      }
+      let h5gLevel = parseInt( h5gs[ 0 ].tagName.match( /([0-9])/)[ 0 ] );
+      const rootEle3t = this.#findH5gsClosestRootEle3t( h5gs );
+      const tree = new DataTree(
+        `«${ this.#ele3tToString( rootEle3t ) }»`
+      );
+      let lastNode = tree.root.addChild(
+        `${ h5gs[ 0 ].textContent } «${ this.#ele3tToString( h5gs[ 0 ] ) }»`
+      );
+      let prevH5gLevel = h5gLevel;
+      for ( let i = 1; i < h5gs.length; i++ ) {
+        h5gLevel = parseInt( h5gs[ i ].tagName.match( /([0-9])/)[ 0 ] );
+        if ( h5gLevel > prevH5gLevel ) {
+          lastNode = lastNode.addChild(
+            `${ h5gs[ i ].textContent.trim() } «${ this.#ele3tToString( h5gs[ i ] ) }»`
+          );
+        } else if ( h5gLevel == prevH5gLevel ) {
+          lastNode = lastNode.addSibling(
+            `${ h5gs[ i ].textContent.trim() } «${ this.#ele3tToString( h5gs[ i ] ) }»`
+          );
+        } else {
+          lastNode = this.#placeH5gUpTreeBranch( h5gs[ i ], h5gLevel, tree,
+            lastNode );
+        }
+        console.log( `Item #${ i } processed.` );
+        prevH5gLevel = h5gLevel;
+      }
+
+      return tree;
+    }
+
+    #placeH5gUpTreeBranch( h5g, h5gLevel, tree, lastNode ) {
+      let parentH5gLevel;
+      while( lastNode.parent != tree.root ) {
+        parentH5gLevel = parseInt( lastNode.parent.data.match( /«H([0-9])/)[ 1 ] );
+        if ( h5gLevel >= parentH5gLevel ) {
+          lastNode = lastNode.parent.addSibling(
+            `${ h5g.textContent.trim() } «${ this.#ele3tToString( h5g ) }»`
+          );
+          break;
+        } else {
+          lastNode = lastNode.parent;
+        }
+      }
+      if ( lastNode.parent == tree.root ) {
+        lastNode = tree.root.addChild(
+          `${ h5g.textContent.trim() } «${ this.#ele3tToString( h5g ) }»`
+        );
+      }
+      return lastNode;
+    }
+
+    #ele3tToString( ele3t ) {
+      const ele3tId = ele3t.id != '' ?
+        '#' + ele3t.id :
+        '';
+      const ele3tClassList = ele3t.classList.length > 0 ?
+        '.' + [...ele3t.classList].join( '.' ) :
+        '';
+      return ele3t.tagName + ele3tId + ele3tClassList;
+    }
+
+    #findH5gsClosestRootEle3t( h5gs ) {
+      const p5sRef5e = this.#getParentsForEle3t( h5gs[ 0 ] );
+      let p5sCur3t, rootI3x = 0;
+      for ( let i = 1; i < h5gs.length; i++ ) {
+        p5sCur3t = this.#getParentsForEle3t( h5gs[ i ] );
+        rootI3x = this.#compareH5gsParents( rootI3x, p5sRef5e, p5sCur3t );
+      }
+
+      return p5sRef5e[ rootI3x ];
+    }
+
+    #getParentsForEle3t( ele3t ) {
+      const parents = [];
+      while ( ele3t.parentNode !== null ) {
+        parents.push( ele3t.parentNode );
+        ele3t = ele3t.parentNode;
+      }
+
+      return parents;
+    }
+  }
+
   class DataTree {
     constructor( root ) {
       this.root = new DataTreeNode(
@@ -959,5 +1084,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc4'
+  version: '0.11.0-rc5'
 } );
