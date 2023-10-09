@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.11.0-rc6
+ * @version 0.11.0-rc7
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -50,6 +50,61 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     constructor() {
       this.cssScanner = new CssScanner( this );
       this.domScanner = new DomScanner( this );
+    }
+
+    createDataTree( rootData ) {
+      return new DataTree( rootData );
+    }
+
+    isUrlString( value ) {
+      return (
+        typeof value == 'string' &&
+        value.match(
+          new RegExp( '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Z' +
+            'a-z0-9]+(?:\/.*)?$' )
+        ) !== null
+      );
+    }
+
+    getLabeledMsg( msg, wrapLen ) {
+      return this.#wrapMsgAtCharLen( `${this.#prefix4Msgs} ${msg}`, wrapLen );
+    }
+
+    logMsg( msgText, wrapLen ) {
+      console.log( this.getLabeledMsg( msgText, wrapLen ) );
+    }
+
+    openUrlInNewWindow( url ) {
+      if( !this.isUrlString( url ) ) {
+        adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
+          please give me a string containing URL. The argument you gave me was
+          «${whichStyleSheet}».`
+        );
+        return;
+      }
+      window.open(
+        url,
+        '_blank'
+      ).focus();
+    }
+
+    async waitForDoc4tFocus() {
+      const checkDoc4tFocus = ( resolve ) => {
+        if ( document.hasFocus() ) {
+          resolve();
+        } else {
+          setTimeout( () => checkDoc4tFocus( resolve ), 250 );
+        }
+      }
+      return new Promise( checkDoc4tFocus );
+    }
+
+    waitForTime( timeInMs ) {
+      return new Promise( ( resolve ) => {
+        setTimeout( () => {
+          resolve( '' );
+        }, timeInMs );
+      } );
     }
 
     #wrapMsgAtCharLen( msg, len ) {
@@ -161,61 +216,6 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
       return newMsg;
     }
-
-    createDataTree( rootData ) {
-      return new DataTree( rootData );
-    }
-
-    isUrlString( value ) {
-      return (
-        typeof value == 'string' &&
-        value.match(
-          new RegExp( '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Z' +
-            'a-z0-9]+(?:\/.*)?$' )
-        ) !== null
-      );
-    }
-
-    getLabeledMsg( msg, wrapLen ) {
-      return this.#wrapMsgAtCharLen( `${this.#prefix4Msgs} ${msg}`, wrapLen );
-    }
-
-    logMsg( msgText, wrapLen ) {
-      console.log( this.getLabeledMsg( msgText, wrapLen ) );
-    }
-
-    openUrlInNewWindow( url ) {
-      if( !this.isUrlString( url ) ) {
-        adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
-          please give me a string containing URL. The argument you gave me was
-          «${whichStyleSheet}».`
-        );
-        return;
-      }
-      window.open(
-        url,
-        '_blank'
-      ).focus();
-    }
-
-    async waitForDoc4tFocus() {
-      const checkDoc4tFocus = ( resolve ) => {
-        if ( document.hasFocus() ) {
-          resolve();
-        } else {
-          setTimeout( () => checkDoc4tFocus( resolve ), 250 );
-        }
-      }
-      return new Promise( checkDoc4tFocus );
-    }
-
-    waitForTime( timeInMs ) {
-      return new Promise( ( resolve ) => {
-        setTimeout( () => {
-          resolve( '' );
-        }, timeInMs );
-      } );
-    }
   }
 
   class CssScanner {
@@ -230,202 +230,6 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     constructor( adj4rMnkyCmdLn ) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
       this.scanForCssFiles();
-    }
-
-    #checkDocSSIndex( docSSIndex ) {
-      if (
-        typeof docSSIndex == 'string' &&
-        !Number.isNaN( parseInt( docSSIndex, 10 ) )
-      ) {
-        docSSIndex = parseInt( docSSIndex, 10 );
-      }
-      if (
-        typeof docSSIndex != 'number' ||
-        docSSIndex < 0 ||
-        docSSIndex >= document.styleSheets.length
-      ) {
-        docSSIndex = null;
-      }
-      return docSSIndex;
-    }
-
-    #copyMediaRuleCSSToArrayBySel4rMat4g(
-      mediaRule, array, regExpNeedle
-    ) {
-      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
-      const rules = mediaRule.cssRules;
-      let results = [];
-      for ( let i = 0; i < rules.length; i++ ) {
-        if (
-          rules.item( i ) instanceof CSSStyleRule &&
-          rules.item( i ).selectorText.match( regExpNeedle )
-        ) {
-          results.push( rules.item( i ).cssText );
-        }
-      }
-      if ( results.length > 0 ) {
-        results = results.join( '\n' );
-        results = results.replace( /^(?!$)/gm, "  " );
-        results = "@media " + mediaRule.conditionText + " {\n" + results
-          + "\n}";
-        array.push( results );
-      }
-    }
-
-    #copyRulesCSSToArrayBySel4rMat4g( cssRules, array, regExpNeedle ) {
-      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
-      for ( let i = 0; i < cssRules.length; i++ ) {
-        if (
-          cssRules.item( i ) instanceof CSSStyleRule &&
-          cssRules.item( i ).selectorText.match( regExpNeedle )
-        ) {
-          array.push( cssRules.item( i ).cssText );
-        }
-        if (
-          cssRules.item( i ) instanceof CSSMediaRule
-        ) {
-          this.#copyMediaRuleCSSToArrayBySel4rMat4g( cssRules.item( i ),
-            array, regExpNeedle );
-        }
-      }
-    }
-
-    #extractAttrsFromSsLink( link, attrsSet ) {
-      const numAttrs = link.attributes.length;
-      for( let index = 0; index < numAttrs; index++ ) {
-        attrsSet.add( link.attributes[ index ].name );
-      }
-    }
-
-    #extractClassesUsedInPage() {
-      const cssClassSet = new Set();
-      const bodyElems = document.querySelectorAll( 'body, body *' );
-      bodyElems.forEach( ( elem, index ) => {
-        for ( let index = 0; index < elem.classList.length; index++ ) {
-          cssClassSet.add( elem.classList.item( index ) );
-        }
-      } );
-      return cssClassSet;
-    }
-
-    async #fetchStyleSheetCode( url ) {
-      let finalResponse = null;
-      if ( !this.isUrlStringToCss( url ) ) {
-        throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
-          `When attempting to fetch style sheet code, a URL I was given for a
-          style sheet: ^¶⇥«${url}»^¶ does not take the expected form.`
-        ) );
-      }
-      await fetch( url )
-        .then( ( response ) => {
-          if ( !response.ok ) {
-            throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
-              `Unable to access resource: ^¶⇥« ${url} »^¶ Status returned was:
-              «${response.status}».`
-            ) );
-          }
-          return response.text();
-        } )
-        .then( ( response ) => {
-          finalResponse = response;
-        } )
-        .catch( ( error ) => {
-          console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
-          this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to use the fetch API
-            to request the style sheet, I will now open it in a new tab.`
-          );
-          this.#adj4rMnkyCmdLn.openUrlInNewWindow( url );
-        } );
-      return finalResponse;
-    }
-
-    #findClassesUsedInMediaRule( mediaRule, setOfClasses ) {
-      const cssRules = mediaRule.cssRules
-      for ( let i = 0; i < cssRules.length; i++ ) {
-        if ( cssRules.item( i ) instanceof CSSStyleRule ) {
-          this.#findClassesUsedInStyleRule(
-            cssRules.item( i ),
-            setOfClasses
-          );
-        }
-      }
-    }
-
-    #findClassesUsedInStyleRule( styleRule, setOfClasses ) {
-      if ( styleRule.selectorText === undefined ) {
-        return;
-      }
-      const classesFound = styleRule.selectorText
-        .match( /\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g );
-      if( classesFound === null ) {
-        return;
-      }
-      classesFound.forEach( ( match ) => {
-        setOfClasses.add( match.substring( 1, match.length ) );
-      } );
-    }
-
-    #findDocSSIndexFromURL( urlOfSS ) {
-      let scanner = 0;
-      let foundIndex = null;
-      while( scanner < document.styleSheets.length && foundIndex === null ) {
-          if( document.styleSheets.item( scanner ).href == urlOfSS ) {
-              foundIndex = scanner;
-          }
-          scanner++;
-      }
-      return foundIndex;
-    }
-
-    #getClassesUsedInSS( styleSheet ) {
-      if ( !(
-        typeof styleSheet == 'object' &&
-        styleSheet instanceof CSSStyleSheet
-       ) ) {
-        return null;
-      }
-      const setOfClassesInSS = new Set();
-      for ( let i = 0; i < styleSheet.cssRules.length; i++ ) {
-        if ( styleSheet.cssRules.item( i ) instanceof CSSStyleRule ) {
-          this.#findClassesUsedInStyleRule( styleSheet.cssRules.item( i ),
-            setOfClassesInSS );
-        }
-        if ( styleSheet.cssRules.item( i ) instanceof CSSMediaRule ) {
-          this.#findClassesUsedInMediaRule( styleSheet.cssRules.item( i ),
-            setOfClassesInSS );
-        }
-      }
-      return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
-    }
-
-    #recon5tCssFromDoc( urlOfCssSrc ) {
-      let allCssText = '';
-      try {
-        const indexOfSS = this.#findDocSSIndexFromURL( urlOfCssSrc );
-        if( indexOfSS === null ) {
-          throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was unable to
-            find the requested style sheet among those loaded on the page.` ) );
-        }
-        const docSSRules = document.styleSheets.item( indexOfSS ).cssRules;
-        for( let index = 0; index < docSSRules.length; index++ ) {
-          allCssText += docSSRules.item( index ).cssText;
-        }
-      } catch( error ) {
-        console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
-        this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to reconstruct the
-          style sheet from «document.styleSheets», I suggest you manually load
-          the style sheet code for further analysis into my list of dynamically
-          loaded reference style sheets.` );
-      }
-      return allCssText;
-    }
-
-    #sortAttrsFromSsLinks( attrsSet ) {
-      const attrs = [];
-      for( const attr of attrsSet ) {
-        attrs.push( attr );
-      }
-      return attrs.toSorted();
     }
 
     async addRefStyleSheet( urlOrCssText, docSSIndex, cssTextSrc ) {
@@ -773,6 +577,202 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         this.#adj4rMnkyCmdLn.logMsg( error.message );
       }
     }
+
+    #checkDocSSIndex( docSSIndex ) {
+      if (
+        typeof docSSIndex == 'string' &&
+        !Number.isNaN( parseInt( docSSIndex, 10 ) )
+      ) {
+        docSSIndex = parseInt( docSSIndex, 10 );
+      }
+      if (
+        typeof docSSIndex != 'number' ||
+        docSSIndex < 0 ||
+        docSSIndex >= document.styleSheets.length
+      ) {
+        docSSIndex = null;
+      }
+      return docSSIndex;
+    }
+
+    #copyMediaRuleCSSToArrayBySel4rMat4g(
+      mediaRule, array, regExpNeedle
+    ) {
+      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
+      const rules = mediaRule.cssRules;
+      let results = [];
+      for ( let i = 0; i < rules.length; i++ ) {
+        if (
+          rules.item( i ) instanceof CSSStyleRule &&
+          rules.item( i ).selectorText.match( regExpNeedle )
+        ) {
+          results.push( rules.item( i ).cssText );
+        }
+      }
+      if ( results.length > 0 ) {
+        results = results.join( '\n' );
+        results = results.replace( /^(?!$)/gm, "  " );
+        results = "@media " + mediaRule.conditionText + " {\n" + results
+          + "\n}";
+        array.push( results );
+      }
+    }
+
+    #copyRulesCSSToArrayBySel4rMat4g( cssRules, array, regExpNeedle ) {
+      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
+      for ( let i = 0; i < cssRules.length; i++ ) {
+        if (
+          cssRules.item( i ) instanceof CSSStyleRule &&
+          cssRules.item( i ).selectorText.match( regExpNeedle )
+        ) {
+          array.push( cssRules.item( i ).cssText );
+        }
+        if (
+          cssRules.item( i ) instanceof CSSMediaRule
+        ) {
+          this.#copyMediaRuleCSSToArrayBySel4rMat4g( cssRules.item( i ),
+            array, regExpNeedle );
+        }
+      }
+    }
+
+    #extractAttrsFromSsLink( link, attrsSet ) {
+      const numAttrs = link.attributes.length;
+      for( let index = 0; index < numAttrs; index++ ) {
+        attrsSet.add( link.attributes[ index ].name );
+      }
+    }
+
+    #extractClassesUsedInPage() {
+      const cssClassSet = new Set();
+      const bodyElems = document.querySelectorAll( 'body, body *' );
+      bodyElems.forEach( ( elem, index ) => {
+        for ( let index = 0; index < elem.classList.length; index++ ) {
+          cssClassSet.add( elem.classList.item( index ) );
+        }
+      } );
+      return cssClassSet;
+    }
+
+    async #fetchStyleSheetCode( url ) {
+      let finalResponse = null;
+      if ( !this.isUrlStringToCss( url ) ) {
+        throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
+          `When attempting to fetch style sheet code, a URL I was given for a
+          style sheet: ^¶⇥«${url}»^¶ does not take the expected form.`
+        ) );
+      }
+      await fetch( url )
+        .then( ( response ) => {
+          if ( !response.ok ) {
+            throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
+              `Unable to access resource: ^¶⇥« ${url} »^¶ Status returned was:
+              «${response.status}».`
+            ) );
+          }
+          return response.text();
+        } )
+        .then( ( response ) => {
+          finalResponse = response;
+        } )
+        .catch( ( error ) => {
+          console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
+          this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to use the fetch API
+            to request the style sheet, I will now open it in a new tab.`
+          );
+          this.#adj4rMnkyCmdLn.openUrlInNewWindow( url );
+        } );
+      return finalResponse;
+    }
+
+    #findClassesUsedInMediaRule( mediaRule, setOfClasses ) {
+      const cssRules = mediaRule.cssRules
+      for ( let i = 0; i < cssRules.length; i++ ) {
+        if ( cssRules.item( i ) instanceof CSSStyleRule ) {
+          this.#findClassesUsedInStyleRule(
+            cssRules.item( i ),
+            setOfClasses
+          );
+        }
+      }
+    }
+
+    #findClassesUsedInStyleRule( styleRule, setOfClasses ) {
+      if ( styleRule.selectorText === undefined ) {
+        return;
+      }
+      const classesFound = styleRule.selectorText
+        .match( /\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g );
+      if( classesFound === null ) {
+        return;
+      }
+      classesFound.forEach( ( match ) => {
+        setOfClasses.add( match.substring( 1, match.length ) );
+      } );
+    }
+
+    #findDocSSIndexFromURL( urlOfSS ) {
+      let scanner = 0;
+      let foundIndex = null;
+      while( scanner < document.styleSheets.length && foundIndex === null ) {
+          if( document.styleSheets.item( scanner ).href == urlOfSS ) {
+              foundIndex = scanner;
+          }
+          scanner++;
+      }
+      return foundIndex;
+    }
+
+    #getClassesUsedInSS( styleSheet ) {
+      if ( !(
+        typeof styleSheet == 'object' &&
+        styleSheet instanceof CSSStyleSheet
+       ) ) {
+        return null;
+      }
+      const setOfClassesInSS = new Set();
+      for ( let i = 0; i < styleSheet.cssRules.length; i++ ) {
+        if ( styleSheet.cssRules.item( i ) instanceof CSSStyleRule ) {
+          this.#findClassesUsedInStyleRule( styleSheet.cssRules.item( i ),
+            setOfClassesInSS );
+        }
+        if ( styleSheet.cssRules.item( i ) instanceof CSSMediaRule ) {
+          this.#findClassesUsedInMediaRule( styleSheet.cssRules.item( i ),
+            setOfClassesInSS );
+        }
+      }
+      return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
+    }
+
+    #recon5tCssFromDoc( urlOfCssSrc ) {
+      let allCssText = '';
+      try {
+        const indexOfSS = this.#findDocSSIndexFromURL( urlOfCssSrc );
+        if( indexOfSS === null ) {
+          throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was unable to
+            find the requested style sheet among those loaded on the page.` ) );
+        }
+        const docSSRules = document.styleSheets.item( indexOfSS ).cssRules;
+        for( let index = 0; index < docSSRules.length; index++ ) {
+          allCssText += docSSRules.item( index ).cssText;
+        }
+      } catch( error ) {
+        console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
+        this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to reconstruct the
+          style sheet from «document.styleSheets», I suggest you manually load
+          the style sheet code for further analysis into my list of dynamically
+          loaded reference style sheets.` );
+      }
+      return allCssText;
+    }
+
+    #sortAttrsFromSsLinks( attrsSet ) {
+      const attrs = [];
+      for( const attr of attrsSet ) {
+        attrs.push( attr );
+      }
+      return attrs.toSorted();
+    }
   }
 
   class DomScanner {
@@ -1082,5 +1082,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc6'
+  version: '0.11.0-rc7'
 } );
