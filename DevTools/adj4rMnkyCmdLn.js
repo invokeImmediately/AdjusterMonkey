@@ -8,11 +8,13 @@
  *  browser extension to provide enhanced tools for front-end web development.
  *
  * Utilities offered by the script are intended to be utilized alongside
- *  DevTools when working on the development of a site. Utilities include a CSS
- *  scanner that can quickly compare what is available in a website's
- *  stylesheets with the CSS classes it actually uses.
+ *  DevTools when working on the development of a site. Utilities include:
+ *  • A CSS scanner that can quickly compare what is available in a website's
+ *    style sheets with the CSS classes in use on the page.
+ *  • A DOM scanner that can quickly analyze and report properties of the page's
+ *    structure, such as heading hierarchy.
  *
- * @version 0.11.0-rc5
+ * @version 0.11.0-rc6
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -781,11 +783,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     }
 
     printHeadingTextTree() {
-      // const h5gArray = [ ...document.querySelectorAll( 'h1, h2, h3, h4, h5,
-      //   h6' ) ].map( ( h5g ) => `«${h5g.tagName}» ${h5g.textContent}` );
       const h5gs = [ ...document.querySelectorAll( 'h1, h2, h3, h4, h5, h6' ) ];
-      // ·> TO-DO: Use DataTree to translate the array into a tree and print   ·
-      // ·         out to the console.                                        <·
       const h5gTree = this.#createTextTreeFromH5gArray( h5gs );
       console.log( h5gTree.toString() );
     }
@@ -1084,5 +1082,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc5'
+  version: '0.11.0-rc6'
 } );
