@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.11.0-rc7
+ * @version 0.11.0-rc8
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -850,7 +850,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
           lastNode = lastNode.parent.addSibling(
             `${ h5g.textContent.trim() } «${ this.#ele3tToString( h5g ) }»`
           );
-          break;
+          return lastNode;
         } else {
           lastNode = lastNode.parent;
         }
