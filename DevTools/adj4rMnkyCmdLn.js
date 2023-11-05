@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.11.0-rc10
+ * @version 0.11.0-rc11
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -997,12 +997,14 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     }
 
     #wrapStrDataAtLength( strData, len ) {
+
       // ·> Use a default line wrapping length.                               <·
       if ( typeof len == 'undefined' ) {
         len = 80;
       }
 
-      // ·> Convert the line wrapping length to a number if possible.         <·
+      // ·> Before proceeding, ensure the line wrapping length is a valid      ·
+      // ·  number if possible. If not, just return the unwrapped message.    <·
       if ( typeof len != 'number' && Number.isNaN( parseInt( len ) ) ) {
         return strData;
       } else if ( typeof len != 'number' ) {
@@ -1010,101 +1012,59 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       }
 
       // ·> Enforce minimum and maximum line wrapping lengths to ensure a      ·
-      // ·  clean looking result.                                             <·
+      // ·  clean looking result within the console.                          <·
       if ( len < 40 ) {
         len = 40;
       } else if ( len > 120 ) {
         len = 120;
       }
 
-      // ·> Re-indent the original message to allow template literals to be    ·
-      // ·  used following clean coding practices when specifying the argu-    ·
-      // ·  ment.                                                             <·
-      let iterCount = 0;
-      while(
-        strData.length > 0 &&
-        ( strData.match( /[ \n]+\n/gi ) !== null ||
-        strData.match( /\n[ \n]+/gi ) !== null ) &&
-        iterCount < 1024
-      ) {
-        strData = strData.replaceAll( /[ \n]+\n/gi, ' ' );
-        strData = strData.replaceAll( /\n[ \n]+/gi, ' ' );
-        iterCount++
-      }
-      strData = strData.replaceAll( /\n+/gi, ' ' );
-      if ( strData.length < len ) {
-        return strData;
-      }
-
-      // ·> Replace a special tab escape sequence with indentation at this     ·
-      // ·  later point following re-indentation so it correctly persists      ·
-      // ·  into the final line-wrapped message.                              <·
-      strData = strData.replaceAll( /\^↹/g, '  ' );
-
-      // ·> Apply line wrapping to the message.                               <·
+      // ·> Apply line wrapping to the message using a reverse scanning tech-  ·
+      // .  nique to identify appropriate break points for line wrapping.     <·
       let w5dStrData = '';
-      let i_start = 0;
-      let j_scan;
-      let iterCount2 = 0;
-      while( i_start < strData.length && iterCount2 < 1024) {
-        j_scan = i_start + len;
-        while(
-          j_scan < strData.length && j_scan > i_start &&
-          strData.charAt( j_scan ).match( /[- \/\\«»\(\)]/ ) === null
+      let startI3x = 0;
+      let scanI3x;
+      while ( startI3x < strData.length ) {
+        scanI3x = startI3x + len;
+
+        // ·> Start scanning at a distance of the line length limit away from  ·
+        // ·  the starting index, and work backward until a break-point char-  ·
+        // ·  acter is encountered.                                           <·
+        while (
+          scanI3x < strData.length && scanI3x > startI3x &&
+          strData.charAt( scanI3x ).match( /[-–— /\\«»()[\]{}]/ ) === null
         ) {
-          j_scan--;
+          scanI3x--;
         }
-        if ( j_scan == i_start ) {
-          j_scan = j_scan + len;
-        } else if ( j_scan > strData.length ) {
-          j_scan = strData.length;
+
+        // ·> Handle edge cases where scanning found no break point or reached ·
+        // ·  the end of the full unwrapped message.                          <·
+        if ( scanI3x == startI3x ) {
+          scanI3x = scanI3x + len;
+        } else if ( scanI3x > strData.length ) {
+          scanI3x = strData.length;
         }
-        if (
-          strData.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null &&
-          ( i_start == 0 || strData.charAt( i_start ) == ' ' )
-        ) {
-          strData = strData.substring( 0, j_scan + 1 ) + " "
-            + strData.substring( j_scan + 1, strData.length );
-          j_scan++;
-        } else if (
-          strData.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null
-        ) {
-          strData = strData.substring( 0, j_scan + 1 ) + " "
-            + strData.substring( j_scan + 1, strData.length );
-          j_scan++;
-          strData = strData.substring( 0, i_start ) + " "
-            + strData.substring( i_start, strData.length );
-          j_scan++;
-        }
-        if (
-          j_scan == i_start + len && strData.charAt( i_start ) != ' ' &&
-          i_start != 0
-        ) {
-          strData = strData.substring( 0, i_start ) + " "
-            + strData.substring( i_start, strData.length );
-        }
-        if ( j_scan == strData.length && strData.charAt(i_start) != ' ' ) {
-          strData = strData.substring( 0, i_start + 1 ) + " "
-            + strData.substring( i_start, strData.length );
-          j_scan = j_scan - i_start < len ?
-            j_scan + 1 :
-            j_scan;
-        }
-        if ( i_start != 0 ) {
+
+        // ·> Unless we are working on the first line of the wrapped message,  ·
+        // ·  insert a newline character before appending the next portion of  ·
+        // ·  the wrapped message just identified.                            <·
+        if ( startI3x != 0 ) {
           w5dStrData += '\n';
         }
-        if ( i_start != 0 && strData.charAt( i_start ) == ' ' ) {
-          i_start++;
-        }
-        w5dStrData += strData.substring( i_start, j_scan );
-        i_start = j_scan;
-        iterCount2++;
-      }
 
-      // ·> Process a special newline escape sequence following re-indenta-    ·
-      // ·  tion so it correctly persists into the final line-wrapped mess-    ·
-      // ·  age.                                                              <·
-      w5dStrData = w5dStrData.replaceAll( /\^¶/g, '\n' );
+        // ·> Avoid beginning lines of a wrapped message with a space char-    ·
+        // ·  acter.                                                          <·
+        if ( startI3x != 0 && strData.charAt( startI3x ) == ' ' ) {
+          startI3x++;
+        }
+
+        // ·> Append the next portion of the wrapped message.                 <·
+        w5dStrData += strData.substring( startI3x, scanI3x );
+
+        // ·> Prepare to scan for the next break point in the full, unwrapped  ·
+        // ·  message.                                                        <·
+        startI3x = scanI3x;
+      }
 
       return w5dStrData;
     }
@@ -1208,6 +1168,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
   }
 
   function main() {
+
     // ·> Only proceed with loading AdjusterMonkey if the window represents a  ·
     // ·  web page the user is actively browsing.                             <·
     if (
@@ -1234,10 +1195,11 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         already present. Consequently, the instance was not added to the window
         object.` );
     }
+
     return adj4rMnkyCmdLn;
   }
 
   return main();
 } )( {
-  version: '0.11.0-rc10'
+  version: '0.11.0-rc11'
 } );
