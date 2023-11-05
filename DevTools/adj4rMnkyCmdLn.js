@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.11.0-rc9
+ * @version 0.11.0-rc10
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -152,61 +152,90 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·  into the final line-wrapped message.                              <·
       msg = msg.replaceAll( /\^↹/g, '  ' );
 
-      // ·> Apply line wrapping to the message.                               <·
+      // ·> Scan through each character of the message to look for break-      ·
+      // ·  point characters at appropriate wrapping locations to satisfy a    . 
+      // ·  specified line length limit. Insert newlines when they are en-     ·
+      // ·  countered to produce a wrapped message where each line's length    ·
+      // ·  is less than the desired limit and line breaks fall at desirable   ·
+      // ·  break points.                                                     <·
       let newMsg = '';
-      let i_start = 0;
-      let j_scan;
-      let iterCount2 = 0;
-      while( i_start < msg.length && iterCount2 < 1024) {
-        j_scan = i_start + len;
+      let startI3x = 0;   // Starting index
+      let scanI3x;        // Scanning index
+      while( startI3x < msg.length ) {
+        scanI3x = startI3x + len;
+
+        // ·> Start scanning at a distance of the line length limit away from  ·
+        // ·  the starting index, and work backward until a break-point char-  ·
+        // ·  acter is encountered.                                           <·
         while(
-          j_scan < msg.length && j_scan > i_start &&
-          msg.charAt( j_scan ).match( /[- \/\\«»\(\)]/ ) === null
+          scanI3x < msg.length && scanI3x > startI3x &&
+          msg.charAt( scanI3x ).match( /[- \/\\«»\(\)]/ ) === null
         ) {
-          j_scan--;
+          scanI3x--;
         }
-        if ( j_scan == i_start ) {
-          j_scan = j_scan + len;
-        } else if ( j_scan > msg.length ) {
-          j_scan = msg.length;
+
+        // ·> Handle edge cases where scanning found no break point or reached ·
+        // ·  the end of the message.                                         <·
+        if ( scanI3x == startI3x ) {
+          scanI3x = scanI3x + len;
+        } else if ( scanI3x > msg.length ) {
+          scanI3x = msg.length;
         }
+
+        // ·> Introduce a line break in such a manner that the first charac-   ·
+        // ·  ter at beginning of the line is a space, with the first line     ·
+        // ·  being excepted. This achieves a hanging indent that can help     ·
+        // ·  with visually distinguishing distinct messages in the console.  <·
+        // ·> To-do: Avoid manipulating the original string when working to    ·
+        // ·  create a hanging indent to improve performance.                 <·
         if (
-          msg.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null &&
-          ( i_start == 0 || msg.charAt( i_start ) == ' ' )
+          msg.charAt( scanI3x ).match( /[-\/\\«»\(\)]/ ) !== null &&
+          ( startI3x == 0 || msg.charAt( startI3x ) == ' ' )
         ) {
-          msg = msg.substring( 0, j_scan + 1 ) + " "
-            + msg.substring( j_scan + 1, msg.length );
-          j_scan++;
+          msg = msg.substring( 0, scanI3x + 1 ) + " "   // <– Add an indent-
+            + msg.substring( scanI3x + 1, msg.length ); // <– ation to the
+          scanI3x++;                                    // <– next line.
         } else if (
-          msg.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null
+          msg.charAt( scanI3x ).match( /[-\/\\«»\(\)]/ ) !== null
         ) {
-          msg = msg.substring( 0, j_scan + 1 ) + " "
-            + msg.substring( j_scan + 1, msg.length );
-          j_scan++;
-          msg = msg.substring( 0, i_start ) + " "
-            + msg.substring( i_start, msg.length );
-          j_scan++;
+          msg = msg.substring( 0, scanI3x + 1 ) + " "   // <– Add an indent-
+            + msg.substring( scanI3x + 1, msg.length ); // <–  ation to the
+          scanI3x++;                                    // <–  next line.
+          msg = msg.substring( 0, startI3x ) + " "    // <– Add an indentation
+            + msg.substring( startI3x, msg.length );  // <–  to the beginning
+          scanI3x++;                                  // <–  of this line.
         }
+
+        // ·> Handle the edge case where a special break-point character was   ·
+        // ·  not encountered while scanning. (For example, this can easily    ·
+        // ·  happen when messages contain URLs.)                             <·
         if (
-          j_scan == i_start + len && msg.charAt( i_start ) != ' ' &&
-          i_start != 0
+          scanI3x == startI3x + len && msg.charAt( startI3x ) != ' ' &&
+          startI3x != 0
         ) {
-          msg = msg.substring( 0, i_start ) + " "
-            + msg.substring( i_start, msg.length );
+          msg = msg.substring( 0, startI3x ) + " "
+            + msg.substring( startI3x, msg.length );
         }
-        if ( j_scan == msg.length && msg.charAt(i_start) != ' ' ) {
-          msg = msg.substring( 0, i_start + 1 ) + " "
-            + msg.substring( i_start, msg.length );
-          j_scan = j_scan - i_start < len ?
-            j_scan + 1 :
-            j_scan;
+
+        // ·> Handle the edge case where a special break-point character was   ·
+        // ·  not encountered while scanning and we have reached the end of    ·
+        // ·  the full original message.                                      <·
+        if ( scanI3x == msg.length && msg.charAt(startI3x) != ' ' ) {
+          msg = msg.substring( 0, startI3x + 1 ) + " "
+            + msg.substring( startI3x, msg.length );
+          scanI3x = scanI3x - startI3x < len ?
+            scanI3x + 1 :
+            scanI3x;
         }
-        if ( i_start != 0 ) {
+
+        // ·> Handle the case where a special break-point character was not    ·
+        // ·  encountered while scanning. (For example, this can easily happen ·
+        // ·  when messages contain URLs.)                                    <·
+        if ( startI3x != 0 ) {
           newMsg += '\n';
         }
-        newMsg += msg.substring( i_start, j_scan );
-        i_start = j_scan;
-        iterCount2++;
+        newMsg += msg.substring( startI3x, scanI3x );
+        startI3x = scanI3x;
       }
 
       // ·> Process a special newline escape sequence following re-indenta-    ·
@@ -1210,5 +1239,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc9'
+  version: '0.11.0-rc10'
 } );
