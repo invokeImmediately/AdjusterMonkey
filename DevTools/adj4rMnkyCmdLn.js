@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.11.0-rc8
+ * @version 0.11.0-rc9
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -782,10 +782,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
     }
 
-    printHeadingTextTree() {
+    printHeadingTextTree( maxLineLength = 100 ) {
       const h5gs = [ ...document.querySelectorAll( 'h1, h2, h3, h4, h5, h6' ) ];
       const h5gTree = this.#createTextTreeFromH5gArray( h5gs );
-      console.log( h5gTree.toString() );
+      console.log( h5gTree.toString( maxLineLength ) );
     }
 
     #compareH5gsParents( rootI3x, p5sRef5e, p5sCur3t ) {
@@ -912,21 +912,21 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       return this.root.findFirst( data );
     }
 
-    toString() {
+    toString( maxLineLength = 100 ) {
       let cur4Node = this.root.children[ 0 ];
       let out3Prefix = '';
       let ou3tString = out3Prefix + this.root.data + '\n';
       let counter = 0;
 
       while ( cur4Node !== undefined ) {
-        out3Prefix = out3Prefix.replace( '├─', '│ ' );
-        out3Prefix = out3Prefix.replace( '└─', '  ' );
+        out3Prefix = out3Prefix.replace( '├──', '│  ' );
+        out3Prefix = out3Prefix.replace( '└──', '   ' );
         if ( cur4Node.getNextSibling() === undefined ) {
-          out3Prefix += '└─ ';
+          out3Prefix += '└──';
         } else {
-          out3Prefix += '├─ ';
+          out3Prefix += '├──';
         }
-        ou3tString += out3Prefix + cur4Node.data + '\n';
+        ou3tString += this.#nodeToString( cur4Node, out3Prefix, maxLineLength );
         if ( cur4Node.children.length ) {
           cur4Node = cur4Node.children[0];
         } else if ( cur4Node.getNextSibling() !== undefined ) {
@@ -950,6 +950,134 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       }
 
       return ou3tString;
+    }
+
+    #nodeToString( cur4Node, out3Prefix, maxLineLength ) {
+      let ou3tString;
+      let maxDataLength = maxLineLength - out3Prefix.length;
+      if ( maxDataLength <= 40 || cur4Node.data.length <= maxDataLength ) {
+        ou3tString = out3Prefix + cur4Node.data + '\n';
+
+        return ou3tString;
+      }
+      ou3tString = this.#wrapStrDataAtLength( cur4Node.data, maxDataLength );
+      ou3tString = ou3tString.replace( /^(.)/, out3Prefix + '$1' );
+      out3Prefix = out3Prefix.replace( '├──', '│  ' ).replace( '└──', '   ' );
+      ou3tString = ou3tString.replace( /(\n)(.)/g, '$1' + out3Prefix + '$2' );
+      return ou3tString + '\n';
+    }
+
+    #wrapStrDataAtLength( strData, len ) {
+      // ·> Use a default line wrapping length.                               <·
+      if ( typeof len == 'undefined' ) {
+        len = 80;
+      }
+
+      // ·> Convert the line wrapping length to a number if possible.         <·
+      if ( typeof len != 'number' && Number.isNaN( parseInt( len ) ) ) {
+        return strData;
+      } else if ( typeof len != 'number' ) {
+        len = parseInt( len );
+      }
+
+      // ·> Enforce minimum and maximum line wrapping lengths to ensure a      ·
+      // ·  clean looking result.                                             <·
+      if ( len < 40 ) {
+        len = 40;
+      } else if ( len > 120 ) {
+        len = 120;
+      }
+
+      // ·> Re-indent the original message to allow template literals to be    ·
+      // ·  used following clean coding practices when specifying the argu-    ·
+      // ·  ment.                                                             <·
+      let iterCount = 0;
+      while(
+        strData.length > 0 &&
+        ( strData.match( /[ \n]+\n/gi ) !== null ||
+        strData.match( /\n[ \n]+/gi ) !== null ) &&
+        iterCount < 1024
+      ) {
+        strData = strData.replaceAll( /[ \n]+\n/gi, ' ' );
+        strData = strData.replaceAll( /\n[ \n]+/gi, ' ' );
+        iterCount++
+      }
+      strData = strData.replaceAll( /\n+/gi, ' ' );
+      if ( strData.length < len ) {
+        return strData;
+      }
+
+      // ·> Replace a special tab escape sequence with indentation at this     ·
+      // ·  later point following re-indentation so it correctly persists      ·
+      // ·  into the final line-wrapped message.                              <·
+      strData = strData.replaceAll( /\^↹/g, '  ' );
+
+      // ·> Apply line wrapping to the message.                               <·
+      let w5dStrData = '';
+      let i_start = 0;
+      let j_scan;
+      let iterCount2 = 0;
+      while( i_start < strData.length && iterCount2 < 1024) {
+        j_scan = i_start + len;
+        while(
+          j_scan < strData.length && j_scan > i_start &&
+          strData.charAt( j_scan ).match( /[- \/\\«»\(\)]/ ) === null
+        ) {
+          j_scan--;
+        }
+        if ( j_scan == i_start ) {
+          j_scan = j_scan + len;
+        } else if ( j_scan > strData.length ) {
+          j_scan = strData.length;
+        }
+        if (
+          strData.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null &&
+          ( i_start == 0 || strData.charAt( i_start ) == ' ' )
+        ) {
+          strData = strData.substring( 0, j_scan + 1 ) + " "
+            + strData.substring( j_scan + 1, strData.length );
+          j_scan++;
+        } else if (
+          strData.charAt( j_scan ).match( /[-\/\\«»\(\)]/ ) !== null
+        ) {
+          strData = strData.substring( 0, j_scan + 1 ) + " "
+            + strData.substring( j_scan + 1, strData.length );
+          j_scan++;
+          strData = strData.substring( 0, i_start ) + " "
+            + strData.substring( i_start, strData.length );
+          j_scan++;
+        }
+        if (
+          j_scan == i_start + len && strData.charAt( i_start ) != ' ' &&
+          i_start != 0
+        ) {
+          strData = strData.substring( 0, i_start ) + " "
+            + strData.substring( i_start, strData.length );
+        }
+        if ( j_scan == strData.length && strData.charAt(i_start) != ' ' ) {
+          strData = strData.substring( 0, i_start + 1 ) + " "
+            + strData.substring( i_start, strData.length );
+          j_scan = j_scan - i_start < len ?
+            j_scan + 1 :
+            j_scan;
+        }
+        if ( i_start != 0 ) {
+          w5dStrData += '\n';
+        }
+        if ( i_start != 0 && strData.charAt( i_start ) == ' ' ) {
+          i_start++;
+        }
+        w5dStrData += strData.substring( i_start, j_scan );
+        i_start = j_scan;
+        iterCount2++;
+      }
+
+      // ·> Process a special newline escape sequence following re-indenta-    ·
+      // ·  tion so it correctly persists into the final line-wrapped mess-    ·
+      // ·  age.                                                              <·
+      w5dStrData = w5dStrData.replaceAll( /\^¶/g, '\n' );
+
+      return w5dStrData;
     }
   }
 
@@ -1082,5 +1210,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc7'
+  version: '0.11.0-rc9'
 } );
