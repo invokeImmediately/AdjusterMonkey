@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.11.0-rc11
+ * @version 0.11.0-rc12
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -1019,6 +1019,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         len = 120;
       }
 
+      // ·> Encode any newlines that happen to be present in the message as    ·
+      // ·  greek capital lambda characters.                                  <·
+      strData = strData.replace( '\n', ' \\n ' );
+
       // ·> Apply line wrapping to the message using a reverse scanning tech-  ·
       // .  nique to identify appropriate break points for line wrapping.     <·
       let w5dStrData = '';
@@ -1064,6 +1068,12 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         // ·> Prepare to scan for the next break point in the full, unwrapped  ·
         // ·  message.                                                        <·
         startI3x = scanI3x;
+        while (
+          startI3x < strData.length &&
+          strData.charAt( startI3x ) == ' '
+        ) {
+          startI3x++;
+        }
       }
 
       return w5dStrData;
@@ -1201,5 +1211,5 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.11.0-rc11'
+  version: '0.11.0-rc12'
 } );
