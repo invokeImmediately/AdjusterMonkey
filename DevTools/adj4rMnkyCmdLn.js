@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.12.0
+ * @version 0.12.0->rc+0.1.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -153,7 +153,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       msg = msg.replaceAll( /\^↹/g, '  ' );
 
       // ·> Scan through each character of the message to look for break-      ·
-      // ·  point characters at appropriate wrapping locations to satisfy a    . 
+      // ·  point characters at appropriate wrapping locations to satisfy a    .
       // ·  specified line length limit. Insert newlines when they are en-     ·
       // ·  countered to produce a wrapped message where each line's length    ·
       // ·  is less than the desired limit and line breaks fall at desirable   ·
@@ -1177,15 +1177,21 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     }
   }
 
-  function main() {
-
+  function retryLoadingScript(
+    loadingStartTime, instCreatedMsg, instNotAddedMsg
+  ) {
     // ·> Only proceed with loading AdjusterMonkey if the window represents a  ·
     // ·  web page the user is actively browsing.                             <·
+    const elapsedTime = new Date() - loadingStartTime;
     if (
-      typeof document == 'undefined' ||
-      typeof document.hasFocus != 'function' ||
-      !document.hasFocus()
+      !document.hasFocus() &&
+      elapsedTime < iife.loadWaitTime &&
+      typeof window.adj4rMnkyCmdLn == 'undefined'
     ) {
+      console.log( 'Waiting ' + iife.loadWaitTime + 'ms for the document to ' +
+        'receive focus so the AdjusterMonkey utility script can be loaded.' );
+      window.setTimeout( retryLoadingScript, 1000, loadingStartTime,
+        instCreatedMsg, instNotAddedMsg );
       return;
     }
 
@@ -1194,16 +1200,44 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
     if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
-      adj4rMnkyCmdLn.logMsg( `An AdjusterMonkey instance (v${iife.version}) for
-        use with the DevTools command-line has been added to the window object
-        associated with the document “${document.title}” at location
-        “${window.location.hostname}.”` );
+      adj4rMnkyCmdLn.logMsg( instCreatedMsg )
     } else {
-      adj4rMnkyCmdLn.logMsg( `When attempting to add an AdjusterMonkey instance
-        (v${iife.version}) for use with the DevTools command-line interface to
-        the window object, it was found that the adj4rMnkyCmdLn property was
-        already present. Consequently, the instance was not added to the window
-        object.` );
+      adj4rMnkyCmdLn.logMsg( instNotAddedMsg );
+    }
+  }
+
+  function main() {
+    const instCreatedMsg = `An AdjusterMonkey instance (v${iife.version}) for
+      use with the DevTools command-line has been added to the window object
+      associated with the document “${document.title}” at location
+      “${window.location.hostname}.”`;
+    const instNotAddedMsg = `When attempting to add an AdjusterMonkey instance
+      (v${iife.version}) for use with the DevTools command-line interface to
+      the window object, it was found that the adj4rMnkyCmdLn property was
+      already present. Consequently, the instance was not added to the window
+      object.`;
+
+    // ·> Only proceed with loading AdjusterMonkey if the window represents a  ·
+    // ·  web page the user is actively browsing.                             <·
+    if ( typeof document == 'undefined' || typeof document.hasFocus != 'function' ) {
+      return;
+    } else if ( !document.hasFocus() && document.title.trim() != "" ) {
+      const currentTime = new Date();
+      window.setTimeout( retryLoadingScript, 1000, currentTime, instCreatedMsg,
+        instNotAddedMsg );
+      return;
+    } else if ( document.title.trim() == "" ) {
+      return;
+    }
+
+    // ·> Create instance of the AdjusterMonkey command-line utility inter-    ·
+    // ·  face and add it safely to the window object for global access.      <·
+    const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
+    if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
+      window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
+      adj4rMnkyCmdLn.logMsg( instCreatedMsg );
+    } else {
+      adj4rMnkyCmdLn.logMsg( instNotAddedMsg );
     }
 
     return adj4rMnkyCmdLn;
@@ -1211,5 +1245,6 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
   return main();
 } )( {
-  version: '0.12.0'
+  version: '0.12.0->rc+0.1.0',
+  loadWaitTime: 30000,
 } );
