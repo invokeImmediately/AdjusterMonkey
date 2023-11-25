@@ -1,33 +1,55 @@
 /*!*****************************************************************************
- * AdjusterMonkey. ▄▀▀▀ ▄▀▀▄ █▀▀▄ █▀▀▀ · · · · · · · · · · · · · · · · · · · · ·
- *  · · · · · · ·  █    █  █ █▄▄▀ █▀▀   · · · · · · · · · · · · · · · · · · · ·
- * · · · · · · · ·  ▀▀▀  ▀▀  ▀  ▀▄▀▀▀▀ .js · · · · · · · · · · · · · · · · · · ·
- * ·············································································
- * Tampermonkey script that serves as the core from which all AdjusterMonkey scritps are built.
+ * ▓▓▓▒ AdjusterMonkey. ▄▀▀▀ ▄▀▀▄ █▀▀▄ █▀▀▀ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓
+ * ▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ █    █  █ █▄▄▀ █▀▀  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓
+ * ▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ▀▀▀  ▀▀  ▀  ▀▄▀▀▀▀ .js ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓
  *
- * Implements a GUI that serves as a foundation for each AdjusterMonkey variant to utilize in building a TamperMonkey-mediated enhancement script tailored to a target website or web app. Includes core commands for web browser enhancements that are useful for use with any website.
+ * Tampermonkey script that serves as the core GUI that all AdjusterMonkey
+ *  utility scripts utilize to interface with the developer.
  *
- * @version 0.1.0
+ * Implements a GUI that serves as a foundation for each AdjusterMonkey variant
+ *  to utilize in building a TamperMonkey-mediated enhancement script tailored
+ *  to a target website or web app. Includes UI controls to expose core commands
+ *  for web browser enhancements that are useful for work with any website.
  *
- * @author Daniel C. Rieck [daniel.rieck@wsu.edu] (https://github.com/invokeImmediately)
- * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/Core/AdjusterMonkey.Core.js
+ * @version 0.1.0->+0.1.0
+ *
+ * @author Daniel C. Rieck
+ *  [daniel.rieck@wsu.edu]
+ *  (https://github.com/invokeImmediately)
+ *
+ * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/Core/Adjus
+ *  terMonkey.Core.js
+ *
  * @license MIT - Copyright (c) 2023 Daniel C. Rieck
- *   Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
- *   The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- *   THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *   of this software and associated documentation files (the “Software”), to
+ *   deal in the Software without restriction, including without limitation the
+ *   rights to use, copy, modify, merge, publish, distribute, sublicense,
+ *   and/or sell copies of the Software, and to permit persons to whom the
+ *   Software is furnished to do so, subject to the following conditions:
+ *  The above copyright notice and this permission notice shall be included in
+ *   all copies or substantial portions of the Software.
+ *  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ *   DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 
-const AdjusterMonkeyGui = ( function( iifeSettings ) {
+// ·> Declare «AdjusterMonkeyGui» class.                                      <·
+const AdjusterMonkeyGui = ( function( iifeSet4s ) {
   'use strict';
 
   class AdjusterMonkeyGui {
-    guiVersion = iifeSettings.guiVersion;
-    bemCssClasses = iifeSettings.bemCssClasses;
-    domInsertionPointSelector = iifeSettings.selectors.domInsertionPoint;
-    elementIds = iifeSettings.elementIds;
-    fieldNames = iifeSettings.fieldNames;
-    logoDetails = iifeSettings.logoDetails;
-    targetApplication = iifeSettings.targetApplication;
+    guiVersion = iifeSet4s.guiVersion;
+    bemCssClasses = iifeSet4s.bemCssClasses;
+    domInsertionPointSelector = iifeSet4s.selectors.domInsertionPoint;
+    elementIds = iifeSet4s.elementIds;
+    fieldNames = iifeSet4s.fieldNames;
+    logoDetails = iifeSet4s.logoDetails;
+    targetApplication = iifeSet4s.targetApplication;
     #guiElements = {};
     #parentElement;
 
@@ -42,12 +64,18 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
     }
 
     #applySettingsToGui( settings ) {
-      this.domInsertionPointSelector = this.#setPropertySafely( settings.domInsertionPointSelector, this.domInsertionPointSelector );
+      this.domInsertionPointSelector = this.#setPropertySafely(
+        settings.domInsertionPointSelector, this.domInsertionPointSelector
+      );
       if ( 'bemCssClasses' in settings ) {
         this.#setBemCssClasses( settings.bemCssClasses );
       }
-      this.guiVersion = this.#setPropertySafely( settings.guiVersion, this.guiVersion );
-      this.targetApplication = this.#setPropertySafely( settings.targetApplication, this.targetApplication );
+      this.guiVersion = this.#setPropertySafely(
+        settings.guiVersion, this.guiVersion
+      );
+      this.targetApplication = this.#setPropertySafely(
+        settings.targetApplication, this.targetApplication
+      );
     }
 
     #convertCamelcaseToSnakeCase( inputString ) {
@@ -59,7 +87,11 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
       }
       let output = inputString[0].toLowerCase();
       for ( let i = 1; i < inputString.length; i++ ) {
-        if ( this.#isCharacterUppercase( inputString[ i ] ) && ( !this.#isCharacterUppercase( inputString[ i - 1 ] ) || ( i < inputString.length - 1 && !this.#isCharacterUppercase( inputString[ i + 1 ] ) ) ) ) {
+        if ( this.#isCharacterUppercase( inputString[ i ] ) &&
+          ( !this.#isCharacterUppercase( inputString[ i - 1 ] ) ||
+            ( i < inputString.length - 1 && !this.#isCharacterUppercase(
+              inputString[ i + 1 ] ) ) )
+        ) {
           output += '-';
         }
         output += inputString[ i ].toLowerCase();
@@ -207,7 +239,7 @@ const AdjusterMonkeyGui = ( function( iifeSettings ) {
   └─targetApplication: ${this.targetApplication}`*/
   `Settings for instance of AdjusterMonkeyGui are as follows:
 ${JSON.stringify(this)}`
-  );
+      );
     }
   }
 
@@ -260,13 +292,36 @@ ${JSON.stringify(this)}`
   targetApplication: 'Miscellaneous Website',
 } );
 
-// NODE.JS TEST CODE:
+// ·> Create an instance of the «AdjusterMonkeyGui» class to be accessed       ·
+// ·  through the «Adj4rMnkyCmdLn» object once the latter has been added to    ·
+// ·  «window» object.                                                        <·
+( function( AdjusterMonkeyGui, iifeS6s ) {
+  'use strict';
 
-const gui = new AdjusterMonkeyGui( {
-  domInsertionPointSelector: 'body',
-  bemCssClasses: {
-    gui: 'adjuster-monkey-trello-gui',
-  },
+  function tryLoadingAdj4rM4yGui( loadingStartTime ) {
+    const elapsedTime = new Date() - loadingStartTime;
+    if (
+      typeof window.adj4rMnkyCmdLn == 'object' &&
+      typeof window.adj4rMnkyCmdLn.constructor == 'function' &&
+      window.adj4rMnkyCmdLn.constructor.name == 'Adj4rMnkyCmdLn'
+    ) {
+      window.adj4rMnkyCmdLn.adj4rMnkyGui = new AdjusterMonkeyGui( {
+        domInsertionPointSelector: 'body',
+        bemCssClasses: {
+          gui: 'adjuster-monkey-trello-gui',
+        },
+      } );
+    } else if ( elapsedTime <= iifeS6s.loadWaitTime ) {
+      window.setTimeout( tryLoadingAdj4rM4yGui, 1000, loadingStartTime );
+    }
+  }
+
+  function main() {
+    const currentTime = new Date();
+    window.setTimeout( tryLoadingAdj4rM4yGui, 1000, currentTime );
+  }
+
+  return main();
+} )( AdjusterMonkeyGui, {
+  loadWaitTime: 35000,
 } );
-
-gui.printGuiSettings();
