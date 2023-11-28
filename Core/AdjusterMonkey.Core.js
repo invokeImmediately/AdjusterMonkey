@@ -11,7 +11,7 @@
  *  to a target website or web app. Includes UI controls to expose core commands
  *  for web browser enhancements that are useful for work with any website.
  *
- * @version 0.1.0->+0.2.0
+ * @version 0.1.0->+0.2.1
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -39,7 +39,7 @@
  ******************************************************************************/
 
 // ·> Declare «AdjusterMonkeyGui» class.                                      <·
-const AdjusterMonkeyGui = ( function( iifeSet4s ) {
+const AdjusterMonkeyGui = (function(iifeSet4s) {
   'use strict';
 
   class AdjusterMonkeyGui {
@@ -53,49 +53,57 @@ const AdjusterMonkeyGui = ( function( iifeSet4s ) {
     #guiElements = {};
     #parentElement;
 
-    constructor( guiSettings ) {
-      if ( typeof guiSettings !== 'undefined' ) {
-        this.#applySettingsToGui( guiSettings );
+    constructor(guiSettings) {
+      if (typeof guiSettings !== 'undefined') {
+        this.#applySettingsToGui(guiSettings);
       }
       this.#setUndefinedElementIds();
-      if ( typeof document !== 'undefined' ) {
+      if (typeof document !== 'undefined') {
         this.#insertGuiIntoDom();
       }
     }
 
-    #applySettingsToGui( settings ) {
-      this.domInsertionPointSelector = this.#setPropertySafely(
-        settings.domInsertionPointSelector, this.domInsertionPointSelector
-      );
-      if ( 'bemCssClasses' in settings ) {
-        this.#setBemCssClasses( settings.bemCssClasses );
+    #applySettingsToGui(settings) {
+      this.domInsertionPointSelector =
+          this.#setPropertySafely(settings.domInsertionPointSelector,
+          this.domInsertionPointSelector);
+      if ('bemCssClasses' in settings) {
+        this.#setBemCssClasses(settings.bemCssClasses);
       }
-      this.guiVersion = this.#setPropertySafely(
-        settings.guiVersion, this.guiVersion
-      );
-      this.targetApplication = this.#setPropertySafely(
-        settings.targetApplication, this.targetApplication
-      );
-    }
+      this.guiVersion =
+          this.#setPropertySafely(settings.guiVersion, this.guiVersion);
+      this.targetApplication =
+          this.#setPropertySafely(settings.targetApplication,
+          this.targetApplication);
+      }
 
     #convertCamelcaseToSnakeCase( inputString ) {
-      if ( typeof inputString !== 'string' ) {
+      if (typeof inputString !== 'string') {
         return null;
       }
-      if ( inputString == "" ) {
+
+      if (inputString == "" ) {
         return inputString;
       }
+
       let output = inputString[0].toLowerCase();
-      for ( let i = 1; i < inputString.length; i++ ) {
-        if ( this.#isCharacterUppercase( inputString[ i ] ) &&
-          ( !this.#isCharacterUppercase( inputString[ i - 1 ] ) ||
-            ( i < inputString.length - 1 && !this.#isCharacterUppercase(
-              inputString[ i + 1 ] ) ) )
+      for (let i = 1; i < inputString.length; i++) {
+        if (
+          this.#isCharacterUppercase(inputString[i])
+          && (
+            !this.#isCharacterUppercase(inputString[i - 1])
+            || (
+              i < inputString.length - 1
+              && !this.#isCharacterUppercase(inputString[i + 1])
+            )
+          )
         ) {
           output += '-';
         }
+
         output += inputString[ i ].toLowerCase();
       }
+
       return output;
     }
 
@@ -104,10 +112,14 @@ const AdjusterMonkeyGui = ( function( iifeSet4s ) {
       $gui.id = this.elementIds.adjusterMonkeyGui;
       $gui.classList.add( this.bemCssClasses.guiBlock );
       $gui.innerHTML = this.#generateInnerHtmlForGui();
+
       // TODO: Generate selectors to internal DOM Elements // this.#generateElementSelectors();
       // TODO: Populate references to elements within the GUI // this.#populateDOMElementReferences();
       // TODO: Set up event handlers // this.#registerEventHandlers();
       return $gui;
+    }
+
+    #createGuiSSElement() {
     }
 
     #generateInnerHtmlForGui() {
@@ -131,13 +143,31 @@ const AdjusterMonkeyGui = ( function( iifeSet4s ) {
 <button id="${this.elementIds.collapseGui}" class="${this.bemCssClasses.guiElements.command}" type="button" aria-label="Collapse AdjusterMonkey.">×</button>`;
     }
 
+    #generateStyleSheetForGui() {
+    }
+
     #insertGuiIntoDom() {
-      const $insertionPoint = document.querySelector( this.domInsertionPointSelector );
-      if ( $insertionPoint === null ) {
+      const $insertionPoint =
+        document.querySelector(this.domInsertionPointSelector);
+
+      if ($insertionPoint === null) {
         return;
       } else {
         this.#parentElement = $insertionPoint;
       }
+
+      this.#guiElements.gui = this.#createGuiElement();
+      this.#parentElement.append(this.#guiElements.gui);
+    }
+
+    #insertGuiSSIntoDom() {
+      const $insertionPoint =
+        document.querySelector(this.domInsertionPointSelector);
+
+      if ($insertionPoint === null) {
+        return;
+      }
+
       this.#guiElements.gui = this.#createGuiElement();
       this.#parentElement.append( this.#guiElements.gui );
     }
@@ -146,38 +176,114 @@ const AdjusterMonkeyGui = ( function( iifeSet4s ) {
       if ( typeof character !== 'string' || character.length !== 1 ) {
         return null;
       }
+
       const regExTest = /[A-Z]/;
       return character.match( regExTest );
     }
 
     #setBemCssClasses( bemCssClasses ) {
-      this.bemCssClasses.guiBlock = this.#setPropertySafely( bemCssClasses.guiBlock, this.bemCssClasses.guiBlock );
-      if( 'guiElements' in bemCssClasses && typeof bemCssClasses.guiElements === 'object' ) {
+      this.bemCssClasses.guiBlock =
+        this.#setPropertySafely( bemCssClasses.guiBlock,
+        this.bemCssClasses.guiBlock );
+
+      if ('guiElements' in bemCssClasses && typeof bemCssClasses.guiElements ===
+        'object' ) {
         this.#setGuiElementsClasses( bemCssClasses.guiElements );
       }
-      if( 'guiModifiers' in bemCssClasses && typeof bemCssClasses.guiModifiers === 'object' ) {
+
+      if (
+        'guiModifiers' in bemCssClasses &&
+        typeof bemCssClasses.guiModifiers === 'object'
+      ) {
         this.#setGuiModifiersClasses( bemCssClasses.guiModifiers );
       }
     }
 
     #setGuiElementsClasses( classes ) {
-      this.bemCssClasses.guiElements.changeSnap = this.#setPropertySafely( classes.changeSnap, this.bemCssClasses.guiElements.changeSnap );
-      this.bemCssClasses.guiElements.changeSnapButtons = this.#setPropertySafely( classes.changeSnapButtons, this.bemCssClasses.guiElements.changeSnap );
-      this.bemCssClasses.guiElements.changeSnapHorizontally = this.#setPropertySafely( classes.changeSnapHorizontally, this.bemCssClasses.guiElements.changeSnapHorizontally );
-      this.bemCssClasses.guiElements.changeSnapVertically = this.#setPropertySafely( classes.changeSnapVertically, this.bemCssClasses.guiElements.changeSnapVertically );
-      this.bemCssClasses.guiElements.command = this.#setPropertySafely( classes.command, this.bemCssClasses.guiElements.command );
-      this.bemCssClasses.guiElements.commandsList = this.#setPropertySafely( classes.commandsList, this.bemCssClasses.guiElements.commandsList );
-      this.bemCssClasses.guiElements.logo = this.#setPropertySafely( classes.logo, this.bemCssClasses.guiElements.logo );
-      this.bemCssClasses.guiElements.logoPlacementArea = this.#setPropertySafely( classes.logoPlacementArea, this.bemCssClasses.guiElements.logoPlacementArea );
-      this.bemCssClasses.guiElements.title = this.#setPropertySafely( classes.title, this.bemCssClasses.guiElements.title );
+      this.bemCssClasses.guiElements.changeSnap =
+        this.#setPropertySafely(
+          classes.changeSnap, this.bemCssClasses.guiElements.changeSnap
+        );
+
+      this.bemCssClasses.guiElements.changeSnapButtons =
+        this.#setPropertySafely(
+          classes.changeSnapButtons,
+          this.bemCssClasses.guiElements.changeSnap
+        );
+
+      this.bemCssClasses.guiElements.changeSnapHorizontally =
+        this.#setPropertySafely(
+          classes.changeSnapHorizontally,
+          this.bemCssClasses.guiElements.changeSnapHorizontally
+        );
+
+      this.bemCssClasses.guiElements.changeSnapVertically =
+        this.#setPropertySafely(
+          classes.changeSnapVertically,
+          this.bemCssClasses.guiElements.changeSnapVertically
+        );
+
+      this.bemCssClasses.guiElements.command =
+        this.#setPropertySafely(
+          classes.command,
+          this.bemCssClasses.guiElements.command
+        );
+
+      this.bemCssClasses.guiElements.commandsList =
+        this.#setPropertySafely(
+          classes.commandsList,
+          this.bemCssClasses.guiElements.commandsList
+        );
+
+      this.bemCssClasses.guiElements.logo =
+        this.#setPropertySafely(
+          classes.logo,
+          this.bemCssClasses.guiElements.logo
+        );
+
+      this.bemCssClasses.guiElements.logoPlacementArea =
+        this.#setPropertySafely(
+          classes.logoPlacementArea,
+          this.bemCssClasses.guiElements.logoPlacementArea
+        );
+
+      this.bemCssClasses.guiElements.title =
+        this.#setPropertySafely(
+          classes.title,
+          this.bemCssClasses.guiElements.title
+        );
     }
 
     #setGuiModifiersClasses( classes ) {
-      this.bemCssClasses.guiModifiers.expanded = this.#setPropertySafely( classes.expanded, this.bemCssClasses.guiModifiers.expanded );
-      this.bemCssClasses.guiModifiers.snapToLowerLeft = this.#setPropertySafely( classes.snapToLowerLeft, this.bemCssClasses.guiModifiers.snapToLowerLeft );
-      this.bemCssClasses.guiModifiers.snapToLowerRight = this.#setPropertySafely( classes.snapToLowerRight, this.bemCssClasses.guiModifiers.snapToLowerRight );
-      this.bemCssClasses.guiModifiers.snapToUpperLeft = this.#setPropertySafely( classes.snapToUpperLeft, this.bemCssClasses.guiModifiers.snapToUpperLeft );
-      this.bemCssClasses.guiModifiers.snapToUpperRight = this.#setPropertySafely( classes.snapToUpperRight, this.bemCssClasses.guiModifiers.snapToUpperRight );
+      this.bemCssClasses.guiModifiers.expanded =
+        this.#setPropertySafely(
+          classes.expanded,
+          this.bemCssClasses.guiModifiers.expanded
+        );
+
+      this.bemCssClasses.guiModifiers.snapToLowerLeft =
+        this.#setPropertySafely(
+          classes.snapToLowerLeft,
+          this.bemCssClasses.guiModifiers.snapToLowerLeft
+        );
+
+      this.bemCssClasses.guiModifiers.snapToLowerRight =
+        this.#setPropertySafely(
+          classes.snapToLowerRight,
+          this.bemCssClasses.guiModifiers.snapToLowerRight
+        );
+
+      this.bemCssClasses.guiModifiers.snapToUpperLeft =
+        this.#setPropertySafely(
+          classes.snapToUpperLeft,
+          this.bemCssClasses.guiModifiers.snapToUpperLeft
+        );
+
+      this.bemCssClasses.guiModifiers.snapToUpperRight =
+        this.#setPropertySafely(
+          classes.snapToUpperRight,
+          this.bemCssClasses.guiModifiers.snapToUpperRight
+        );
     }
 
     #setPropertySafely( prospectiveSetting, safeSetting ) {
@@ -186,14 +292,16 @@ const AdjusterMonkeyGui = ( function( iifeSet4s ) {
 
     #setUndefinedElementIds() {
       let guiId = '';
-      for( let key in this.elementIds ) {
-        if ( key == 'adjusterMonkeyGui' ) {
-          this.elementIds[ key ] = this.#convertCamelcaseToSnakeCase( key );
-          guiId = this.elementIds[ key ];
+
+      for (let key in this.elementIds) {
+        if (key == 'adjusterMonkeyGui') {
+          this.elementIds[key] = this.#convertCamelcaseToSnakeCase(key);
+          guiId = this.elementIds[key];
         } else {
-          this.elementIds[ key ] = guiId + '_' + this.#convertCamelcaseToSnakeCase( key );
+          this.elementIds[key] =
+            guiId + '_' + this.#convertCamelcaseToSnakeCase(key);
         }
-        console.log( this.elementIds[ key ] );
+        console.log(this.elementIds[key]);
       }
     }
 
@@ -237,7 +345,7 @@ const AdjusterMonkeyGui = ( function( iifeSet4s ) {
   ├─selectors:
   │ └─.domInsertionPoint: ${this.selectors.domInsertionPoint}
   └─targetApplication: ${this.targetApplication}`*/
-  `Settings for instance of AdjusterMonkeyGui are as follows:
+        `Settings for instance of AdjusterMonkeyGui are as follows:
 ${JSON.stringify(this)}`
       );
     }
@@ -296,33 +404,34 @@ ${JSON.stringify(this)}`
 // ·> Create an instance of the «AdjusterMonkeyGui» class to be accessed       ·
 // ·  through the «Adj4rMnkyCmdLn» object once the latter has been added to    ·
 // ·  «window» object.                                                        <·
-( function( AdjusterMonkeyGui, iifeS6s ) {
+(function(AdjusterMonkeyGui, iifeS6s) {
   'use strict';
 
   function tryLoadingAdj4rM4yGui( loadingStartTime ) {
     const elapsedTime = new Date() - loadingStartTime;
+
     if (
       typeof window.adj4rMnkyCmdLn == 'object' &&
       typeof window.adj4rMnkyCmdLn.constructor == 'function' &&
       window.adj4rMnkyCmdLn.constructor.name == 'Adj4rMnkyCmdLn'
     ) {
-      window.adj4rMnkyCmdLn.adj4rMnkyGui = new AdjusterMonkeyGui( {
+      window.adj4rMnkyCmdLn.adj4rMnkyGui = new AdjusterMonkeyGui({
         domInsertionPointSelector: 'body',
         bemCssClasses: {
           gui: 'adjuster-monkey-trello-gui',
         },
-      } );
-    } else if ( elapsedTime <= iifeS6s.loadWaitTime ) {
-      window.setTimeout( tryLoadingAdj4rM4yGui, 1000, loadingStartTime );
+      });
+    } else if (elapsedTime <= iifeS6s.loadWaitTime) {
+      window.setTimeout(tryLoadingAdj4rM4yGui, 1000, loadingStartTime);
     }
   }
 
   function main() {
     const currentTime = new Date();
-    window.setTimeout( tryLoadingAdj4rM4yGui, 1000, currentTime );
+    window.setTimeout(tryLoadingAdj4rM4yGui, 1000, currentTime);
   }
 
   return main();
-} )( AdjusterMonkeyGui, {
+})(AdjusterMonkeyGui, {
   loadWaitTime: 35000,
-} );
+});
