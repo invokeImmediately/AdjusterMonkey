@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.12.0->rc+0.1.0
+ * @version 0.12.0->rc+0.1.1
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -41,90 +41,87 @@
  *   DEALINGS IN THE SOFTWARE.
  */
 
-const adj4rMnkyCmdLn = ( function( iife ) {
+const adj4rMnkyCmdLn = (function(iife) {
   'use strict';
 
   class Adj4rMnkyCmdLn {
-    #prefix4Msgs = '( 🐵 AdjusterMonkey 🛠️ ) =>';
+    #prefix4Msgs = '(🐵 AdjusterMonkey 🛠️) =>';
 
     constructor() {
-      this.cssScanner = new CssScanner( this );
-      this.domScanner = new DomScanner( this );
+      this.cssScanner = new CssScanner(this);
+      this.domScanner = new DomScanner(this);
     }
 
-    createDataTree( rootData ) {
-      return new DataTree( rootData );
+    createDataTree(rootData) {
+      return new DataTree(rootData);
     }
 
-    isUrlString( value ) {
+    isUrlString(value) {
       return (
-        typeof value == 'string' &&
-        value.match(
-          new RegExp( '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Z' +
-            'a-z0-9]+(?:\/.*)?$' )
+        typeof value == 'string'
+        && value.match(
+          new RegExp( '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Za-z0-9]+(?:\/.*)?$' )
         ) !== null
       );
     }
 
-    getLabeledMsg( msg, wrapLen ) {
-      return this.#wrapMsgAtCharLen( `${this.#prefix4Msgs} ${msg}`, wrapLen );
+    getLabeledMsg(msg, wrapLen) {
+      return this.#wrapMsgAtCharLen(`${this.#prefix4Msgs} ${msg}`, wrapLen);
     }
 
-    logMsg( msgText, wrapLen ) {
-      console.log( this.getLabeledMsg( msgText, wrapLen ) );
+    logMsg(msgText, wrapLen) {
+      console.log(this.getLabeledMsg(msgText, wrapLen));
     }
 
-    openUrlInNewWindow( url ) {
-      if( !this.isUrlString( url ) ) {
-        adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
-          please give me a string containing URL. The argument you gave me was
+    openUrlInNewWindow(url) {
+      if (!this.isUrlString(url)) {
+        adj4rMnkyCmdLn.logMsg(
+          `If you want me to open a document style sheet, please give me a
+          string containing URL. The argument you gave me was
           «${whichStyleSheet}».`
         );
         return;
       }
-      window.open(
-        url,
-        '_blank'
-      ).focus();
+      window.open(url, '_blank').focus();
     }
 
     async waitForDoc4tFocus() {
-      const checkDoc4tFocus = ( resolve ) => {
-        if ( document.hasFocus() ) {
+      const checkDoc4tFocus = (resolve) => {
+        if (document.hasFocus()) {
           resolve();
         } else {
-          setTimeout( () => checkDoc4tFocus( resolve ), 250 );
+          setTimeout(() => checkDoc4tFocus(resolve), 250);
         }
       }
-      return new Promise( checkDoc4tFocus );
+      return new Promise(checkDoc4tFocus);
     }
 
-    waitForTime( timeInMs ) {
-      return new Promise( ( resolve ) => {
-        setTimeout( () => {
-          resolve( '' );
-        }, timeInMs );
-      } );
+    waitForTime(timeInMs) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve('');
+        }, timeInMs);
+      });
     }
 
-    #wrapMsgAtCharLen( msg, len ) {
+    #wrapMsgAtCharLen(msg, len) {
       // ·> Use a default line wrapping length.                               <·
-      if ( typeof len == 'undefined' ) {
+      if (typeof len == 'undefined') {
         len = 80;
       }
 
       // ·> Convert the line wrapping length to a number if possible.         <·
-      if ( typeof len != 'number' && Number.isNaN( parseInt( len ) ) ) {
+      if (typeof len != 'number' && Number.isNaN(parseInt(len))) {
         return msg;
-      } else if ( typeof len != 'number' ) {
-        len = parseInt( len );
+      } else if (typeof len != 'number') {
+        len = parseInt(len);
       }
 
       // ·> Enforce minimum and maximum line wrapping lengths to ensure a      ·
       // ·  clean looking result.                                             <·
-      if ( len < 40 ) {
+      if (len < 40) {
         len = 40;
-      } else if ( len > 100 ) {
+      } else if (len > 100) {
         len = 100;
       }
 
@@ -132,25 +129,27 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·  used following clean coding practices when specifying the argu-    ·
       // ·  ment.                                                             <·
       let iterCount = 0;
-      while(
-        msg.length > 0 &&
-        ( msg.match( /[ \n]+\n/gi ) !== null ||
-        msg.match( /\n[ \n]+/gi ) !== null ) &&
-        iterCount < 1024
+      while (
+        msg.length > 0
+        && (
+          msg.match(/[ \n]+\n/gi) !== null
+          || msg.match(/\n[ \n]+/gi) !== null
+        )
+        && iterCount < 1024
       ) {
-        msg = msg.replaceAll( /[ \n]+\n/gi, ' ' );
-        msg = msg.replaceAll( /\n[ \n]+/gi, ' ' );
+        msg = msg.replaceAll(/[ \n]+\n/gi, ' ');
+        msg = msg.replaceAll(/\n[ \n]+/gi, ' ');
         iterCount++
       }
-      msg = msg.replaceAll( /\n+/gi, ' ' );
-      if ( msg.length < len ) {
+      msg = msg.replaceAll(/\n+/gi, ' ');
+      if (msg.length < len) {
         return msg;
       }
 
       // ·> Replace a special tab escape sequence with indentation at this     ·
       // ·  later point following re-indentation so it correctly persists      ·
       // ·  into the final line-wrapped message.                              <·
-      msg = msg.replaceAll( /\^↹/g, '  ' );
+      msg = msg.replaceAll(/\^↹/g, '  ');
 
       // ·> Scan through each character of the message to look for break-      ·
       // ·  point characters at appropriate wrapping locations to satisfy a    .
@@ -159,26 +158,27 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·  is less than the desired limit and line breaks fall at desirable   ·
       // ·  break points.                                                     <·
       let newMsg = '';
-      let startI3x = 0;   // Starting index
-      let scanI3x;        // Scanning index
-      while( startI3x < msg.length ) {
+      let startI3x = 0; // Starting index
+      let scanI3x; // Scanning index
+      while (startI3x < msg.length) {
         scanI3x = startI3x + len;
 
         // ·> Start scanning at a distance of the line length limit away from  ·
         // ·  the starting index, and work backward until a break-point char-  ·
         // ·  acter is encountered.                                           <·
-        while(
-          scanI3x < msg.length && scanI3x > startI3x &&
-          msg.charAt( scanI3x ).match( /[- \/\\«»\(\)]/ ) === null
+        while (
+          scanI3x < msg.length
+          && scanI3x > startI3x
+          && msg.charAt(scanI3x).match(/[- \/\\«»\(\)]/) === null
         ) {
           scanI3x--;
         }
 
         // ·> Handle edge cases where scanning found no break point or reached ·
         // ·  the end of the message.                                         <·
-        if ( scanI3x == startI3x ) {
+        if (scanI3x == startI3x) {
           scanI3x = scanI3x + len;
-        } else if ( scanI3x > msg.length ) {
+        } else if (scanI3x > msg.length) {
           scanI3x = msg.length;
         }
 
@@ -189,41 +189,56 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         // ·> To-do: Avoid manipulating the original string when working to    ·
         // ·  create a hanging indent to improve performance.                 <·
         if (
-          msg.charAt( scanI3x ).match( /[-\/\\«»\(\)]/ ) !== null &&
-          ( startI3x == 0 || msg.charAt( startI3x ) == ' ' )
+          msg.charAt(scanI3x).match(/[-\/\\«»\(\)]/) !== null
+          && (startI3x == 0 || msg.charAt(startI3x) == ' ')
         ) {
-          msg = msg.substring( 0, scanI3x + 1 ) + " "   // <– Add an indent-
-            + msg.substring( scanI3x + 1, msg.length ); // <– ation to the
-          scanI3x++;                                    // <– next line.
+          // Add an indentation to the next line.
+          msg =
+            msg.substring(0, scanI3x + 1 ) + " " +
+            msg.substring(scanI3x + 1, msg.length);
+
+          scanI3x++;
         } else if (
-          msg.charAt( scanI3x ).match( /[-\/\\«»\(\)]/ ) !== null
+          msg.charAt(scanI3x).match(/[-\/\\«»\(\)]/) !== null
         ) {
-          msg = msg.substring( 0, scanI3x + 1 ) + " "   // <– Add an indent-
-            + msg.substring( scanI3x + 1, msg.length ); // <–  ation to the
-          scanI3x++;                                    // <–  next line.
-          msg = msg.substring( 0, startI3x ) + " "    // <– Add an indentation
-            + msg.substring( startI3x, msg.length );  // <–  to the beginning
-          scanI3x++;                                  // <–  of this line.
+          // Add an indentation to the next line.
+          msg =
+            msg.substring(0, scanI3x + 1) + " " +
+            msg.substring(scanI3x + 1, msg.length);
+
+          scanI3x++;
+
+          // Add an indentation to the beginning of this line.
+          msg =
+            msg.substring(0, startI3x) + " " +
+            msg.substring(startI3x, msg.length);
+
+          scanI3x++;
         }
 
         // ·> Handle the edge case where a special break-point character was   ·
         // ·  not encountered while scanning. (For example, this can easily    ·
         // ·  happen when messages contain URLs.)                             <·
         if (
-          scanI3x == startI3x + len && msg.charAt( startI3x ) != ' ' &&
-          startI3x != 0
+          scanI3x == startI3x + len
+          && msg.charAt(startI3x) != ' '
+          && startI3x != 0
         ) {
-          msg = msg.substring( 0, startI3x ) + " "
-            + msg.substring( startI3x, msg.length );
+          msg =
+            msg.substring(0, startI3x) + " " +
+            msg.substring(startI3x, msg.length);
         }
 
         // ·> Handle the edge case where a special break-point character was   ·
         // ·  not encountered while scanning and we have reached the end of    ·
         // ·  the full original message.                                      <·
         if ( scanI3x == msg.length && msg.charAt(startI3x) != ' ' ) {
-          msg = msg.substring( 0, startI3x + 1 ) + " "
-            + msg.substring( startI3x, msg.length );
-          scanI3x = scanI3x - startI3x < len ?
+          msg =
+            msg.substring(0, startI3x + 1) + " " +
+            msg.substring(startI3x, msg.length);
+
+          scanI3x =
+            scanI3x - startI3x < len ?
             scanI3x + 1 :
             scanI3x;
         }
@@ -231,17 +246,17 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         // ·> Handle the case where a special break-point character was not    ·
         // ·  encountered while scanning. (For example, this can easily happen ·
         // ·  when messages contain URLs.)                                    <·
-        if ( startI3x != 0 ) {
+        if (startI3x != 0) {
           newMsg += '\n';
         }
-        newMsg += msg.substring( startI3x, scanI3x );
+        newMsg += msg.substring(startI3x, scanI3x);
         startI3x = scanI3x;
       }
 
       // ·> Process a special newline escape sequence following re-indenta-    ·
       // ·  tion so it correctly persists into the final line-wrapped mess-    ·
       // ·  age.                                                              <·
-      newMsg = newMsg.replaceAll( /\^¶/g, '\n' );
+      newMsg = newMsg.replaceAll(/\^¶/g, '\n');
 
       return newMsg;
     }
@@ -256,122 +271,152 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     #referenceCssFiles = [];
     #scannedCssFile;
 
-    constructor( adj4rMnkyCmdLn ) {
+    constructor(adj4rMnkyCmdLn) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
       this.scanForCssFiles();
     }
 
-    async addRefStyleSheet( urlOrCssText, docSSIndex, cssTextSrc ) {
-      if ( typeof urlOrCssText != 'string' ) {
+    async addRefStyleSheet(urlOrCssText, docSSIndex, cssTextSrc) {
+      if (typeof urlOrCssText != 'string') {
         return;
       }
-      docSSIndex = this.#checkDocSSIndex( docSSIndex );
+      docSSIndex = this.#checkDocSSIndex(docSSIndex);
       let htmlId = null;
-      if ( docSSIndex !== null ) {
-        htmlId = document.styleSheets.item( docSSIndex ).ownerNode.id;
+      if (docSSIndex !== null) {
+        htmlId = document.styleSheets.item(docSSIndex).ownerNode.id;
       }
-      if ( this.isUrlStringToCss( urlOrCssText ) ) {
+      if (this.isUrlStringToCss(urlOrCssText)) {
         cssTextSrc = urlOrCssText;
-        urlOrCssText = await this.#fetchStyleSheetCode( urlOrCssText );
+        urlOrCssText = await this.#fetchStyleSheetCode(urlOrCssText);
       }
-      if ( urlOrCssText == '' ) {
+      if (urlOrCssText == '') {
         return;
       }
-      if ( !this.isUrlStringToCss( cssTextSrc ) ) {
+      if (!this.isUrlStringToCss(cssTextSrc)) {
         cssTextSrc = '';
       }
       const newSS = new CSSStyleSheet();
-      newSS.replaceSync( urlOrCssText );
-      this.#referenceCssFiles.push( {
+      newSS.replaceSync(urlOrCssText);
+      this.#referenceCssFiles.push({
         styleSheet: newSS,
         cssText: urlOrCssText,
         cssTextSrc: cssTextSrc,
         docSSIndex: docSSIndex,
         htmlId: htmlId,
-      } );
-      this.#adj4rMnkyCmdLn.logMsg( `Reference CSS style sheet added at index
-        ${this.#referenceCssFiles.length - 1} with ${ newSS.cssRules.length }
-        accepted style rules.` );
+      });
+      this.#adj4rMnkyCmdLn.logMsg(`Reference CSS style sheet added at index
+        ${this.#referenceCssFiles.length - 1} with ${newSS.cssRules.length}
+        accepted style rules.`);
     }
 
-    async addRefStyleSheetFromClipboard( docSSIndex, cssTextSrc ) {
-      this.#adj4rMnkyCmdLn.logMsg( `Ready to load the text on the clipboard as a
+    async addRefStyleSheetFromClipboard(docSSIndex, cssTextSrc) {
+      this.#adj4rMnkyCmdLn.logMsg(`Ready to load the text on the clipboard as a
         reference style sheet. Please close DevTools and focus on the document
-        when you are ready.` );
+        when you are ready.`);
+
       await this.#adj4rMnkyCmdLn.waitForDoc4tFocus();
+
       await navigator.clipboard
         .readText()
-        .then( ( clipboardText ) => {
-          this.addRefStyleSheet( clipboardText, docSSIndex, cssTextSrc );
-        } );
-      window.alert( this.#adj4rMnkyCmdLn.getLabeledMsg( `The CSS code on the
+        .then((clipboardText) => {
+          this.addRefStyleSheet(clipboardText, docSSIndex, cssTextSrc);
+        });
+
+      window.alert(this.#adj4rMnkyCmdLn.getLabeledMsg(`The CSS code on the
         clipboard has been added as a reference style sheet and will be
-        available for further analysis via the DevTools command line.`, 60 ) );
+        available for further analysis via the DevTools command line.`, 60));
     }
 
     get classesUsedInPage() {
-      if ( this.#classesUsedInPage === undefined ) {
+      if (this.#classesUsedInPage === undefined) {
         this.scanForClassesUsedInPage();
       }
+
       return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
     }
 
     clearRefSS() {
       const refSSCount = this.#referenceCssFiles.length;
-      this.#referenceCssFiles.splice( 0 );
-      this.#adj4rMnkyCmdLn.logMsg( `A total of ${refSSCount} reference style
-        sheets have been cleared.` );
+      this.#referenceCssFiles.splice(0);
+      this.#adj4rMnkyCmdLn.logMsg(`A total of ${refSSCount} reference style
+        sheets have been cleared.`);
     }
 
     clearRefSSFromLocalStorage() {
       let i = 0;
       let key = `${this.#localStoragePrefix}${i}`;
-      let value = window.localStorage.getItem( key );
+      let value = window.localStorage.getItem(key);
+
       const iter4nLimit = 1024;
-      while( i < iter4nLimit && value !== null ) {
-        window.localStorage.removeItem( key );
+      while(i < iter4nLimit && value !== null) {
+        window.localStorage.removeItem(key);
         i++;
         key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
-        value = window.localStorage.getItem( key );
+        value = window.localStorage.getItem(key);
       }
-      this.#adj4rMnkyCmdLn.logMsg( `A total of ${i} reference style sheets were
-        cleared from local storage.` );
+
+      this.#adj4rMnkyCmdLn.logMsg(`A total of ${i} reference style sheets were
+        cleared from local storage.`);
     }
 
-    getClassesUsedInDocSS( index ) {
-      if ( index < 0 || index >= document.styleSheets.length ) {
+    getClassesUsedInDocSS(index) {
+      if (index < 0 || index >= document.styleSheets.length) {
         return null;
       }
-      return this.#getClassesUsedInSS( document.styleSheets[ index ] );
+
+      return this.#getClassesUsedInSS(document.styleSheets[index]);
     }
 
-    getClassesUsedInReferenceSS( index ) {
-      if ( index < 0 || index >= this.#referenceCssFiles.length ) {
+    getClassesUsedInReferenceSS(index) {
+      if (index < 0 || index >= this.#referenceCssFiles.length) {
         return null;
       }
-      return this.#getClassesUsedInSS( this.#referenceCssFiles[ index ]
-        .styleSheet );
+
+      return this.#getClassesUsedInSS(this.#referenceCssFiles[index]
+        .styleSheet);
     }
 
-    getDocSSRulesBySelectorMatching( sSIndex, regExpNeedle ) {
+    getDocSSRulesBySelectorMatching(sSIndex, regExpNeedle) {
       // ·> TO-DO: Check if sSIndex is an array and, if so, process multiple   ·
       // ·  style sheets with a single call.                                  <·
       if ( sSIndex < 0 || sSIndex >= document.styleSheets.length ) {
         return null;
       }
+
       const results = [];
       const rules = document.styleSheets[ sSIndex ].cssRules;
-      this.#copyRulesCSSToArrayBySel4rMat4g( rules, results, regExpNeedle );
+      this.#copyRulesCSSToArrayBySel4rMat4g(rules, results, regExpNeedle);
+
       return results;
     }
 
-    getRefCssText( index ) {
+    getRefCssText(index) {
+      if (
+        typeof index == 'string'
+        && !Number.isNaN(parseInt(index, 10))
+      ) {
+        index = parseInt(index, 10);
+      }
+
+      if (
+        typeof index != 'number'
+        || index < 0
+        || index >= this.#referenceCssFiles.length
+      ) {
+        return null;
+      }
+
+      return this.#referenceCssFiles[index].cssText;
+    }
+
+    getRefStyleSheet(index) {
       if (
         typeof index == 'string' &&
-        !Number.isNaN( parseInt( index, 10 ) )
+        !Number.isNaN(parseInt(index, 10))
       ) {
-        index = parseInt( index, 10 );
+        index = parseInt(index, 10);
       }
+
       if (
         typeof index != 'number' ||
         index < 0 ||
@@ -379,67 +424,55 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       ) {
         return null;
       }
-      return this.#referenceCssFiles[ index ].cssText;
+
+      return this.#referenceCssFiles[index].styleSheet;
     }
 
-    getRefStyleSheet( index ) {
-      if (
-        typeof index == 'string' &&
-        !Number.isNaN( parseInt( index, 10 ) )
-      ) {
-        index = parseInt( index, 10 );
-      }
-      if (
-        typeof index != 'number' ||
-        index < 0 ||
-        index >= this.#referenceCssFiles.length
-      ) {
-        return null;
-      }
-      return this.#referenceCssFiles[ index ].styleSheet;
-    }
-
-    isUrlStringToCss( value ) {
+    isUrlStringToCss(value) {
       return (
-        typeof value == 'string' &&
-        value.match(
-          new RegExp( '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Z' +
-            'a-z0-9]+\/.+\\.css(?:\\?.+)?\/?$' )
-        ) !== null
+        typeof value == 'string'
+        && value.match(new RegExp(
+          '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Za-z0-9]+\/.+\\.css(?:\\?.+)?\/?$'
+        )) !== null
       );
     }
 
-    matchDocSSIndexToSS( docSSIndex, cssTextSrc ) {
-      docSSIndex = this.#checkDocSSIndex( docSSIndex );
-      if ( docSSIndex === null ||
-        document.styleSheets[ docSSIndex ].href != cssTextSrc
+    matchDocSSIndexToSS(docSSIndex, cssTextSrc) {
+      docSSIndex = this.#checkDocSSIndex(docSSIndex);
+
+      if (
+        docSSIndex === null
+        || document.styleSheets[docSSIndex].href != cssTextSrc
       ) {
-        for( let i = 0; i < document.styleSheets.length; i++ ) {
-          if ( document.styleSheets[ i ].href == cssTextSrc ) {
+        for (let i = 0; i < document.styleSheets.length; i++) {
+          if (document.styleSheets[i].href == cssTextSrc) {
             docSSIndex = i;
             break;
-          } else if ( i == document.styleSheets.length - 1 ) {
+          } else if (i == document.styleSheets.length - 1) {
             docSSIndex = null;
           }
         }
       }
+
       return docSSIndex;
     }
 
     openDocSSInNewWindow( whichStyleSheet ) {
-      if(
+      if (
         typeof whichStyleSheet == 'string' &&
-        !Number.isNaN( parseInt( whichStyleSheet, 10 ) )
+        !Number.isNaN(parseInt(whichStyleSheet, 10))
       ) {
-        whichStyleSheet = parseInt( whichStyleSheet, 10 );
+        whichStyleSheet = parseInt(whichStyleSheet, 10);
       }
-      if( typeof whichStyleSheet != 'number' ) {
+
+      if (typeof whichStyleSheet != 'number') {
         adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
           please give me the index of the desired style sheet in
           «document.styleSheets». The argument you gave me was
           «${whichStyleSheet}».` );
         return;
       }
+
       if (
         whichStyleSheet < 0 ||
         whichStyleSheet >= document.styleSheets.length
@@ -449,46 +482,53 @@ const adj4rMnkyCmdLn = ( function( iife ) {
           accepted indices.` );
         return;
       }
-      if( document.styleSheets.item( whichStyleSheet ).href === null ) {
+
+      if (document.styleSheets.item( whichStyleSheet ).href === null) {
         adj4rMnkyCmdLn.logMsg( `The index you gave me for the document style
           sheet to open of «${whichStyleSheet}» represents an internal style
           sheet.` );
         return;
       }
-      adj4rMnkyCmdLn.logMsg( `Opening document style sheet «${whichStyleSheet}»
+
+      adj4rMnkyCmdLn.logMsg(`Opening document style sheet «${whichStyleSheet}»
         with href «${document.styleSheets.item( whichStyleSheet ).href}» in a
-        new window.` );
+        new window.`);
+
       window.open(
-        `${document.styleSheets.item( whichStyleSheet ).href}`,
+        `${document.styleSheets.item(whichStyleSheet).href}`,
         '_blank'
       ).focus();
     }
 
     printClassesUsedInPage() {
-      if ( this.#classesUsedInPage === undefined ) {
+      if (this.#classesUsedInPage === undefined) {
         this.scanForClassesUsedInPage();
       }
-      console.log( Array.from( this.#classesUsedInPage ).toSorted() );
+
+      console.log(Array.from(this.#classesUsedInPage).toSorted());
     }
 
     printLinksAttrsList() {
-      console.log( this.#linksAttrsList );
+      console.log(this.#linksAttrsList);
     }
 
     printDocSSList() {
       const docSSDetails = [];
-      for( let index = 0; index < document.styleSheets.length; index++ ) {
-        docSSDetails.push( {
-          href: document.styleSheets.item( index ).href,
-          tagName: document.styleSheets.item( index ).ownerNode.tagName,
-          tagID: document.styleSheets.item( index ).ownerNode.id,
-          innerTextHead: document.styleSheets.item( index )
-            .ownerNode.innerText.substring( 0, 64 ),
-        } );
-        if ( docSSDetails[ index ].innerTextHead.length == 64 ) {
-          docSSDetails[ index ].innerTextHead += "…";
+
+      for (let index = 0; index < document.styleSheets.length; index++) {
+        docSSDetails.push({
+          href: document.styleSheets.item(index).href,
+          tagName: document.styleSheets.item(index).ownerNode.tagName,
+          tagID: document.styleSheets.item(index).ownerNode.id,
+          innerTextHead: document.styleSheets.item(index)
+            .ownerNode.innerText.substring(0, 64),
+        });
+
+        if (docSSDetails[index].innerTextHead.length == 64) {
+          docSSDetails[index].innerTextHead += "…";
         }
       }
+
       console.table( docSSDetails, [ 'href', 'tagName', 'tagID',
         'innerTextHead' ] );
     }
@@ -503,16 +543,22 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       let value = window.localStorage.getItem( key );
       let styleSheetData;
       const iter4nLimit = 1024;
-      while( i < iter4nLimit && value !== null ) {
+
+      while (i < iter4nLimit && value !== null) {
         styleSheetData = JSON.parse( value );
-        styleSheetData.docSSIndex = this.matchDocSSIndexToSS(
-          styleSheetData.docSSIndex, styleSheetData.cssTextSrc );
-        this.addRefStyleSheet( styleSheetData.cssText,
-          styleSheetData.docSSIndex, styleSheetData.cssTextSrc );
+
+        styleSheetData.docSSIndex =
+          this.matchDocSSIndexToSS(styleSheetData.docSSIndex,
+            styleSheetData.cssTextSrc );
+
+        this.addRefStyleSheet(styleSheetData.cssText, styleSheetData.docSSIndex,
+          styleSheetData.cssTextSrc );
+
         i++;
         key = `adj4rMnkyCmdLn.cssScanner.referenceCssFiles.${i}`;
-        value = window.localStorage.getItem( key );
+        value = window.localStorage.getItem(key);
       }
+
       this.#adj4rMnkyCmdLn.logMsg( `A total of ${i} reference style sheets were
         restored from local storage.` );
     }
@@ -525,102 +571,117 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       const cssFileLinks = document.querySelectorAll(
         'link[rel="stylesheet"]'
       );
+
       const scanResults = [];
       const linksAttrsList = new Set();
-      cssFileLinks.forEach( ( link, index ) => {
-        this.#extractAttrsFromSsLink( link, linksAttrsList );
+
+      cssFileLinks.forEach((link, index) => {
+        this.#extractAttrsFromSsLink(link, linksAttrsList);
 
         // ·> Find the source URL for the linked CSS file.                    <·
         let hrefVal = link.href;
-        if ( hrefVal == '' ) {
+
+        if (hrefVal == '') {
           hrefVal = link.dataset.href;
         }
-        if ( hrefVal == '' ) {
+
+        if (hrefVal == '') {
           return;
         }
 
         // ·> Determine the section of the DOM, head or body, of the link.    <·
         let domSection = 'neither';
-        if ( link.closest( 'head' ) !== null ) {
+
+        if (link.closest('head') !== null) {
           domSection = 'head';
-        } else if ( link.closest( 'body' ) !== null ) {
+        } else if (link.closest('body') !== null) {
           domSection = 'body';
         }
 
         // ·> Store scan results for later.                                   <·
-        scanResults.push( {
+        scanResults.push({
           htmlId: link.id,
           section: domSection,
           ssUrl: hrefVal,
-        } );
+        });
       } );
-      this.#linksAttrsList = this.#sortAttrsFromSsLinks( linksAttrsList );
+      this.#linksAttrsList = this.#sortAttrsFromSsLinks(linksAttrsList);
       this.#linkedCssFiles = scanResults;
     }
 
-    async scanLinkedCssFile( whichFile ) {
-      if ( !(
-        typeof whichFile === 'string' || typeof whichFile === 'number'
-      ) ) {
+    async scanLinkedCssFile(whichFile) {
+      if (!(
+        typeof whichFile === 'string'
+        || typeof whichFile === 'number'
+      )) {
         throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was given
           the following input for scanning a CSS file: ^¶⇥«${whichFile}».
           ^¶ This input was not a string or number as expected.` ) );
       }
-      if ( typeof whichFile === 'string' &&
-        !Number.isNaN( parseInt( whichFile ) )
+
+      if (
+        typeof whichFile === 'string'
+        && !Number.isNaN(parseInt(whichFile))
       ) {
-        whichFile = parseInt( whichFile );
+        whichFile = parseInt(whichFile);
       }
-      if ( typeof whichFile === 'number' && (
-        whichFile < 0 || whichFile >= this.#linkedCssFiles.length
-      ) ) {
-        throw new RangeError( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was given
+
+      if (
+        typeof whichFile === 'number'
+        && (whichFile < 0 || whichFile >= this.#linkedCssFiles.length)
+      ) {
+        throw new RangeError(this.#adj4rMnkyCmdLn.getLabeledMsg( `I was given
           the following index as input for scanning a CSS file: ^¶
           ⇥«${whichFile}»^¶ This index is out of range with respect to the
-          number of linked CSS files loaded by this page.` ) );
+          number of linked CSS files loaded by this page.`));
       }
-      if ( typeof whichFile === 'number' ) {
+
+      if (typeof whichFile === 'number') {
         whichFile = this.#linkedCssFiles[ whichFile ].ssUrl;
       }
+
       this.#scannedCssFile = this.#fetchStyleSheetCode( whichFile );
+
       return this.#scannedCssFile;
     }
 
     storeRefStyleSheetsLocally() {
       try {
-        for( let i = 0; i < this.#referenceCssFiles.length; i++ ) {
+        for(let i = 0; i < this.#referenceCssFiles.length; i++) {
           window.localStorage.setItem(
             `${this.#localStoragePrefix}${i}`,
-            JSON.stringify( {
-              cssText: this.#referenceCssFiles[ i ].cssText,
-              cssTextSrc: this.#referenceCssFiles[ i ].cssTextSrc,
-              docSSIndex: this.#referenceCssFiles[ i ].docSSIndex,
-              htmlId: this.#referenceCssFiles[ i ].htmlId,
-            } ) );
+            JSON.stringify({
+              cssText: this.#referenceCssFiles[i].cssText,
+              cssTextSrc: this.#referenceCssFiles[i].cssTextSrc,
+              docSSIndex: this.#referenceCssFiles[i].docSSIndex,
+              htmlId: this.#referenceCssFiles[i].htmlId,
+            }));
         }
-        this.#adj4rMnkyCmdLn.logMsg( `A total of
-          ${ this.#referenceCssFiles.length } reference style sheets were placed
+        this.#adj4rMnkyCmdLn.logMsg(`A total of
+          ${this.#referenceCssFiles.length} reference style sheets were placed
           in to local storage using the key pattern
-          '${this.#localStoragePrefix}n'.` );
+          '${this.#localStoragePrefix}n'.`);
       } catch( error ) {
-        this.#adj4rMnkyCmdLn.logMsg( error.message );
+        this.#adj4rMnkyCmdLn.logMsg(error.message);
       }
     }
 
-    #checkDocSSIndex( docSSIndex ) {
+    #checkDocSSIndex(docSSIndex) {
       if (
-        typeof docSSIndex == 'string' &&
-        !Number.isNaN( parseInt( docSSIndex, 10 ) )
+        typeof docSSIndex == 'string'
+        && !Number.isNaN(parseInt(docSSIndex, 10))
       ) {
-        docSSIndex = parseInt( docSSIndex, 10 );
+        docSSIndex = parseInt(docSSIndex, 10);
       }
+
       if (
-        typeof docSSIndex != 'number' ||
-        docSSIndex < 0 ||
-        docSSIndex >= document.styleSheets.length
+        typeof docSSIndex != 'number'
+        || docSSIndex < 0
+        || docSSIndex >= document.styleSheets.length
       ) {
         docSSIndex = null;
       }
+
       return docSSIndex;
     }
 
@@ -630,91 +691,102 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
       const rules = mediaRule.cssRules;
       let results = [];
-      for ( let i = 0; i < rules.length; i++ ) {
+
+      for (let i = 0; i < rules.length; i++) {
         if (
-          rules.item( i ) instanceof CSSStyleRule &&
-          rules.item( i ).selectorText.match( regExpNeedle )
+          rules.item(i) instanceof CSSStyleRule
+          && rules.item(i).selectorText.match(regExpNeedle)
         ) {
-          results.push( rules.item( i ).cssText );
+          results.push(rules.item(i).cssText);
         }
       }
-      if ( results.length > 0 ) {
-        results = results.join( '\n' );
-        results = results.replace( /^(?!$)/gm, "  " );
-        results = "@media " + mediaRule.conditionText + " {\n" + results
-          + "\n}";
+
+      if (results.length > 0) {
+        results = results.join('\n');
+        results = results.replace(/^(?!$)/gm, "  ");
+        results = "@media " + mediaRule.conditionText + " {\n" + results +
+          "\n}";
+
         array.push( results );
       }
     }
 
-    #copyRulesCSSToArrayBySel4rMat4g( cssRules, array, regExpNeedle ) {
+    #copyRulesCSSToArrayBySel4rMat4g(cssRules, array, regExpNeedle) {
       // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
-      for ( let i = 0; i < cssRules.length; i++ ) {
+      for (let i = 0; i < cssRules.length; i++) {
         if (
-          cssRules.item( i ) instanceof CSSStyleRule &&
-          cssRules.item( i ).selectorText.match( regExpNeedle )
+          cssRules.item(i) instanceof CSSStyleRule &&
+          cssRules.item(i).selectorText.match(regExpNeedle)
         ) {
-          array.push( cssRules.item( i ).cssText );
+          array.push(cssRules.item(i).cssText);
         }
+
         if (
-          cssRules.item( i ) instanceof CSSMediaRule
+          cssRules.item(i) instanceof CSSMediaRule
         ) {
-          this.#copyMediaRuleCSSToArrayBySel4rMat4g( cssRules.item( i ),
-            array, regExpNeedle );
+          this.#copyMediaRuleCSSToArrayBySel4rMat4g(cssRules.item(i),
+            array, regExpNeedle);
         }
       }
     }
 
-    #extractAttrsFromSsLink( link, attrsSet ) {
+    #extractAttrsFromSsLink(link, attrsSet) {
       const numAttrs = link.attributes.length;
-      for( let index = 0; index < numAttrs; index++ ) {
-        attrsSet.add( link.attributes[ index ].name );
+      for (let index = 0; index < numAttrs; index++) {
+        attrsSet.add(link.attributes[index].name);
       }
     }
 
     #extractClassesUsedInPage() {
       const cssClassSet = new Set();
-      const bodyElems = document.querySelectorAll( 'body, body *' );
-      bodyElems.forEach( ( elem, index ) => {
-        for ( let index = 0; index < elem.classList.length; index++ ) {
-          cssClassSet.add( elem.classList.item( index ) );
+      const bodyElems = document.querySelectorAll('body, body *');
+
+      bodyElems.forEach((elem, index) => {
+        for (let index = 0; index < elem.classList.length; index++) {
+          cssClassSet.add(elem.classList.item(index));
         }
-      } );
+      });
+
       return cssClassSet;
     }
 
-    async #fetchStyleSheetCode( url ) {
+    async #fetchStyleSheetCode(url) {
       let finalResponse = null;
-      if ( !this.isUrlStringToCss( url ) ) {
-        throw new TypeError( this.#adj4rMnkyCmdLn.getLabeledMsg(
+
+      if (!this.isUrlStringToCss(url)) {
+        throw new TypeError(this.#adj4rMnkyCmdLn.getLabeledMsg(
           `When attempting to fetch style sheet code, a URL I was given for a
           style sheet: ^¶⇥«${url}»^¶ does not take the expected form.`
-        ) );
+        ));
       }
-      await fetch( url )
-        .then( ( response ) => {
-          if ( !response.ok ) {
-            throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg(
+
+      await fetch(url)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(this.#adj4rMnkyCmdLn.getLabeledMsg(
               `Unable to access resource: ^¶⇥« ${url} »^¶ Status returned was:
               «${response.status}».`
-            ) );
+            ));
           }
+
           return response.text();
-        } )
-        .then( ( response ) => {
+        })
+        .then((response) => {
           finalResponse = response;
-        } )
-        .catch( ( error ) => {
-          console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
-          this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to use the fetch API
-            to request the style sheet, I will now open it in a new tab.`
-          );
-          this.#adj4rMnkyCmdLn.openUrlInNewWindow( url );
+        })
+        .catch((error) => {
+          console.error(this.#adj4rMnkyCmdLn.getLabeledMsg(error.message));
+
+          this.#adj4rMnkyCmdLn.logMsg(`Since I was unable to use the fetch API
+            to request the style sheet, I will now open it in a new tab.`);
+
+          this.#adj4rMnkyCmdLn.openUrlInNewWindow(url);
         } );
+
       return finalResponse;
     }
 
-    #findClassesUsedInMediaRule( mediaRule, setOfClasses ) {
+    #findClassesUsedInMediaRule(mediaRule, setOfClasses) {
       const cssRules = mediaRule.cssRules
       for ( let i = 0; i < cssRules.length; i++ ) {
         if ( cssRules.item( i ) instanceof CSSStyleRule ) {
@@ -726,80 +798,94 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       }
     }
 
-    #findClassesUsedInStyleRule( styleRule, setOfClasses ) {
-      if ( styleRule.selectorText === undefined ) {
+    #findClassesUsedInStyleRule(styleRule, setOfClasses) {
+      if (styleRule.selectorText === undefined) {
         return;
       }
-      const classesFound = styleRule.selectorText
-        .match( /\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g );
+
+      const classesFound =
+        styleRule.selectorText.match(/\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g);
+
       if( classesFound === null ) {
         return;
       }
-      classesFound.forEach( ( match ) => {
-        setOfClasses.add( match.substring( 1, match.length ) );
-      } );
+
+      classesFound.forEach((match) => {
+        setOfClasses.add(match.substring(1, match.length));
+      });
     }
 
-    #findDocSSIndexFromURL( urlOfSS ) {
+    #findDocSSIndexFromURL(urlOfSS) {
       let scanner = 0;
       let foundIndex = null;
-      while( scanner < document.styleSheets.length && foundIndex === null ) {
-          if( document.styleSheets.item( scanner ).href == urlOfSS ) {
-              foundIndex = scanner;
-          }
-          scanner++;
+
+      while(scanner < document.styleSheets.length && foundIndex === null) {
+        if(document.styleSheets.item(scanner).href == urlOfSS) {
+          foundIndex = scanner;
+        }
+
+        scanner++;
       }
+
       return foundIndex;
     }
 
-    #getClassesUsedInSS( styleSheet ) {
-      if ( !(
-        typeof styleSheet == 'object' &&
-        styleSheet instanceof CSSStyleSheet
-       ) ) {
+    #getClassesUsedInSS(styleSheet) {
+      if (!(
+        typeof styleSheet == 'object'
+        && styleSheet instanceof CSSStyleSheet
+      )) {
         return null;
       }
+
       const setOfClassesInSS = new Set();
-      for ( let i = 0; i < styleSheet.cssRules.length; i++ ) {
-        if ( styleSheet.cssRules.item( i ) instanceof CSSStyleRule ) {
-          this.#findClassesUsedInStyleRule( styleSheet.cssRules.item( i ),
-            setOfClassesInSS );
+
+      for (let i = 0; i < styleSheet.cssRules.length; i++) {
+        if (styleSheet.cssRules.item(i) instanceof CSSStyleRule) {
+          this.#findClassesUsedInStyleRule(styleSheet.cssRules.item(i),
+            setOfClassesInSS);
         }
-        if ( styleSheet.cssRules.item( i ) instanceof CSSMediaRule ) {
-          this.#findClassesUsedInMediaRule( styleSheet.cssRules.item( i ),
-            setOfClassesInSS );
+
+        if (styleSheet.cssRules.item(i) instanceof CSSMediaRule) {
+          this.#findClassesUsedInMediaRule(styleSheet.cssRules.item(i),
+            setOfClassesInSS);
         }
       }
-      return Array.from( setOfClassesInSS ).toSorted().join( '\n' );
+
+      return Array.from(setOfClassesInSS).toSorted().join('\n');
     }
 
     #recon5tCssFromDoc( urlOfCssSrc ) {
       let allCssText = '';
+
       try {
-        const indexOfSS = this.#findDocSSIndexFromURL( urlOfCssSrc );
-        if( indexOfSS === null ) {
-          throw new Error( this.#adj4rMnkyCmdLn.getLabeledMsg( `I was unable to
-            find the requested style sheet among those loaded on the page.` ) );
+        const indexOfSS = this.#findDocSSIndexFromURL(urlOfCssSrc);
+        if (indexOfSS === null) {
+          throw new Error(this.#adj4rMnkyCmdLn.getLabeledMsg(`I was unable to
+            find the requested style sheet among those loaded on the page.`));
         }
-        const docSSRules = document.styleSheets.item( indexOfSS ).cssRules;
-        for( let index = 0; index < docSSRules.length; index++ ) {
-          allCssText += docSSRules.item( index ).cssText;
+
+        const docSSRules = document.styleSheets.item(indexOfSS).cssRules;
+        for(let index = 0; index < docSSRules.length; index++) {
+          allCssText += docSSRules.item(index).cssText;
         }
-      } catch( error ) {
-        console.error( this.#adj4rMnkyCmdLn.getLabeledMsg( error.message ) );
-        this.#adj4rMnkyCmdLn.logMsg( `Since I was unable to reconstruct the
+      } catch (error) {
+        console.error(this.#adj4rMnkyCmdLn.getLabeledMsg(error.message));
+        this.#adj4rMnkyCmdLn.logMsg(`Since I was unable to reconstruct the
           style sheet from «document.styleSheets», I suggest you manually load
           the style sheet code for further analysis into my list of dynamically
-          loaded reference style sheets.` );
+          loaded reference style sheets.`);
       }
+
       return allCssText;
     }
 
-    #sortAttrsFromSsLinks( attrsSet ) {
+    #sortAttrsFromSsLinks(attrsSet) {
       const attrs = [];
-      for( const attr of attrsSet ) {
-        attrs.push( attr );
+      for(const attr of attrsSet) {
+        attrs.push(attr);
       }
+
       return attrs.toSorted();
     }
   }
@@ -807,116 +893,134 @@ const adj4rMnkyCmdLn = ( function( iife ) {
   class DomScanner {
     #adj4rMnkyCmdLn;
 
-    constructor( adj4rMnkyCmdLn ) {
+    constructor(adj4rMnkyCmdLn) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
     }
 
-    printHeadingTextTree( maxLineLength = 100 ) {
-      const h5gs = [ ...document.querySelectorAll( 'h1, h2, h3, h4, h5, h6' ) ];
-      const h5gTree = this.#createTextTreeFromH5gArray( h5gs );
-      console.log( h5gTree.toString( maxLineLength ) );
+    printHeadingTextTree(maxLineLength = 100) {
+      const h5gs = [...document.querySelectorAll('h1, h2, h3, h4, h5, h6')];
+      const h5gTree = this.#createTextTreeFromH5gArray(h5gs);
+      console.log(h5gTree.toString(maxLineLength));
     }
 
-    #compareH5gsParents( rootI3x, p5sRef5e, p5sCur3t ) {
+    #compareH5gsParents(rootI3x, p5sRef5e, p5sCur3t) {
       let i, j;
-      for ( i = rootI3x; i < p5sRef5e.length; i++ ) {
-        for ( j = 0; j < p5sCur3t.length; j++ ) {
-          if ( p5sRef5e[ i ] == p5sCur3t[ j ] ) {
+      for (i = rootI3x; i < p5sRef5e.length; i++) {
+        for (j = 0; j < p5sCur3t.length; j++) {
+          if (p5sRef5e[i] == p5sCur3t[j]) {
             break;
           }
         }
-        if ( j == p5sCur3t.length ) {
+
+        if (j == p5sCur3t.length) {
           continue;
         }
-        if ( i != rootI3x ) {
+
+        if (i != rootI3x) {
           rootI3x = i;
         }
+
         break;
       }
 
       return rootI3x;
     }
 
-    #createTextTreeFromH5gArray( h5gs ) {
-      if ( h5gs.length == 0 ) {
+    #createTextTreeFromH5gArray(h5gs) {
+      if (h5gs.length == 0) {
         return null;
       }
-      let h5gLevel = parseInt( h5gs[ 0 ].tagName.match( /([0-9])/)[ 0 ] );
-      const rootEle3t = this.#findH5gsClosestRootEle3t( h5gs );
-      const tree = new DataTree(
-        `«${ this.#ele3tToString( rootEle3t ) }»`
-      );
-      let lastNode = tree.root.addChild(
-        `${ h5gs[ 0 ].textContent } «${ this.#ele3tToString( h5gs[ 0 ] ) }»`
-      );
+
+      let h5gLevel = parseInt(h5gs[0].tagName.match(/([0-9])/)[0]);
+      const rootEle3t = this.#findH5gsClosestRootEle3t(h5gs);
+      const tree = new DataTree(`«${this.#ele3tToString(rootEle3t)}»`);
+      let lastNode =
+        tree.root.addChild(
+          `${h5gs[0].textContent} «${this.#ele3tToString(h5gs[0])}»`
+        );
       let prevH5gLevel = h5gLevel;
-      for ( let i = 1; i < h5gs.length; i++ ) {
+
+      for (let i = 1; i < h5gs.length; i++) {
         h5gLevel = parseInt( h5gs[ i ].tagName.match( /([0-9])/)[ 0 ] );
+
         if ( h5gLevel > prevH5gLevel ) {
-          lastNode = lastNode.addChild(
-            `${ h5gs[ i ].textContent.trim() } «${ this.#ele3tToString( h5gs[ i ] ) }»`
-          );
+          lastNode =
+            lastNode.addChild(
+              `${h5gs[i].textContent.trim()} «${this.#ele3tToString(h5gs[i])}»`
+            );
         } else if ( h5gLevel == prevH5gLevel ) {
-          lastNode = lastNode.addSibling(
-            `${ h5gs[ i ].textContent.trim() } «${ this.#ele3tToString( h5gs[ i ] ) }»`
-          );
+          lastNode =
+            lastNode.addSibling(
+              `${h5gs[i].textContent.trim()} «${this.#ele3tToString(h5gs[i])}»`
+            );
         } else {
-          lastNode = this.#placeH5gUpTreeBranch( h5gs[ i ], h5gLevel, tree,
-            lastNode );
+          lastNode =
+            this.#placeH5gUpTreeBranch(h5gs[i], h5gLevel, tree, lastNode);
         }
-        console.log( `Item #${ i } processed.` );
+
+        console.log(`Item #${ i } processed.`);
         prevH5gLevel = h5gLevel;
       }
 
       return tree;
     }
 
-    #placeH5gUpTreeBranch( h5g, h5gLevel, tree, lastNode ) {
+    #placeH5gUpTreeBranch(h5g, h5gLevel, tree, lastNode) {
       let parentH5gLevel;
-      while( lastNode.parent != tree.root ) {
-        parentH5gLevel = parseInt( lastNode.parent.data.match( /«H([0-9])/)[ 1 ] );
-        if ( h5gLevel >= parentH5gLevel ) {
-          lastNode = lastNode.parent.addSibling(
-            `${ h5g.textContent.trim() } «${ this.#ele3tToString( h5g ) }»`
-          );
+
+      while(lastNode.parent != tree.root) {
+        parentH5gLevel = parseInt(lastNode.parent.data.match(/«H([0-9])/)[1]);
+        if (h5gLevel >= parentH5gLevel) {
+          lastNode =
+            lastNode.parent.addSibling(
+              `${h5g.textContent.trim()} «${this.#ele3tToString(h5g)}»`
+            );
           return lastNode;
         } else {
           lastNode = lastNode.parent;
         }
       }
-      if ( lastNode.parent == tree.root ) {
-        lastNode = tree.root.addChild(
-          `${ h5g.textContent.trim() } «${ this.#ele3tToString( h5g ) }»`
-        );
+
+      if (lastNode.parent == tree.root) {
+        lastNode =
+          tree.root.addChild(
+            `${h5g.textContent.trim()} «${this.#ele3tToString(h5g)}»`
+          );
       }
+
       return lastNode;
     }
 
-    #ele3tToString( ele3t ) {
-      const ele3tId = ele3t.id != '' ?
+    #ele3tToString(ele3t) {
+      const ele3tId =
+        ele3t.id != '' ?
         '#' + ele3t.id :
         '';
-      const ele3tClassList = ele3t.classList.length > 0 ?
+
+      const ele3tClassList =
+        ele3t.classList.length > 0 ?
         '.' + [...ele3t.classList].join( '.' ) :
         '';
+
       return ele3t.tagName + ele3tId + ele3tClassList;
     }
 
-    #findH5gsClosestRootEle3t( h5gs ) {
-      const p5sRef5e = this.#getParentsForEle3t( h5gs[ 0 ] );
+    #findH5gsClosestRootEle3t(h5gs) {
+      const p5sRef5e = this.#getParentsForEle3t(h5gs[0]);
       let p5sCur3t, rootI3x = 0;
-      for ( let i = 1; i < h5gs.length; i++ ) {
-        p5sCur3t = this.#getParentsForEle3t( h5gs[ i ] );
-        rootI3x = this.#compareH5gsParents( rootI3x, p5sRef5e, p5sCur3t );
+
+      for (let i = 1; i < h5gs.length; i++) {
+        p5sCur3t = this.#getParentsForEle3t(h5gs[ i ]);
+        rootI3x = this.#compareH5gsParents(rootI3x, p5sRef5e, p5sCur3t);
       }
 
-      return p5sRef5e[ rootI3x ];
+      return p5sRef5e[rootI3x];
     }
 
-    #getParentsForEle3t( ele3t ) {
+    #getParentsForEle3t(ele3t) {
       const parents = [];
-      while ( ele3t.parentNode !== null ) {
-        parents.push( ele3t.parentNode );
+      while (ele3t.parentNode !== null) {
+        parents.push(ele3t.parentNode);
         ele3t = ele3t.parentNode;
       }
 
@@ -925,7 +1029,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
   }
 
   class DataTree {
-    constructor( root ) {
+    constructor(root) {
       this.root = new DataTreeNode(
         root,
         0,
@@ -937,43 +1041,47 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       this.lastAdded = this.root;
     }
 
-    findFirst( data ) {
-      return this.root.findFirst( data );
+    findFirst(data) {
+      return this.root.findFirst(data);
     }
 
-    toString( maxLineLength = 100 ) {
-      let cur4Node = this.root.children[ 0 ];
+    toString(maxLineLength = 100) {
+      let cur4Node = this.root.children[0];
       let out3Prefix = '';
       let ou3tString = out3Prefix + this.root.data + '\n';
       let counter = 0;
 
-      while ( cur4Node !== undefined ) {
-        out3Prefix = out3Prefix.replace( '├──', '│  ' );
-        out3Prefix = out3Prefix.replace( '└──', '   ' );
-        if ( cur4Node.getNextSibling() === undefined ) {
+      while (cur4Node !== undefined) {
+        out3Prefix = out3Prefix.replace('├──', '│  ');
+        out3Prefix = out3Prefix.replace('└──', '   ');
+        
+        if (cur4Node.getNextSibling() === undefined) {
           out3Prefix += '└──';
         } else {
           out3Prefix += '├──';
         }
-        ou3tString += this.#nodeToString( cur4Node, out3Prefix, maxLineLength );
-        if ( cur4Node.children.length ) {
+
+        ou3tString += this.#nodeToString(cur4Node, out3Prefix, maxLineLength);
+
+        if (cur4Node.children.length) {
           cur4Node = cur4Node.children[0];
-        } else if ( cur4Node.getNextSibling() !== undefined ) {
+        } else if (cur4Node.getNextSibling() !== undefined) {
           cur4Node = cur4Node.getNextSibling();
-          out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+          out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3);
         } else {
           cur4Node = cur4Node.parent;
-          out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+          out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3);
+
           while (
-            cur4Node !== undefined &&
-            cur4Node.getNextSibling() === undefined
+            cur4Node !== undefined
+            && cur4Node.getNextSibling() === undefined
           ) {
             cur4Node = cur4Node.parent;
-            out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+            out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3);
           }
-          if ( cur4Node !== undefined ) {
+          if (cur4Node !== undefined) {
             cur4Node = cur4Node.getNextSibling();
-            out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3 );
+            out3Prefix = out3Prefix.slice(0, out3Prefix.length - 3);
           }
         }
       }
@@ -981,96 +1089,99 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       return ou3tString;
     }
 
-    #nodeToString( cur4Node, out3Prefix, maxLineLength ) {
+    #nodeToString(cur4Node, out3Prefix, maxLineLength) {
       let ou3tString;
       let maxDataLength = maxLineLength - out3Prefix.length;
-      if ( maxDataLength <= 40 || cur4Node.data.length <= maxDataLength ) {
+
+      if (maxDataLength <= 40 || cur4Node.data.length <= maxDataLength) {
         ou3tString = out3Prefix + cur4Node.data + '\n';
 
         return ou3tString;
       }
-      ou3tString = this.#wrapStrDataAtLength( cur4Node.data, maxDataLength );
-      ou3tString = ou3tString.replace( /^(.)/, out3Prefix + '$1' );
-      out3Prefix = out3Prefix.replace( '├──', '│  ' ).replace( '└──', '   ' );
-      ou3tString = ou3tString.replace( /(\n)(.)/g, '$1' + out3Prefix + '$2' );
+
+      ou3tString = this.#wrapStrDataAtLength(cur4Node.data, maxDataLength);
+      ou3tString = ou3tString.replace(/^(.)/, out3Prefix + '$1');
+      out3Prefix = out3Prefix.replace('├──', '│  ').replace( '└──', '   ');
+      ou3tString = ou3tString.replace(/(\n)(.)/g, '$1' + out3Prefix + '$2');
+
       return ou3tString + '\n';
     }
 
     #wrapStrDataAtLength( strData, len ) {
-
       // ·> Use a default line wrapping length.                               <·
-      if ( typeof len == 'undefined' ) {
+      if (typeof len == 'undefined') {
         len = 80;
       }
 
       // ·> Before proceeding, ensure the line wrapping length is a valid      ·
       // ·  number if possible. If not, just return the unwrapped message.    <·
-      if ( typeof len != 'number' && Number.isNaN( parseInt( len ) ) ) {
+      if (typeof len != 'number' && Number.isNaN(parseInt(len))) {
         return strData;
-      } else if ( typeof len != 'number' ) {
-        len = parseInt( len );
+      } else if (typeof len != 'number') {
+        len = parseInt(len);
       }
 
       // ·> Enforce minimum and maximum line wrapping lengths to ensure a      ·
       // ·  clean looking result within the console.                          <·
-      if ( len < 40 ) {
+      if (len < 40) {
         len = 40;
-      } else if ( len > 120 ) {
+      } else if (len > 120) {
         len = 120;
       }
 
       // ·> Encode any newlines that happen to be present in the message as    ·
       // ·  greek capital lambda characters.                                  <·
-      strData = strData.replace( '\n', ' \\n ' );
+      strData = strData.replace('\n', ' \\n ');
 
       // ·> Apply line wrapping to the message using a reverse scanning tech-  ·
       // .  nique to identify appropriate break points for line wrapping.     <·
       let w5dStrData = '';
       let startI3x = 0;
       let scanI3x;
-      while ( startI3x < strData.length ) {
+      while (startI3x < strData.length) {
         scanI3x = startI3x + len;
 
         // ·> Start scanning at a distance of the line length limit away from  ·
         // ·  the starting index, and work backward until a break-point char-  ·
         // ·  acter is encountered.                                           <·
         while (
-          scanI3x < strData.length && scanI3x > startI3x &&
-          strData.charAt( scanI3x ).match( /[-–— /\\«»()[\]{}]/ ) === null
+          scanI3x < strData.length
+          && scanI3x > startI3x
+          && strData.charAt(scanI3x).match(/[-–— /\\«»()[\]{}]/) === null
         ) {
           scanI3x--;
         }
 
         // ·> Handle edge cases where scanning found no break point or reached ·
         // ·  the end of the full unwrapped message.                          <·
-        if ( scanI3x == startI3x ) {
+        if (scanI3x == startI3x) {
           scanI3x = scanI3x + len;
-        } else if ( scanI3x > strData.length ) {
+        } else if (scanI3x > strData.length) {
           scanI3x = strData.length;
         }
 
         // ·> Unless we are working on the first line of the wrapped message,  ·
         // ·  insert a newline character before appending the next portion of  ·
         // ·  the wrapped message just identified.                            <·
-        if ( startI3x != 0 ) {
+        if (startI3x != 0) {
           w5dStrData += '\n';
         }
 
         // ·> Avoid beginning lines of a wrapped message with a space char-    ·
         // ·  acter.                                                          <·
-        if ( startI3x != 0 && strData.charAt( startI3x ) == ' ' ) {
+        if (startI3x != 0 && strData.charAt(startI3x) == ' ') {
           startI3x++;
         }
 
         // ·> Append the next portion of the wrapped message.                 <·
-        w5dStrData += strData.substring( startI3x, scanI3x );
+        w5dStrData += strData.substring(startI3x, scanI3x);
 
         // ·> Prepare to scan for the next break point in the full, unwrapped  ·
         // ·  message.                                                        <·
         startI3x = scanI3x;
         while (
-          startI3x < strData.length &&
-          strData.charAt( startI3x ) == ' '
+          startI3x < strData.length
+          && strData.charAt(startI3x) == ' '
         ) {
           startI3x++;
         }
@@ -1081,7 +1192,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
   }
 
   class DataTreeNode {
-    constructor( data, index, depth, parentNode, parentTree ) {
+    constructor(data, index, depth, parentNode, parentTree) {
       this.data = data;
       this.index = index;
       this.depth = depth;
@@ -1090,7 +1201,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       this.children = [];
     }
 
-    addChild( data ) {
+    addChild(data) {
       const newNode = new DataTreeNode(
         data,
         this.children.length,
@@ -1098,7 +1209,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
         this,
         this.tree
       );
-      this.children.push( newNode );
+
+      this.children.push(newNode);
       this.tree.lastAdded = newNode;
 
       return newNode;
@@ -1107,7 +1219,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     addSibling( data ) {
       let newNode = undefined;
 
-      if ( this.parent !== undefined ) {
+      if (this.parent !== undefined) {
         newNode = new DataTreeNode(
           data,
           this.parent.children.length,
@@ -1115,7 +1227,8 @@ const adj4rMnkyCmdLn = ( function( iife ) {
           this.parent,
           this.tree
         );
-        this.parent.children.push( newNode );
+
+        this.parent.children.push(newNode);
         this.tree.lastAdded = newNode;
       }
 
@@ -1125,11 +1238,11 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     findFirst( data ) {
       let result = undefined;
 
-      if ( data == this.data ) {
+      if (data == this.data) {
         result = this;
-      } else if ( this.children.length ) {
-        for ( let i = 0; !result && i < this.children.length; i++ ) {
-          result = this.children[ i ].findFirst( data );
+      } else if (this.children.length) {
+        for (let i = 0; !result && i < this.children.length; i++) {
+          result = this.children[i].findFirst(data);
         }
       }
 
@@ -1140,12 +1253,12 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       let next;
 
       if (
-        this.parent === undefined ||
-        this.index >= this.parent.children.length - 1
+        this.parent === undefined
+        || this.index >= this.parent.children.length - 1
       ) {
         next = undefined;
       } else {
-        next = this.parent.children[ this.index + 1 ];
+        next = this.parent.children[this.index + 1];
       }
 
       return next;
@@ -1155,9 +1268,9 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       const path = [];
       let curNode = this.parent;
 
-      path.splice( 0, 0, this.index );
-      for ( let i = this.depth - 1; i > 0; i-- ) {
-        path.splice( 0, 0, curNode.index);
+      path.splice(0, 0, this.index);
+      for (let i = this.depth - 1; i > 0; i--) {
+        path.splice(0, 0, curNode.index);
         curNode = curNode.parent;
       }
 
@@ -1167,10 +1280,10 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     getPreviousSibling() {
       let previous;
 
-      if ( this.index == 0 ) {
+      if (this.index == 0) {
         previous = undefined;
       } else {
-        previous = this.parent.children[ this.index - 1 ];
+        previous = this.parent.children[this.index - 1];
       }
 
       return previous;
@@ -1184,25 +1297,25 @@ const adj4rMnkyCmdLn = ( function( iife ) {
     // ·  web page the user is actively browsing.                             <·
     const elapsedTime = new Date() - loadingStartTime;
     if (
-      !document.hasFocus() &&
-      elapsedTime < iife.loadWaitTime &&
-      typeof window.adj4rMnkyCmdLn == 'undefined'
+      !document.hasFocus()
+      && elapsedTime < iife.loadWaitTime
+      && typeof window.adj4rMnkyCmdLn == 'undefined'
     ) {
-      console.log( 'Waiting ' + iife.loadWaitTime + 'ms for the document to ' +
-        'receive focus so the AdjusterMonkey utility script can be loaded.' );
-      window.setTimeout( retryLoadingScript, 1000, loadingStartTime,
-        instCreatedMsg, instNotAddedMsg );
+      console.log('Waiting ' + iife.loadWaitTime + 'ms for the document to ' +
+        'receive focus so the AdjusterMonkey utility script can be loaded.');
+      window.setTimeout(retryLoadingScript, 1000, loadingStartTime,
+        instCreatedMsg, instNotAddedMsg);
       return;
     }
 
     // ·> Create instance of the AdjusterMonkey command-line utility inter-    ·
     // ·  face and add it safely to the window object for global access.      <·
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
-    if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
+    if (typeof window.adj4rMnkyCmdLn == 'undefined') {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
-      adj4rMnkyCmdLn.logMsg( instCreatedMsg )
+      adj4rMnkyCmdLn.logMsg(instCreatedMsg)
     } else {
-      adj4rMnkyCmdLn.logMsg( instNotAddedMsg );
+      adj4rMnkyCmdLn.logMsg(instNotAddedMsg);
     }
   }
 
@@ -1211,6 +1324,7 @@ const adj4rMnkyCmdLn = ( function( iife ) {
       use with the DevTools command-line has been added to the window object
       associated with the document “${document.title}” at location
       “${window.location.hostname}.”`;
+
     const instNotAddedMsg = `When attempting to add an AdjusterMonkey instance
       (v${iife.version}) for use with the DevTools command-line interface to
       the window object, it was found that the adj4rMnkyCmdLn property was
@@ -1219,32 +1333,32 @@ const adj4rMnkyCmdLn = ( function( iife ) {
 
     // ·> Only proceed with loading AdjusterMonkey if the window represents a  ·
     // ·  web page the user is actively browsing.                             <·
-    if ( typeof document == 'undefined' || typeof document.hasFocus != 'function' ) {
+    if (typeof document == 'undefined' || typeof document.hasFocus != 'function') {
       return;
-    } else if ( !document.hasFocus() && document.title.trim() != "" ) {
+    } else if (!document.hasFocus() && document.title.trim() != "") {
       const currentTime = new Date();
       window.setTimeout( retryLoadingScript, 1000, currentTime, instCreatedMsg,
         instNotAddedMsg );
       return;
-    } else if ( document.title.trim() == "" ) {
+    } else if (document.title.trim() == "") {
       return;
     }
 
     // ·> Create instance of the AdjusterMonkey command-line utility inter-    ·
     // ·  face and add it safely to the window object for global access.      <·
     const adj4rMnkyCmdLn = new Adj4rMnkyCmdLn();
-    if ( typeof window.adj4rMnkyCmdLn == 'undefined' ) {
+    if (typeof window.adj4rMnkyCmdLn == 'undefined') {
       window.adj4rMnkyCmdLn = adj4rMnkyCmdLn;
-      adj4rMnkyCmdLn.logMsg( instCreatedMsg );
+      adj4rMnkyCmdLn.logMsg(instCreatedMsg);
     } else {
-      adj4rMnkyCmdLn.logMsg( instNotAddedMsg );
+      adj4rMnkyCmdLn.logMsg(instNotAddedMsg);
     }
 
     return adj4rMnkyCmdLn;
   }
 
   return main();
-} )( {
+})({
   version: '0.12.0->rc+0.1.0',
   loadWaitTime: 30000,
-} );
+});
