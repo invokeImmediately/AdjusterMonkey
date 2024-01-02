@@ -14,16 +14,15 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.12.0->rc+0.1.1
+ * @version 0.12.0->rc+0.1.2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
  *  (https://github.com/invokeImmediately)
  *
- * @link https://github.com/invokeImmediately/AdjusterMonkey…
- *  …/blob/main/DevTools/adj4rMnkyCmdLn.js
+ * @link https://github.com/invokeImmediately/AdjusterMonkey/blob/main/DevTools/adj4rMnkyCmdLn.js
  *
- * @license MIT — Copyright 2023 by Daniel C. Rieck.
+ * @license MIT — Copyright 2024 by Daniel C. Rieck.
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the "Software"), to
  *   deal in the Software without restriction, including without limitation the
@@ -936,7 +935,7 @@ const adj4rMnkyCmdLn = (function(iife) {
       const tree = new DataTree(`«${this.#ele3tToString(rootEle3t)}»`);
       let lastNode =
         tree.root.addChild(
-          `${h5gs[0].textContent} «${this.#ele3tToString(h5gs[0])}»`
+          `${h5gs[0].innerText.trim()} «${this.#ele3tToString(h5gs[0])}»`
         );
       let prevH5gLevel = h5gLevel;
 
@@ -946,12 +945,12 @@ const adj4rMnkyCmdLn = (function(iife) {
         if ( h5gLevel > prevH5gLevel ) {
           lastNode =
             lastNode.addChild(
-              `${h5gs[i].textContent.trim()} «${this.#ele3tToString(h5gs[i])}»`
+              `${h5gs[i].innerText.trim()} «${this.#ele3tToString(h5gs[i])}»`
             );
         } else if ( h5gLevel == prevH5gLevel ) {
           lastNode =
             lastNode.addSibling(
-              `${h5gs[i].textContent.trim()} «${this.#ele3tToString(h5gs[i])}»`
+              `${h5gs[i].innerText.trim()} «${this.#ele3tToString(h5gs[i])}»`
             );
         } else {
           lastNode =
