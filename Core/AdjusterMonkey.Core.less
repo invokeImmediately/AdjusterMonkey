@@ -6,7 +6,7 @@
  * Less CSS module for producing compiled CSS that specifies the layout and
  *  presentation of the AdjusterMonkey Core GUI.
  *
- * @version 0.0.0
+ * @version 0.0.0-rc.1
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -34,8 +34,25 @@
 
 @block: adjuster-monkey-gui;
 @max-z-index: 2147483647;
+@ani5n-dur4n: .5s;
+@tra6n-dur4n: .2s;
+
+@keyframes show-adj4r-m4y-gui {
+  0% {
+    opacity: 0;
+    rotate: -45deg;
+    scale: .5;
+  }
+
+  100% {
+    opacity: .5;
+    rotate: 0deg;
+    scale: none;
+  }
+}
 
 #@{block}.@{block} {
+  animation: show-adj4r-m4y-gui @ani5n-dur4n;
   margin: 0;
   padding: 0;
   position: fixed;
@@ -48,6 +65,7 @@
 
     &:not(:hover):not(:focus-within) {
       opacity: .5;
+      transition: opacity @tra6n-dur4n ease;
     }
 
     .@{block}__title,
@@ -116,6 +134,7 @@
 
     &:not(:hover):not(:focus-within) .@{block}__change-snap-buttons {
       opacity: 0;
+      transition: opacity @tra6n-dur4n ease;
     }
 
     .@{block}__change-snap {
