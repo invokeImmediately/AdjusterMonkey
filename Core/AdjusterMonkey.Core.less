@@ -6,7 +6,7 @@
  * Less CSS module for producing compiled CSS that specifies the layout and
  *  presentation of the AdjusterMonkey Core GUI.
  *
- * @version 0.0.0-rc.1
+ * @version 0.0.0-rc.2
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -53,15 +53,18 @@
 
 #@{block}.@{block} {
   animation: show-adj4r-m4y-gui @ani5n-dur4n;
+  bottom: auto;
+  left: 50%;
   margin: 0;
   padding: 0;
   position: fixed;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%);
   z-index: @max-z-index;
 
-  &:not(.@{block}--expanded) {
+  &:not(.@{block}--expand) {
     background: transparent;
-    right: 2rem;
-    bottom: 2rem;
 
     &:not(:hover):not(:focus-within) {
       opacity: .5;
@@ -109,17 +112,11 @@
 
       &:after {
         height: 14px;
-        left: 50%;
-        top: 0;
-        transform: translate(-50%, -100%);
         width: 28px;
       }
 
       &:before {
         height: 28px;
-        left: 0;
-        top: 50%;
-        transform: translate(-100%, -50%);
         width: 14px;
       }
 
@@ -160,6 +157,62 @@
       box-shadow: 0 0 1px 1px rgba(255,255,255,.5), 0 0 8px 2px rgba(255,255,255,.25);
       color: black;
     }
+  }
+
+  &--snap-to-lower-left {
+    bottom: 2rem;
+    left: 2rem;
+    right: auto;
+    top: auto;
+    transform: translate(0, 0);
+
+    .@{block}__change-snap-buttons {
+      &:after {
+       left: 50%;
+       top: 0;
+       transform: translate(-50%, -100%);
+      }
+
+      &:before {
+       left: 0;
+       top: 50%;
+       transform: translate(-100%, -50%);
+      }
+    }
+
+    .@{block}__change-snap-horizontally {
+      right: 0;
+      top: 50%;
+      transform: translate(150%, -50%);
+    }
+
+    .@{block}__change-snap-vertically {
+      left: 50%;
+      top: 0;
+      transform: translate(-50%, -150%);
+    }
+  }
+
+  &--snap-to-lower-right {
+    bottom: 2rem;
+    left: auto;
+    right: 2rem;
+    top: auto;
+    transform: translate(0, 0);
+
+    .@{block}__change-snap-buttons {
+      &:after {
+       left: 50%;
+       top: 0;
+       transform: translate(-50%, -100%);
+      }
+
+      &:before {
+       left: 0;
+       top: 50%;
+       transform: translate(-100%, -50%);
+      }
+    }
 
     .@{block}__change-snap-horizontally {
       left: 0;
@@ -171,6 +224,74 @@
       left: 50%;
       top: 0;
       transform: translate(-50%, -150%);
+    }
+  }
+
+  &--snap-to-upper-left {
+    bottom: auto;
+    left: 2rem;
+    right: auto;
+    top: 2rem;
+    transform: translate(0, 0);
+
+    .@{block}__change-snap-buttons {
+      &:after {
+       bottom: 0;
+       left: 50%;
+       transform: translate(-50%, 0%);
+      }
+
+      &:before {
+       right: 0;
+       top: 50%;
+       transform: translate(100%, -50%);
+      }
+    }
+
+    .@{block}__change-snap-horizontally {
+      right: 0;
+      top: 50%;
+      transform: translate(150%, -50%);
+    }
+
+    .@{block}__change-snap-vertically {
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 100%);
+    }
+  }
+
+  &--snap-to-upper-right {
+    bottom: auto;
+    left: auto;
+    right: 2rem;
+    top: 2rem;
+    transform: translate(0, 0);
+
+    .@{block}__change-snap-buttons {
+      &:after {
+       left: 50%;
+       bottom: 0;
+       transform: translate(-50%, 0%);
+      }
+
+      &:before {
+       left: 0;
+       top: 50%;
+       transform: translate(-100%, -50%);
+      }
+    }
+
+    .@{block}__change-snap-horizontally {
+      left: 0;
+      top: 50%;
+      transform: translate(-150%, -50%);
+    }
+
+    .@{block}__change-snap-vertically {
+      bottom: 0;
+      left: 50%;
+      transform: translate(-50%, 100%);
     }
   }
 }

@@ -11,7 +11,7 @@
  *  to a target website or web app. Includes UI controls to expose core commands
  *  for web browser enhancements that are useful for work with any website.
  *
- * @version 0.1.0->+0.3.1
+ * @version 0.1.0-0.4.1
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -38,22 +38,22 @@
  ******************************************************************************/
 
 // ·> Declare «AdjusterMonkeyGui» class.                                      <·
-const AdjusterMonkeyGui = (function(iifeSet4s) {
+const AdjusterMonkeyGui = (function(iife) {
   'use strict';
 
   class AdjusterMonkeyGui {
-    guiVersion = iifeSet4s.guiVersion;
+    guiVersion = iife.guiVersion;
     bemCssClasses = {
       guiBlock: '',
       guiElements: {},
       guiModifiers: {},
     };
-    domInsertionPointSelector = iifeSet4s.selectors.domInsertionPoint;
-    elementIds = iifeSet4s.elementIds;
-    fieldNames = iifeSet4s.fieldNames;
-    logoDetails = iifeSet4s.logoDetails;
-    targetApplication = iifeSet4s.targetApplication;
-    #guiElements = {};
+    domInsertionPointSelector = iife.selectors.domInsertionPoint;
+    elementIds = iife.elementIds;
+    fieldNames = iife.fieldNames;
+    logoDetails = iife.logoDetails;
+    targetApplication = iife.targetApplication;
+    #guiEl4ts = {};
     #parentElement;
 
     constructor(guiSettings) {
@@ -69,15 +69,26 @@ const AdjusterMonkeyGui = (function(iifeSet4s) {
 
     #applySettingsToGui(settings) {
       this.domInsertionPointSelector =
-          this.#setPropertySafely(settings.domInsertionPointSelector,
-          this.domInsertionPointSelector);
+        this.#setPropertySafely(settings.domInsertionPointSelector,
+        this.domInsertionPointSelector);
       this.#setBemCssClasses(settings.bemCssClasses);
       this.guiVersion =
-          this.#setPropertySafely(settings.guiVersion, this.guiVersion);
+        this.#setPropertySafely(settings.guiVersion, this.guiVersion);
       this.targetApplication =
-          this.#setPropertySafely(settings.targetApplication,
-          this.targetApplication);
-      }
+        this.#setPropertySafely(settings.targetApplication,
+        this.targetApplication);
+    }
+
+    #collectReferencesToGuiElements() {
+      this.#guiEl4ts.changeSnapHor9 =
+        this.#guiEl4ts.gui.querySelector(
+          `.${this.bemCssClasses.guiElements.changeSnapHorizontally}`
+        );
+      this.#guiEl4ts.changeSnapVer7 =
+        this.#guiEl4ts.gui.querySelector(
+          `.${this.bemCssClasses.guiElements.changeSnapVertically}`
+        );
+    }
 
     #convertCamelcaseToSnakeCase( inputString ) {
       if (typeof inputString !== 'string') {
@@ -110,42 +121,39 @@ const AdjusterMonkeyGui = (function(iifeSet4s) {
     }
 
     #createGuiElement() {
-      const $gui = document.createElement( 'form' );
+      const $gui = document.createElement('form');
       $gui.id = this.elementIds.adjusterMonkeyGui;
-      $gui.classList.add( this.bemCssClasses.guiBlock );
-      $gui.innerHTML = this.#generateInnerHtmlForGui();
-
-      // TODO: Generate selectors to internal DOM Elements // this.#generateElementSelectors();
-      // TODO: Populate references to elements within the GUI // this.#populateDOMElementReferences();
-      // TODO: Set up event handlers // this.#registerEventHandlers();
+      $gui.classList.add(this.bemCssClasses.guiBlock,
+        this.bemCssClasses.guiModifiers.snapToLowerRight);
+      $gui.innerHTML = this.#generateHtmlForGui();
       return $gui;
     }
 
     #createGuiSSElement() {
     }
 
-    #generateInnerHtmlForGui() {
+    #generateHtmlForGui() {
       return `<header class="${this.bemCssClasses.guiElements.header}">
-  <figure class="${this.bemCssClasses.guiElements.logoPlacementArea}">
-    <img src="data:image/png;base64,${this.logoDetails.base64Enc4g}" width="${this.logoDetails.width}" height="${this.logoDetails.height}" alt="AdjusterMonkey logo." class="${this.bemCssClasses.guiElements.logo}">
-    <h2 class="${this.bemCssClasses.guiElements.title}">AdjusterMonkey: ${this.targetApplication} Enhancer (v${this.guiVersion})</h2>
-    <p class="${this.bemCssClasses.guiElements.tagline}">Enhancing the web using TamperMonkey scripts.</p>
-  </figure>
-</header>
-<fieldset id="${this.elementIds.changeSnapButtons}" class="${this.bemCssClasses.guiElements.changeSnapButtons}">
-  <legend>Change snap position:</legend>
-  <button id="${this.elementIds.changeSnapHorizontally}" class="${this.bemCssClasses.guiElements.changeSnap} ${this.bemCssClasses.guiElements.changeSnapHorizontally}" type="button" aria-label="Swap horizontal snap position to left edge.">←</button>
-  <button id="${this.elementIds.changeSnapVertically}" class="${this.bemCssClasses.guiElements.changeSnap} ${this.bemCssClasses.guiElements.changeSnapVertically}" type="button" aria-label="Swap vertical snap position to top edge.">↑</button>
-</fieldset>
-<fieldset id="${this.elementIds.commandsList}" class="${this.bemCssClasses.guiElements.commandsList}">
-  <legend>Core commands:</legend>
-  <button id="${this.elementIds.executeAboutAdjusterMonkey}" class="${this.bemCssClasses.guiElements.command}" type="button"><b>About</b> AdjusterMonkey</button>
-  <button id="${this.elementIds.executeGetReferenceToPage}" class="${this.bemCssClasses.guiElements.command}" type="button">Get a linked <b>reference</b> to current page</button>
-</fieldset>
-<button id="${this.elementIds.collapseGui}" class="${this.bemCssClasses.guiElements.command}" type="button" aria-label="Collapse AdjusterMonkey.">×</button>`;
+        <figure class="${this.bemCssClasses.guiElements.logoPlacementArea}">
+          <img src="data:image/png;base64,${this.logoDetails.base64Enc4g}" width="${this.logoDetails.width}" height="${this.logoDetails.height}" alt="AdjusterMonkey logo." class="${this.bemCssClasses.guiElements.logo}">
+          <h2 class="${this.bemCssClasses.guiElements.title}">AdjusterMonkey: ${this.targetApplication} Enhancer (v${this.guiVersion})</h2>
+          <p class="${this.bemCssClasses.guiElements.tagline}">Enhancing the web using TamperMonkey scripts.</p>
+        </figure>
+        </header>
+        <fieldset id="${this.elementIds.changeSnapButtons}" class="${this.bemCssClasses.guiElements.changeSnapButtons}">
+          <legend>Change snap position:</legend>
+          <button id="${this.elementIds.changeSnapHorizontally}" class="${this.bemCssClasses.guiElements.changeSnap} ${this.bemCssClasses.guiElements.changeSnapHorizontally}" type="button" aria-label="Swap horizontal snap position to left edge.">←</button>
+          <button id="${this.elementIds.changeSnapVertically}" class="${this.bemCssClasses.guiElements.changeSnap} ${this.bemCssClasses.guiElements.changeSnapVertically}" type="button" aria-label="Swap vertical snap position to top edge.">↑</button>
+        </fieldset>
+        <fieldset id="${this.elementIds.commandsList}" class="${this.bemCssClasses.guiElements.commandsList}">
+          <legend>Core commands:</legend>
+          <button id="${this.elementIds.executeAboutAdjusterMonkey}" class="${this.bemCssClasses.guiElements.command}" type="button"><b>About</b> AdjusterMonkey</button>
+          <button id="${this.elementIds.executeGetReferenceToPage}" class="${this.bemCssClasses.guiElements.command}" type="button">Get a linked <b>reference</b> to current page</button>
+        </fieldset>
+        <button id="${this.elementIds.collapseGui}" class="${this.bemCssClasses.guiElements.command}" type="button" aria-label="Collapse AdjusterMonkey.">×</button>`;
     }
 
-    #generateStyleSheetForGui() {
+    #generateSSForGui() {
     }
 
     #insertGuiIntoDom() {
@@ -158,20 +166,27 @@ const AdjusterMonkeyGui = (function(iifeSet4s) {
         this.#parentElement = $insertionPoint;
       }
 
-      this.#guiElements.gui = this.#createGuiElement();
-      this.#parentElement.append(this.#guiElements.gui);
+      this.#guiEl4ts.gui = this.#createGuiElement();
+      this.#parentElement.append(this.#guiEl4ts.gui);
+
+      // TODO: Populate references to elements within the GUI
+      this.#collectReferencesToGuiElements();
+
+      // TO-DO: Set up event handlers
+      this.#registerEventHandlers();
     }
 
     #insertGuiSSIntoDom() {
-      const $insertionPoint =
-        document.querySelector(this.domInsertionPointSelector);
+      // TO-DO: Finish writing function
+      // const $insertionPoint =
+      //   document.querySelector(this.domInsertionPointSelector);
 
-      if ($insertionPoint === null) {
-        return;
-      }
+      // if ($insertionPoint === null) {
+      //   return;
+      // }
 
-      this.#guiElements.gui = this.#createGuiElement();
-      this.#parentElement.append( this.#guiElements.gui );
+      // this.#guiElements.gui = this.#createGuiElement();
+      // this.#parentElement.append( this.#guiElements.gui );
     }
 
     #isCharacterUppercase( character ) {
@@ -183,10 +198,21 @@ const AdjusterMonkeyGui = (function(iifeSet4s) {
       return character.match( regExTest );
     }
 
+    #registerEventHandlers() {
+      this.#reg4rChangeSnapE3tH6s();
+    }
+
+    #reg4rChangeSnapE3tH6s() {
+      this.#guiEl4ts.changeSnapHor9.addEventListener('click',
+        this.changeHorizontalSnapPosition.bind(this));
+      this.#guiEl4ts.changeSnapVer7.addEventListener('click',
+        this.changeVerticalSnapPosition.bind(this));
+    }
+
     #setBemCssClasses( bemCssClasses ) {
       this.bemCssClasses.guiBlock =
         this.#setPropertySafely(bemCssClasses.guiBlock,
-        iifeSet4s.bemCssClasses.guiBlock);
+        iife.bemCssClasses.guiBlock);
 
       if (
         !(
@@ -219,69 +245,69 @@ const AdjusterMonkeyGui = (function(iifeSet4s) {
       this.bemCssClasses.guiElements.changeSnap =
         blockPrefix + this.#setPropertySafely(
           classes.changeSnap,
-          iifeSet4s.bemCssClasses.guiElements.changeSnap
+          iife.bemCssClasses.guiElements.changeSnap
         );
 
-      console.log(iifeSet4s.bemCssClasses.guiElements.changeSnap);
+      console.log(iife.bemCssClasses.guiElements.changeSnap);
       this.bemCssClasses.guiElements.changeSnapButtons =
         blockPrefix + this.#setPropertySafely(
           classes.changeSnapButtons,
-          iifeSet4s.bemCssClasses.guiElements.changeSnapButtons
+          iife.bemCssClasses.guiElements.changeSnapButtons
         );
 
       this.bemCssClasses.guiElements.changeSnapHorizontally =
         blockPrefix + this.#setPropertySafely(
           classes.changeSnapHorizontally,
-          iifeSet4s.bemCssClasses.guiElements.changeSnapHorizontally
+          iife.bemCssClasses.guiElements.changeSnapHorizontally
         );
 
       this.bemCssClasses.guiElements.changeSnapVertically =
         blockPrefix + this.#setPropertySafely(
           classes.changeSnapVertically,
-          iifeSet4s.bemCssClasses.guiElements.changeSnapVertically
+          iife.bemCssClasses.guiElements.changeSnapVertically
         );
 
       this.bemCssClasses.guiElements.command =
         blockPrefix + this.#setPropertySafely(
           classes.command,
-          iifeSet4s.bemCssClasses.guiElements.command
+          iife.bemCssClasses.guiElements.command
         );
 
       this.bemCssClasses.guiElements.commandsList =
         blockPrefix + this.#setPropertySafely(
           classes.commandsList,
-          iifeSet4s.bemCssClasses.guiElements.commandsList
+          iife.bemCssClasses.guiElements.commandsList
         );
 
       this.bemCssClasses.guiElements.header =
         blockPrefix + this.#setPropertySafely(
           classes.header,
-          iifeSet4s.bemCssClasses.guiElements.header
+          iife.bemCssClasses.guiElements.header
         );
 
       this.bemCssClasses.guiElements.logo =
         blockPrefix + this.#setPropertySafely(
           classes.logo,
-          iifeSet4s.bemCssClasses.guiElements.logo
+          iife.bemCssClasses.guiElements.logo
         );
 
       this.bemCssClasses.guiElements.logoPlacementArea =
         blockPrefix + this.#setPropertySafely(
           classes.logoPlacementArea,
-          iifeSet4s.bemCssClasses.guiElements.logoPlacementArea
+          iife.bemCssClasses.guiElements.logoPlacementArea
         );
 
       this.bemCssClasses.guiElements.tagline =
         blockPrefix + this.#setPropertySafely(
           classes.tagline,
-          iifeSet4s.bemCssClasses.guiElements.tagline
+          iife.bemCssClasses.guiElements.tagline
         );
 
 
       this.bemCssClasses.guiElements.title =
         blockPrefix + this.#setPropertySafely(
           classes.title,
-          iifeSet4s.bemCssClasses.guiElements.title
+          iife.bemCssClasses.guiElements.title
         );
     }
 
@@ -291,31 +317,31 @@ const AdjusterMonkeyGui = (function(iifeSet4s) {
       this.bemCssClasses.guiModifiers.expanded =
         blockPrefix + this.#setPropertySafely(
           classes.expanded,
-          iifeSet4s.bemCssClasses.guiModifiers.expanded
+          iife.bemCssClasses.guiModifiers.expanded
         );
 
       this.bemCssClasses.guiModifiers.snapToLowerLeft =
         blockPrefix + this.#setPropertySafely(
           classes.snapToLowerLeft,
-          iifeSet4s.bemCssClasses.guiModifiers.snapToLowerLeft
+          iife.bemCssClasses.guiModifiers.snapToLowerLeft
         );
 
       this.bemCssClasses.guiModifiers.snapToLowerRight =
         blockPrefix + this.#setPropertySafely(
           classes.snapToLowerRight,
-          iifeSet4s.bemCssClasses.guiModifiers.snapToLowerRight
+          iife.bemCssClasses.guiModifiers.snapToLowerRight
         );
 
       this.bemCssClasses.guiModifiers.snapToUpperLeft =
         blockPrefix + this.#setPropertySafely(
           classes.snapToUpperLeft,
-          iifeSet4s.bemCssClasses.guiModifiers.snapToUpperLeft
+          iife.bemCssClasses.guiModifiers.snapToUpperLeft
         );
 
       this.bemCssClasses.guiModifiers.snapToUpperRight =
         blockPrefix + this.#setPropertySafely(
           classes.snapToUpperRight,
-          iifeSet4s.bemCssClasses.guiModifiers.snapToUpperRight
+          iife.bemCssClasses.guiModifiers.snapToUpperRight
         );
     }
 
@@ -340,46 +366,69 @@ const AdjusterMonkeyGui = (function(iifeSet4s) {
       }
     }
 
+    changeHorizontalSnapPosition() {
+      console.log('Adjuster Monkey horizontal toggle triggered.');
+      const classes = this.#guiEl4ts.gui.classList;
+      if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToLowerLeft)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToLowerLeft);
+        classes.add(this.bemCssClasses.guiModifiers.snapToLowerRight);
+        this.#guiEl4ts.changeSnapHor9.innerText = '←';
+      } else if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToLowerRight)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToLowerRight);
+        classes.add(this.bemCssClasses.guiModifiers.snapToLowerLeft);
+        this.#guiEl4ts.changeSnapHor9.innerText = '→';
+      } else if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToUpperLeft)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToUpperLeft);
+        classes.add(this.bemCssClasses.guiModifiers.snapToUpperRight);
+        this.#guiEl4ts.changeSnapHor9.innerText = '←';
+      } else if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToUpperRight)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToUpperRight);
+        classes.add(this.bemCssClasses.guiModifiers.snapToUpperLeft);
+        this.#guiEl4ts.changeSnapHor9.innerText = '→';
+      }
+    }
+
+    changeVerticalSnapPosition() {
+      console.log('Adjuster Monkey vertical toggle triggered.');
+      const classes = this.#guiEl4ts.gui.classList;
+      if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToLowerLeft)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToLowerLeft);
+        classes.add(this.bemCssClasses.guiModifiers.snapToUpperLeft);
+        this.#guiEl4ts.changeSnapVer7.innerText = '↓';
+      } else if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToUpperLeft)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToUpperLeft);
+        classes.add(this.bemCssClasses.guiModifiers.snapToLowerLeft);
+        this.#guiEl4ts.changeSnapVer7.innerText = '↑';
+      } else if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToLowerRight)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToLowerRight);
+        classes.add(this.bemCssClasses.guiModifiers.snapToUpperRight);
+        this.#guiEl4ts.changeSnapVer7.innerText = '↓';
+      } else if (
+        classes.contains(this.bemCssClasses.guiModifiers.snapToUpperRight)
+      ) {
+        classes.remove(this.bemCssClasses.guiModifiers.snapToUpperRight);
+        classes.add(this.bemCssClasses.guiModifiers.snapToLowerRight);
+        this.#guiEl4ts.changeSnapVer7.innerText = '↑';
+      }
+    }
+
     printGuiSettings() {
+      // TO-DO: Improve implementation
       console.log(
-/*`Settings for instance of AdjusterMonkeyGui are as follows:
-  ├─bemCssClasses:
-  │ ├─.guiBlock: ${this.bemCssClasses.guiBlock}
-  │ ├─.guiElements
-  │ │ ├─.changeSnap: ${this.bemCssClasses.guiElements.changeSnap}
-  │ │ ├─.changeSnapButtons: ${this.bemCssClasses.guiElements.changeSnapButtons}
-  │ │ ├─.changeSnapHorizontally: ${this.bemCssClasses.guiElements.changeSnapHorizontally}
-  │ │ ├─.changeSnapVertically: ${this.bemCssClasses.guiElements.changeSnapVertically}
-  │ │ ├─.collapseGui: ${this.bem}
-  │ │ ├─.command: ${this.bemCssClasses.guiElements.command}
-  │ │ ├─.commandsList: ${this.bemCssClasses.guiElements.commandsList}
-  │ │ ├─.logo: ${this.bemCssClasses.guiElements.logo}
-  │ │ ├─.logoPlacementArea: ${this.bemCssClasses.guiElements.logoPlacementArea}
-  │ │ ├─.tagline: ${this.bemCssClasses.guiElements.tagline}
-  │ │ └─.title: ${this.bemCssClasses.guiElements.title}
-  │ └─.guiModifiers
-  │   ├─.expanded: ${this.bemCssClasses.guiModifiers.expanded}
-  │   ├─.snapToLowerLeft: ${this.bemCssClasses.guiModifiers.snapToLowerLeft}
-  │   ├─.snapToLowerRight: ${this.bemCssClasses.guiModifiers.snapToLowerRight}
-  │   ├─.snapToUpperLeft: ${this.bemCssClasses.guiModifiers.snapToUpperLeft}
-  │   └─.snapToUpperRight: ${this.bemCssClasses.guiModifiers.snapToUpperRight}
-  ├─elementIds
-  │ ├─.adjusterMonkeyGui: ${this.elementIds.adjusterMonkeyGui}
-  │ ├─.changeSnapButtons: ${this.elementIds.changeSnapButtons}
-  │ ├─.changeSnapHorizontally: ${this.elementIds.changeSnapHorizontally}
-  │ ├─.changeSnapVertically: ${this.elementIds.changeSnapVertically}
-  │ ├─.collapseGui: ${this.elementIds.collapseGui}
-  │ ├─.commandsList: ${this.elementIds.commandsList}
-  │ ├─.executeAboutAdjusterMonkey: ${this.elementIds.executeAboutAdjusterMonkey}
-  │ └─.executeGetReferenceToPage: ${this.elementIds.executeGetReferenceToPage}
-  ├─guiVersion: ${this.guiVersion}
-  ├─logoDetails: ${this.fieldNames}
-  │ ├─.height: ${this.logoDetails.height}
-  │ ├─.width: ${this.logoDetails.width}
-  │ └─.url: ${this.logoDetails.url}
-  ├─selectors:
-  │ └─.domInsertionPoint: ${this.selectors.domInsertionPoint}
-  └─targetApplication: ${this.targetApplication}`*/
         `Settings for instance of AdjusterMonkeyGui are as follows:
 ${JSON.stringify(this)}`
       );
