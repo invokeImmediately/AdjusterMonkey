@@ -11,7 +11,7 @@
  *  to a target website or web app. Includes UI controls to expose core commands
  *  for web browser enhancements that are useful for work with any website.
  *
- * @version 0.1.0-0.4.1
+ * @version 0.1.0-0.5.0
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -87,6 +87,10 @@ const AdjusterMonkeyGui = (function(iife) {
       this.#guiEl4ts.changeSnapVer7 =
         this.#guiEl4ts.gui.querySelector(
           `.${this.bemCssClasses.guiElements.changeSnapVertically}`
+        );
+      this.#guiEl4ts.collapseGui =
+        this.#guiEl4ts.gui.querySelector(
+          `#${this.elementIds.collapseGui}`
         );
     }
 
@@ -199,7 +203,11 @@ const AdjusterMonkeyGui = (function(iife) {
     }
 
     #registerEventHandlers() {
+      this.#guiEl4ts.gui.addEventListener('click',
+        this.expand.bind(this));
       this.#reg4rChangeSnapE3tH6s();
+      this.#guiEl4ts.collapseGui.addEventListener('click',
+        this.collapse.bind(this));
     }
 
     #reg4rChangeSnapE3tH6s() {
@@ -366,8 +374,10 @@ const AdjusterMonkeyGui = (function(iife) {
       }
     }
 
-    changeHorizontalSnapPosition() {
-      console.log('Adjuster Monkey horizontal toggle triggered.');
+    changeHorizontalSnapPosition(event) {
+      if(event !== undefined) {
+        event.stopPropagation();
+      }
       const classes = this.#guiEl4ts.gui.classList;
       if (
         classes.contains(this.bemCssClasses.guiModifiers.snapToLowerLeft)
@@ -394,10 +404,13 @@ const AdjusterMonkeyGui = (function(iife) {
         classes.add(this.bemCssClasses.guiModifiers.snapToUpperLeft);
         this.#guiEl4ts.changeSnapHor9.innerText = '→';
       }
+      this.#guiEl4ts.changeSnapHor9.blur();
     }
 
-    changeVerticalSnapPosition() {
-      console.log('Adjuster Monkey vertical toggle triggered.');
+    changeVerticalSnapPosition(event) {
+      if(event !== undefined) {
+        event.stopPropagation();
+      }
       const classes = this.#guiEl4ts.gui.classList;
       if (
         classes.contains(this.bemCssClasses.guiModifiers.snapToLowerLeft)
@@ -424,6 +437,22 @@ const AdjusterMonkeyGui = (function(iife) {
         classes.add(this.bemCssClasses.guiModifiers.snapToLowerRight);
         this.#guiEl4ts.changeSnapVer7.innerText = '↑';
       }
+      this.#guiEl4ts.changeSnapVer7.blur();
+    }
+
+    collapse(event) {
+      if(event !== undefined) {
+        event.stopPropagation();
+      }
+      this.#guiEl4ts.gui.classList.remove(
+        this.bemCssClasses.guiModifiers.expanded
+      );
+    }
+
+    expand(event) {
+      this.#guiEl4ts.gui.classList.add(
+        this.bemCssClasses.guiModifiers.expanded
+      );
     }
 
     printGuiSettings() {
