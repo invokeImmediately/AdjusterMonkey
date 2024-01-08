@@ -6,7 +6,7 @@
  * Less CSS module for producing compiled CSS that specifies the layout and
  *  presentation of the AdjusterMonkey Core GUI.
  *
- * @version 0.0.0-rc.2
+ * @version 0.0.0-rc.3
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -79,6 +79,7 @@
     }
 
     .@{block}__header {
+      background: transparent;
       display: block;
       line-height: 1;
     }
@@ -121,8 +122,9 @@
       }
 
       & > legend {
-        margin: 0;
+        display: block;
         height: 0;
+        margin: 0;
         overflow: hidden;
         padding: 0;
         width: 0;
@@ -174,9 +176,9 @@
       }
 
       &:before {
-       left: 0;
+       right: 0;
        top: 50%;
-       transform: translate(-100%, -50%);
+       transform: translate(100%, -50%);
       }
     }
 
