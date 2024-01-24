@@ -6,7 +6,7 @@
  * Less CSS module for producing compiled CSS that specifies the layout and
  *  presentation of the AdjusterMonkey Core GUI.
  *
- * @version 0.0.0-rc.3
+ * @version 0.0.0-rc.4
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -32,11 +32,14 @@
  *   DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 
-@block: adjuster-monkey-gui;
+/* VARIABLES—» AdjusterMonkey (AM) GUI Settings */
+@gui-id: adj5-mon3;
+@block: adj5-mon3-gui;
 @max-z-index: 2147483647;
 @ani5n-dur4n: .5s;
 @tra6n-dur4n: .2s;
 
+/* ANIMATION—» Reveal AdjusterMonkey (AM) GUI once Loaded */
 @keyframes show-adj4r-m4y-gui {
   0% {
     opacity: 0;
@@ -51,8 +54,10 @@
   }
 }
 
-#@{block}.@{block} {
+/* BLOCK—» AM GUI */
+#@{gui-id}.@{block} {
   animation: show-adj4r-m4y-gui @ani5n-dur4n;
+  background: transparent;
   bottom: auto;
   left: 50%;
   margin: 0;
@@ -61,20 +66,20 @@
   right: auto;
   top: 50%;
   transform: translate(-50%, -50%);
+  transition: left .333s ease, top .333s ease, transform .333s ease;
   z-index: @max-z-index;
 
-  &:not(.@{block}--expand) {
-    background: transparent;
-
+  /* UNMODIFIED—» Default State: Collapsed */
+  & {
     &:not(:hover):not(:focus-within) {
       opacity: .5;
-      transition: opacity @tra6n-dur4n ease;
+      transition: left .333s ease, opacity @tra6n-dur4n ease, top .333s ease, transform .333s ease;
     }
 
     .@{block}__title,
     .@{block}__tagline,
     .@{block}__commands-list,
-    #@{block}_collapse-gui {
+    #@{gui-id}_collapse-gui {
       display: none;
     }
 
@@ -90,6 +95,12 @@
       margin: 0;
       padding: 0;
       width: auto;
+    }
+
+    .@{block}__logo {
+      margin: 0;
+      max-width: none;
+      padding: 0;
     }
 
     .@{block}__change-snap-buttons {
@@ -138,7 +149,7 @@
 
     .@{block}__change-snap {
       background: rgba(0, 0, 0, .5);
-      border: 1px solid white;
+      border: 2px outset white;
       border-radius: 4px;
       color: white;
       height: 28px;
@@ -155,18 +166,16 @@
 
     .@{block}__change-snap:active {
       background: rgba(255, 255, 255, 0.85);
-      border-color: black;
+      border: 2px inset white;
       box-shadow: 0 0 1px 1px rgba(255,255,255,.5), 0 0 8px 2px rgba(255,255,255,.25);
       color: black;
     }
   }
 
   &--snap-to-lower-left {
-    bottom: 2rem;
     left: 2rem;
-    right: auto;
-    top: auto;
-    transform: translate(0, 0);
+    top: calc(100% - 2rem);
+    transform: translate(0, -100%);
 
     .@{block}__change-snap-buttons {
       &:after {
@@ -196,11 +205,9 @@
   }
 
   &--snap-to-lower-right {
-    bottom: 2rem;
-    left: auto;
-    right: 2rem;
-    top: auto;
-    transform: translate(0, 0);
+    left: calc(100% - 2rem);
+    top: calc(100% - 2rem);
+    transform: translate(-100%, -100%);
 
     .@{block}__change-snap-buttons {
       &:after {
@@ -230,9 +237,7 @@
   }
 
   &--snap-to-upper-left {
-    bottom: auto;
     left: 2rem;
-    right: auto;
     top: 2rem;
     transform: translate(0, 0);
 
@@ -264,11 +269,9 @@
   }
 
   &--snap-to-upper-right {
-    bottom: auto;
-    left: auto;
-    right: 2rem;
+    left: calc(100% - 2rem);
     top: 2rem;
-    transform: translate(0, 0);
+    transform: translate(-100%, 0);
 
     .@{block}__change-snap-buttons {
       &:after {
@@ -294,6 +297,143 @@
       bottom: 0;
       left: 50%;
       transform: translate(-50%, 100%);
+    }
+  }
+
+  /* MODIFIED—» Expanded GUI */
+  &--expand {
+    background-color: #282828;
+    border-radius: .33em;
+    box-shadow: 0 0 3px 1px rgba(0,0,0,0.25), 2px 4px 6px rgba(0,0,0,.25), -2px 4px 6px rgba(0,0,0,.25), 0 6px 12px rgba(0,0,0,0.25);
+    color: white;
+    display: block;
+    font-size: 16px;
+    width: 640px;
+    padding: 1em;
+
+    .@{block}__title,
+    .@{block}__tagline,
+    .@{block}__commands-list,
+    #@{gui-id}_collapse-gui {
+      display: block;
+    }
+
+    #@{gui-id}_collapse-gui.@{block}__command {
+      background-color: #000;
+      border: 2px outset white;
+      border-radius: .33em;
+      color: white;
+      font-family: monospace;
+      font-weight: 600;
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+
+      &:hover,
+      &:focus {
+        background: #505050;
+        box-shadow: 0 0 4px rgba(255, 255, 255, .5), 0 0 0 1px rgba(255, 255, 255, .25);
+      }
+
+      &:active {
+        background: #fff;
+        border: 2px inset white;
+        box-shadow: 0 0 6px 1px rgba(255, 255, 255, .5);
+        color: #000;
+      }
+    }
+
+    .@{block}__logo-placement-area {
+      display: grid;
+      grid-column-gap: 1.5em;
+      grid-template-columns: 96px minmax(200px, 640px);
+      grid-template-rows: 1fr 1fr;
+      margin:0;
+      padding: 0 2em 0 0;
+    }
+
+    .@{block}__logo {
+      grid-area: ~"1 / 1 / 3 / 2";
+    }
+
+    .@{block}__title {
+      align-self: end;
+      background: transparent;
+      font-size: 1.5em;
+      float: none;
+      grid-area: ~"1 / 2 / 2 / 3";
+      line-height: 1.2;
+      margin: 0;
+      padding: 0;
+      position: relative;
+    }
+
+    .@{block}__tagline {
+      font-size: 1em;
+      grid-area: ~"2 / 2 / 3 / 3";
+      line-height: 1.2;
+      margin: .5em 0 0;
+      padding: 0;
+    }
+
+    .@{block}__change-snap-buttons {
+      height: auto;
+      margin-top: 1em;
+      position: static;
+      width: auto;
+
+      & > legend {
+        height: auto;
+        overflow: visible;
+        width: auto;
+      }
+    }
+
+    &:not(:hover):not(:focus-within) .@{block}__change-snap-buttons {
+      opacity: 1;
+    }
+
+    .@{block}__change-snap-buttons,
+    .@{block}__commands-list {
+      background: repeating-linear-gradient(-45deg, #000, #000 8px, #282800 8px, #282800 16px);
+      color: white;
+      border: 1px solid white;
+      border-radius: .333em;
+      margin-top: 1.5em;
+      padding: 1em;
+
+      & > legend {
+        font-family: monospace;
+        font-weight: 600;
+        padding: 0 .5em;
+      }
+    }
+
+    .@{block}__change-snap {
+      &:hover,
+      &:focus {
+        background: #767676;
+      }
+
+      &:active {
+        background: #f0f0f0;
+        color: #000;
+      }
+    }
+
+    &.@{block}--snap-to-lower-left,
+    &.@{block}--snap-to-lower-right,
+    &.@{block}--snap-to-upper-left,
+    &.@{block}--snap-to-upper-right {
+      .@{block}__change-snap-horizontally,
+      .@{block}__change-snap-vertically {
+        bottom: 0;
+        left: auto;
+        position: static;
+        right: auto;
+        top: auto;
+        transform: none;
+      }
     }
   }
 }
