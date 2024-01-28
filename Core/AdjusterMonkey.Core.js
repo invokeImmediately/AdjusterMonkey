@@ -11,7 +11,7 @@
  *  to a target website or web app. Includes UI controls to expose core commands
  *  for web browser enhancements that are useful for work with any website.
  *
- * @version 0.1.0-0.5.0
+ * @version 0.1.0-0.6.0
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -360,17 +360,14 @@ const AdjusterMonkeyGui = (function(iife) {
     }
 
     #setUndefinedElementIds() {
-      let guiId = '';
-
       for (let key in this.elementIds) {
-        if (key == 'adjusterMonkeyGui') {
+        if (key == 'adjusterMonkeyGui' && this.elementIds[key] === undefined) {
           this.elementIds[key] = this.#convertCamelcaseToSnakeCase(key);
-          guiId = this.elementIds[key];
-        } else {
+        } else if (key != 'adjusterMonkeyGui') {
           this.elementIds[key] =
-            guiId + '_' + this.#convertCamelcaseToSnakeCase(key);
+            this.elementIds.adjusterMonkeyGui + '_' +
+            this.#convertCamelcaseToSnakeCase(key);
         }
-        console.log(this.elementIds[key]);
       }
     }
 
@@ -467,7 +464,7 @@ ${JSON.stringify(this)}`
   return AdjusterMonkeyGui;
 } )( {
   bemCssClasses: {
-    guiBlock: 'adjuster-monkey-gui',
+    guiBlock: 'adj5-mon3-gui',
     guiElements: {
       changeSnap: 'change-snap',
       changeSnapButtons: 'change-snap-buttons',
@@ -490,7 +487,7 @@ ${JSON.stringify(this)}`
     },
   },
   elementIds: {
-    adjusterMonkeyGui: undefined,
+    adjusterMonkeyGui: 'adj5-mon3',
     changeSnapButtons: undefined,
     changeSnapHorizontally: undefined,
     changeSnapVertically: undefined,
@@ -521,7 +518,12 @@ ${JSON.stringify(this)}`
 (function(AdjusterMonkeyGui, iifeS6s) {
   'use strict';
 
-  function tryLoadingAdj4rM4yGui( loadingStartTime ) {
+  function main() {
+    const currentTime = new Date();
+    window.setTimeout(tryBindingAdj4rM4yLoader, 1000, currentTime);
+  }
+
+  function tryLoadingAdj4rM4yGui(loadingStartTime) {
     const elapsedTime = new Date() - loadingStartTime;
 
     if (
@@ -540,9 +542,23 @@ ${JSON.stringify(this)}`
     }
   }
 
-  function main() {
-    const currentTime = new Date();
-    window.setTimeout(tryLoadingAdj4rM4yGui, 1000, currentTime);
+  function tryBindingAdj4rM4yLoader(loadingStartTime) {
+    const elapsedTime = new Date() - loadingStartTime;
+
+    if (
+      typeof window.adj4rMnkyCmdLn == 'object' &&
+      typeof window.adj4rMnkyCmdLn.constructor == 'function' &&
+      window.adj4rMnkyCmdLn.constructor.name == 'Adj4rMnkyCmdLn'
+    ) {
+      window.addEventListener("keydown", (event) => {
+        if (event.key == "m" && event.ctrlKey && event.altKey) {
+          const currentTime = new Date();
+          window.setTimeout(tryLoadingAdj4rM4yGui, 250, currentTime);
+        }
+      });
+    } else if (elapsedTime <= iifeS6s.loadWaitTime) {
+      window.setTimeout(tryBindingAdj4rM4yLoader, 1000, loadingStartTime);
+    }
   }
 
   return main();
