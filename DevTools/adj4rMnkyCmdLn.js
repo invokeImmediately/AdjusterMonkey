@@ -1,7 +1,7 @@
 /*!*****************************************************************************
- * ▓▓▓▒ adj4rMnky ▄▀▀▀ ▐▀▄▀▌█▀▀▄ █    ▐▀▀▄ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓
- * ▓▓▒▒▒▒▒▒▒▒▒▒▒  █    █ ▀ ▌█  █ █  ▄ █  ▐  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓
- * ▓▒▒▒▒▒▒▒▒▒▒▒▒▒  ▀▀▀ █   ▀▀▀▀  ▀▀▀  ▀  ▐.js ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓
+ * ▓▓▓▒ adj4rMnky ▄▀▀▀ ▐▀▄▀▌█▀▀▄ █    ▐▀▀▄ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▒▒▓▒▒▓▒▒▓▓▒▒▓▓▒▒▓▓▒▒▓
+ * ▓▓▒▒▒▒▒▒▒▒▒▒▒  █    █ ▀ ▌█  █ █  ▄ █  ▐  ▒▒▒▒▒▒▒▒▒▒▒▒▒▓▒▒▓▒▒▓▒▒▓▓▒▒▓▓▒▒▓▓▒▒▓▓
+ * ▓▒▒▒▒▒▒▒▒▒▒▒▒▒  ▀▀▀ █   ▀▀▀▀  ▀▀▀  ▀  ▐.js ▒▒▒▒▒▒▒▒▒▒▓▒▒▓▒▒▓▒▒▓▓▒▒▓▓▒▒▓▓▒▒▓▓▓
  *
  * Web browser DevTools code snippet that implements a utility interface for
  *  use with a web browser's JS console's command line or the TamperMonkey web
@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.12.0->rc+0.1.2
+ * @version 0.12.0-0.2.2
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -40,21 +40,127 @@
  *   DEALINGS IN THE SOFTWARE.
  */
 
+//>/////////////////////////////////////////////////////////////////////////////
+// TABLE OF CONTENTS:
+// §1: adj4rMnkyCmdLn Object via IIFE......................................143
+// §2: Adj4rMnkyCmdLn Class Declaration....................................148
+//   §2.1: Constructor.....................................................153
+//   §2.2: Data Representation.............................................160
+//     §2.2.1: createDataTree..............................................163
+//     §2.2.2: isUrlString.................................................169
+//   §2.3: Process Timing..................................................180
+//     §2.3.1: waitForDoc4tFocus...........................................183
+//     §2.3.2: waitForTime.................................................196
+//   §2.4: Console Messaging...............................................206
+//     §2.4.1: getLabeledMsg...............................................209
+//     §2.4.2: logMsg......................................................215
+//     §2.4.3: #wrapMsgAtCharLen...........................................221
+//   §2.5: Browser Control.................................................380
+//     §2.5.1: openUrlInNewWindow..........................................383
+// §3: CssScanner Class Declaration........................................398
+//   §3.1: Constructor.....................................................409
+//   §3.2: Data Representation.............................................416
+//     §3.2.1: isUrlStringToCss............................................419
+//     §3.2.2: #copyMediaRuleCSSToArrayBySel4rMat4g........................430
+//     §3.2.3: #copyRulesCSSToArrayBySel4rMat4g............................458
+//     §3.2.4: #sortAttrsFromSsLinks.......................................479
+//   §3.3: Style Sheet References and Control..............................490
+//     §3.3.1: addRefStyleSheet............................................493
+//     §3.3.2: addRefStyleSheetFromClipboard...............................528
+//     §3.3.3: clearRefSS..................................................548
+//     §3.3.4: clearRefSSFromLocalStorage..................................557
+//     §3.3.5: getRefStyleSheet............................................576
+//     §3.3.6: matchDocSSIndexToSS.........................................597
+//     §3.3.7: restoreRefSSFromStorage.....................................619
+//   §3.4: CSS Class Analysis and Extraction...............................647
+//     §3.4.1: classesUsedInPage...........................................650
+//     §3.4.2: getClassesUsedInDocSS.......................................660
+//     §3.4.3: getClassesUsedInReferenceSS.................................670
+//     §3.4.4: getDocSSRulesBySelectorMatching.............................681
+//     §3.4.5: getRefCssText...............................................697
+//     §3.4.6: printClassesUsedInPage......................................718
+//     §3.4.7: scanForClassesUsedInPage....................................728
+//     §3.4.8: #checkDocSSIndex............................................734
+//     §3.4.9: #extractClassesUsedInPage...................................755
+//     §3.4.10: #findClassesUsedInMediaRule................................770
+//     §3.4.11: #findClassesUsedInStyleRule................................784
+//     §3.4.12: #getClassesUsedInSS........................................803
+//   §3.5: Document Analysis...............................................830
+//     §3.5.1: printDocSSList..............................................833
+//     §3.5.2: printLinksAttrsList.........................................856
+//     §3.5.3: printLinkedCssFiles.........................................862
+//     §3.5.4: scanForCssFiles.............................................868
+//     §3.5.5: scanLinkedCssFile...........................................912
+//     §3.5.6: storeRefStyleSheetsLocally..................................950
+//     §3.5.7: #extractAttrsFromSsLink.....................................973
+//     §3.5.8: #fetchStyleSheetCode........................................982
+//     §3.5.9: #findDocSSIndexFromURL.....................................1020
+//     §3.5.10: #recon5tCssFromDoc........................................1037
+//   §3.6: Browser Control................................................1064
+//     §3.6.1: openDocSSInNewWindow.......................................1067
+// §4: DomScanner Class Declaration.......................................1113
+//   §4.1: Constructor....................................................1118
+//   §4.2: Data Representation............................................1124
+//     §4.2.1: #ele3tToString.............................................1127
+//   §4.3: DOM Traversal..................................................1143
+//     §4.3.1: #getParentsForEle3t........................................1146
+//   §4.4: Analysis of Heading Hierarchy..................................1158
+//     §4.4.1: printHeadingTextTree.......................................1161
+//     §4.4.2: #compareH5gsParents........................................1169
+//     §4.4.3: #createTextTreeFromH5gArray................................1194
+//     §4.4.4: #placeH5gUpTreeBranch......................................1235
+//     §4.4.5: #findH5gsClosestRootEle3t..................................1263
+// §5: DataTree Class Declaration.........................................1278
+//   §5.1: Constructor....................................................1282
+//   §5.2: Data Representation............................................1296
+//     §5.2.1: toString...................................................1299
+//     §5.2.2: nodeToString...............................................1345
+//     §5.2.3: #wrapStrDataAtLength.......................................1365
+//   §5.3: Searching the Tree.............................................1450
+//     §5.3.1: findFirst..................................................1453
+// §6: DataTreeNode Class Declaration.....................................1460
+//   §6.1: Constructor....................................................1464
+//   §6.2: Modification of Tree Structure.................................1475
+//     §6.2.1: addChild...................................................1478
+//     §6.2.2: addSibling.................................................1495
+//   §6.3: Tree Traversal.................................................1516
+//     §6.3.1: getNextSibling.............................................1519
+//     §6.3.2: getPathToRoot..............................................1536
+//     §6.3.3: getPreviousSibling.........................................1551
+//   §6.4: Searching the Tree.............................................1565
+//     §6.4.1: findFirst..................................................1568
+// §7: Script Loading.....................................................1585
+// §8: Execution Entry Point..............................................1617
+//</////////////////////////////////////////////////////////////////////////////
+
+//>///////////////////////////////////////////////////////////////////////////--
+//< §1: adj4rMnkyCmdLn Object via IIFE
 const adj4rMnkyCmdLn = (function(iife) {
   'use strict';
 
+  //>/////////////////////////////////////////////////////////////////////////--
+  //< §2: Adj4rMnkyCmdLn Class Declaration
   class Adj4rMnkyCmdLn {
     #prefix4Msgs = '(🐵 AdjusterMonkey 🛠️) =>';
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §2.1: Constructor
     constructor() {
       this.cssScanner = new CssScanner(this);
       this.domScanner = new DomScanner(this);
     }
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §2.2: Data Representation
+
+    //»//////////////////////
+    //« §2.2.1: createDataTree
     createDataTree(rootData) {
       return new DataTree(rootData);
     }
 
+    //»///////////////////
+    // §2.2.2: isUrlString
     isUrlString(value) {
       return (
         typeof value == 'string'
@@ -64,26 +170,11 @@ const adj4rMnkyCmdLn = (function(iife) {
       );
     }
 
-    getLabeledMsg(msg, wrapLen) {
-      return this.#wrapMsgAtCharLen(`${this.#prefix4Msgs} ${msg}`, wrapLen);
-    }
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §2.3: Process Timing
 
-    logMsg(msgText, wrapLen) {
-      console.log(this.getLabeledMsg(msgText, wrapLen));
-    }
-
-    openUrlInNewWindow(url) {
-      if (!this.isUrlString(url)) {
-        adj4rMnkyCmdLn.logMsg(
-          `If you want me to open a document style sheet, please give me a
-          string containing URL. The argument you gave me was
-          «${whichStyleSheet}».`
-        );
-        return;
-      }
-      window.open(url, '_blank').focus();
-    }
-
+    //»///////////////////////////
+    //« §2.3.1: waitForDoc4tFocus
     async waitForDoc4tFocus() {
       const checkDoc4tFocus = (resolve) => {
         if (document.hasFocus()) {
@@ -95,6 +186,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return new Promise(checkDoc4tFocus);
     }
 
+    //»////////////////////
+    //« §2.3.2: waitForTime
     waitForTime(timeInMs) {
       return new Promise((resolve) => {
         setTimeout(() => {
@@ -103,6 +196,23 @@ const adj4rMnkyCmdLn = (function(iife) {
       });
     }
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §2.4: Console Messaging
+
+    //»//////////////////////
+    //« §2.4.1: getLabeledMsg
+    getLabeledMsg(msg, wrapLen) {
+      return this.#wrapMsgAtCharLen(`${this.#prefix4Msgs} ${msg}`, wrapLen);
+    }
+
+    //»///////////////
+    //« §2.4.2: logMsg
+    logMsg(msgText, wrapLen) {
+      console.log(this.getLabeledMsg(msgText, wrapLen));
+    }
+
+    //»//////////////////////////
+    //« §2.4.3: #wrapMsgAtCharLen
     #wrapMsgAtCharLen(msg, len) {
       // ·> Use a default line wrapping length.                               <·
       if (typeof len == 'undefined') {
@@ -259,8 +369,27 @@ const adj4rMnkyCmdLn = (function(iife) {
 
       return newMsg;
     }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §2.5: Browser Control
+
+    //»///////////////////////////
+    //« §2.5.1: openUrlInNewWindow
+    openUrlInNewWindow(url) {
+      if (!this.isUrlString(url)) {
+        adj4rMnkyCmdLn.logMsg(
+          `If you want me to open a document style sheet, please give me a
+          string containing URL. The argument you gave me was
+          «${whichStyleSheet}».`
+        );
+        return;
+      }
+      window.open(url, '_blank').focus();
+    }
   }
 
+  //>/////////////////////////////////////////////////////////////////////////--
+  //< §3: CssScanner Class Declaration
   class CssScanner {
     #adj4rMnkyCmdLn;
     #classesUsedInPage;
@@ -270,11 +399,92 @@ const adj4rMnkyCmdLn = (function(iife) {
     #referenceCssFiles = [];
     #scannedCssFile;
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §3.1: Constructor
     constructor(adj4rMnkyCmdLn) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
       this.scanForCssFiles();
     }
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §3.2: Data Representation
+
+    //»/////////////////////////
+    //« §3.2.1: isUrlStringToCss
+    isUrlStringToCss(value) {
+      return (
+        typeof value == 'string'
+        && value.match(new RegExp(
+          '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Za-z0-9]+\/.+\\.css(?:\\?.+)?\/?$'
+        )) !== null
+      );
+    }
+
+    //»/////////////////////////////////////////////
+    //« §3.2.2: #copyMediaRuleCSSToArrayBySel4rMat4g
+    #copyMediaRuleCSSToArrayBySel4rMat4g(
+      mediaRule, array, regExpNeedle
+    ) {
+      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
+      const rules = mediaRule.cssRules;
+      let results = [];
+
+      for (let i = 0; i < rules.length; i++) {
+        if (
+          rules.item(i) instanceof CSSStyleRule
+          && rules.item(i).selectorText.match(regExpNeedle)
+        ) {
+          results.push(rules.item(i).cssText);
+        }
+      }
+
+      if (results.length > 0) {
+        results = results.join('\n');
+        results = results.replace(/^(?!$)/gm, "  ");
+        results = "@media " + mediaRule.conditionText + " {\n" + results +
+          "\n}";
+
+        array.push( results );
+      }
+    }
+
+    //»/////////////////////////////////////////
+    //« §3.2.3: #copyRulesCSSToArrayBySel4rMat4g
+    #copyRulesCSSToArrayBySel4rMat4g(cssRules, array, regExpNeedle) {
+      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
+      for (let i = 0; i < cssRules.length; i++) {
+        if (
+          cssRules.item(i) instanceof CSSStyleRule &&
+          cssRules.item(i).selectorText.match(regExpNeedle)
+        ) {
+          array.push(cssRules.item(i).cssText);
+        }
+
+        if (
+          cssRules.item(i) instanceof CSSMediaRule
+        ) {
+          this.#copyMediaRuleCSSToArrayBySel4rMat4g(cssRules.item(i),
+            array, regExpNeedle);
+        }
+      }
+    }
+
+    //»//////////////////////////////
+    //« §3.2.4: #sortAttrsFromSsLinks
+    #sortAttrsFromSsLinks(attrsSet) {
+      const attrs = [];
+      for(const attr of attrsSet) {
+        attrs.push(attr);
+      }
+
+      return attrs.toSorted();
+    }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §3.3: Style Sheet References and Control
+
+    //»///////////////////////////
+    //« §3.3.1: addRefStyleSheet
     async addRefStyleSheet(urlOrCssText, docSSIndex, cssTextSrc) {
       if (typeof urlOrCssText != 'string') {
         return;
@@ -308,6 +518,8 @@ const adj4rMnkyCmdLn = (function(iife) {
         accepted style rules.`);
     }
 
+    //»//////////////////////////////////////
+    //« §3.3.2: addRefStyleSheetFromClipboard
     async addRefStyleSheetFromClipboard(docSSIndex, cssTextSrc) {
       this.#adj4rMnkyCmdLn.logMsg(`Ready to load the text on the clipboard as a
         reference style sheet. Please close DevTools and focus on the document
@@ -326,14 +538,8 @@ const adj4rMnkyCmdLn = (function(iife) {
         available for further analysis via the DevTools command line.`, 60));
     }
 
-    get classesUsedInPage() {
-      if (this.#classesUsedInPage === undefined) {
-        this.scanForClassesUsedInPage();
-      }
-
-      return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
-    }
-
+    //»///////////////////
+    //« §3.3.3: clearRefSS
     clearRefSS() {
       const refSSCount = this.#referenceCssFiles.length;
       this.#referenceCssFiles.splice(0);
@@ -341,6 +547,8 @@ const adj4rMnkyCmdLn = (function(iife) {
         sheets have been cleared.`);
     }
 
+    //»///////////////////////////////////
+    //« §3.3.4: clearRefSSFromLocalStorage
     clearRefSSFromLocalStorage() {
       let i = 0;
       let key = `${this.#localStoragePrefix}${i}`;
@@ -358,56 +566,8 @@ const adj4rMnkyCmdLn = (function(iife) {
         cleared from local storage.`);
     }
 
-    getClassesUsedInDocSS(index) {
-      if (index < 0 || index >= document.styleSheets.length) {
-        return null;
-      }
-
-      return this.#getClassesUsedInSS(document.styleSheets[index]);
-    }
-
-    getClassesUsedInReferenceSS(index) {
-      if (index < 0 || index >= this.#referenceCssFiles.length) {
-        return null;
-      }
-
-      return this.#getClassesUsedInSS(this.#referenceCssFiles[index]
-        .styleSheet);
-    }
-
-    getDocSSRulesBySelectorMatching(sSIndex, regExpNeedle) {
-      // ·> TO-DO: Check if sSIndex is an array and, if so, process multiple   ·
-      // ·  style sheets with a single call.                                  <·
-      if ( sSIndex < 0 || sSIndex >= document.styleSheets.length ) {
-        return null;
-      }
-
-      const results = [];
-      const rules = document.styleSheets[ sSIndex ].cssRules;
-      this.#copyRulesCSSToArrayBySel4rMat4g(rules, results, regExpNeedle);
-
-      return results;
-    }
-
-    getRefCssText(index) {
-      if (
-        typeof index == 'string'
-        && !Number.isNaN(parseInt(index, 10))
-      ) {
-        index = parseInt(index, 10);
-      }
-
-      if (
-        typeof index != 'number'
-        || index < 0
-        || index >= this.#referenceCssFiles.length
-      ) {
-        return null;
-      }
-
-      return this.#referenceCssFiles[index].cssText;
-    }
-
+    //»/////////////////////////
+    //« §3.3.5: getRefStyleSheet
     getRefStyleSheet(index) {
       if (
         typeof index == 'string' &&
@@ -427,15 +587,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return this.#referenceCssFiles[index].styleSheet;
     }
 
-    isUrlStringToCss(value) {
-      return (
-        typeof value == 'string'
-        && value.match(new RegExp(
-          '^https?:\/\/(?:[-A-Za-z0-9]+\\.)*[-A-Za-z0-9]+\\.[-A-Za-z0-9]+\/.+\\.css(?:\\?.+)?\/?$'
-        )) !== null
-      );
-    }
-
+    //»////////////////////////////
+    //« §3.3.6: matchDocSSIndexToSS
     matchDocSSIndexToSS(docSSIndex, cssTextSrc) {
       docSSIndex = this.#checkDocSSIndex(docSSIndex);
 
@@ -456,86 +609,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return docSSIndex;
     }
 
-    openDocSSInNewWindow( whichStyleSheet ) {
-      if (
-        typeof whichStyleSheet == 'string' &&
-        !Number.isNaN(parseInt(whichStyleSheet, 10))
-      ) {
-        whichStyleSheet = parseInt(whichStyleSheet, 10);
-      }
-
-      if (typeof whichStyleSheet != 'number') {
-        adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
-          please give me the index of the desired style sheet in
-          «document.styleSheets». The argument you gave me was
-          «${whichStyleSheet}».` );
-        return;
-      }
-
-      if (
-        whichStyleSheet < 0 ||
-        whichStyleSheet >= document.styleSheets.length
-      ) {
-        adj4rMnkyCmdLn.logMsg( `The index you gave me for the document style
-          sheet to open of «${whichStyleSheet}» falls outside the range of
-          accepted indices.` );
-        return;
-      }
-
-      if (document.styleSheets.item( whichStyleSheet ).href === null) {
-        adj4rMnkyCmdLn.logMsg( `The index you gave me for the document style
-          sheet to open of «${whichStyleSheet}» represents an internal style
-          sheet.` );
-        return;
-      }
-
-      adj4rMnkyCmdLn.logMsg(`Opening document style sheet «${whichStyleSheet}»
-        with href «${document.styleSheets.item( whichStyleSheet ).href}» in a
-        new window.`);
-
-      window.open(
-        `${document.styleSheets.item(whichStyleSheet).href}`,
-        '_blank'
-      ).focus();
-    }
-
-    printClassesUsedInPage() {
-      if (this.#classesUsedInPage === undefined) {
-        this.scanForClassesUsedInPage();
-      }
-
-      console.log(Array.from(this.#classesUsedInPage).toSorted());
-    }
-
-    printLinksAttrsList() {
-      console.log(this.#linksAttrsList);
-    }
-
-    printDocSSList() {
-      const docSSDetails = [];
-
-      for (let index = 0; index < document.styleSheets.length; index++) {
-        docSSDetails.push({
-          href: document.styleSheets.item(index).href,
-          tagName: document.styleSheets.item(index).ownerNode.tagName,
-          tagID: document.styleSheets.item(index).ownerNode.id,
-          innerTextHead: document.styleSheets.item(index)
-            .ownerNode.innerText.substring(0, 64),
-        });
-
-        if (docSSDetails[index].innerTextHead.length == 64) {
-          docSSDetails[index].innerTextHead += "…";
-        }
-      }
-
-      console.table( docSSDetails, [ 'href', 'tagName', 'tagID',
-        'innerTextHead' ] );
-    }
-
-    printLinkedCssFiles() {
-      console.table( this.#linkedCssFiles, [ 'htmlId', 'section', 'ssUrl' ] );
-    }
-
+    //»////////////////////////////////
+    //« §3.3.7: restoreRefSSFromStorage
     restoreRefSSFromStorage() {
       let i = 0;
       let key = `${this.#localStoragePrefix}${i}`;
@@ -562,10 +637,229 @@ const adj4rMnkyCmdLn = (function(iife) {
         restored from local storage.` );
     }
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §3.4: CSS Class Analysis and Extraction
+
+    //»//////////////////////////
+    //« §3.4.1: classesUsedInPage
+    get classesUsedInPage() {
+      if (this.#classesUsedInPage === undefined) {
+        this.scanForClassesUsedInPage();
+      }
+
+      return Array.from( this.#classesUsedInPage ).toSorted().join( '\n' );
+    }
+
+    //»//////////////////////////////
+    //« §3.4.2: getClassesUsedInDocSS
+    getClassesUsedInDocSS(index) {
+      if (index < 0 || index >= document.styleSheets.length) {
+        return null;
+      }
+
+      return this.#getClassesUsedInSS(document.styleSheets[index]);
+    }
+
+    //»////////////////////////////////////
+    //« §3.4.3: getClassesUsedInReferenceSS
+    getClassesUsedInReferenceSS(index) {
+      if (index < 0 || index >= this.#referenceCssFiles.length) {
+        return null;
+      }
+
+      return this.#getClassesUsedInSS(this.#referenceCssFiles[index]
+        .styleSheet);
+    }
+
+    //»////////////////////////////////////////
+    //« §3.4.4: getDocSSRulesBySelectorMatching
+    getDocSSRulesBySelectorMatching(sSIndex, regExpNeedle) {
+      // ·> TO-DO: Check if sSIndex is an array and, if so, process multiple   ·
+      // ·  style sheets with a single call.                                  <·
+      if ( sSIndex < 0 || sSIndex >= document.styleSheets.length ) {
+        return null;
+      }
+
+      const results = [];
+      const rules = document.styleSheets[ sSIndex ].cssRules;
+      this.#copyRulesCSSToArrayBySel4rMat4g(rules, results, regExpNeedle);
+
+      return results;
+    }
+
+    //»//////////////////////
+    //« §3.4.5: getRefCssText
+    getRefCssText(index) {
+      if (
+        typeof index == 'string'
+        && !Number.isNaN(parseInt(index, 10))
+      ) {
+        index = parseInt(index, 10);
+      }
+
+      if (
+        typeof index != 'number'
+        || index < 0
+        || index >= this.#referenceCssFiles.length
+      ) {
+        return null;
+      }
+
+      return this.#referenceCssFiles[index].cssText;
+    }
+
+    //»///////////////////////////////
+    //« §3.4.6: printClassesUsedInPage
+    printClassesUsedInPage() {
+      if (this.#classesUsedInPage === undefined) {
+        this.scanForClassesUsedInPage();
+      }
+
+      console.log(Array.from(this.#classesUsedInPage).toSorted());
+    }
+
+    //»/////////////////////////////////
+    //« §3.4.7: scanForClassesUsedInPage
     scanForClassesUsedInPage() {
       this.#classesUsedInPage = this.#extractClassesUsedInPage();
     }
 
+    //»/////////////////////////
+    //« §3.4.8: #checkDocSSIndex
+    #checkDocSSIndex(docSSIndex) {
+      if (
+        typeof docSSIndex == 'string'
+        && !Number.isNaN(parseInt(docSSIndex, 10))
+      ) {
+        docSSIndex = parseInt(docSSIndex, 10);
+      }
+
+      if (
+        typeof docSSIndex != 'number'
+        || docSSIndex < 0
+        || docSSIndex >= document.styleSheets.length
+      ) {
+        docSSIndex = null;
+      }
+
+      return docSSIndex;
+    }
+
+    //»//////////////////////////////////
+    //« §3.4.9: #extractClassesUsedInPage
+    #extractClassesUsedInPage() {
+      const cssClassSet = new Set();
+      const bodyElems = document.querySelectorAll('body, body *');
+
+      bodyElems.forEach((elem, index) => {
+        for (let index = 0; index < elem.classList.length; index++) {
+          cssClassSet.add(elem.classList.item(index));
+        }
+      });
+
+      return cssClassSet;
+    }
+
+    //»/////////////////////////////////////
+    //« §3.4.10: #findClassesUsedInMediaRule
+    #findClassesUsedInMediaRule(mediaRule, setOfClasses) {
+      const cssRules = mediaRule.cssRules
+      for ( let i = 0; i < cssRules.length; i++ ) {
+        if ( cssRules.item( i ) instanceof CSSStyleRule ) {
+          this.#findClassesUsedInStyleRule(
+            cssRules.item( i ),
+            setOfClasses
+          );
+        }
+      }
+    }
+
+    //»/////////////////////////////////////
+    //« §3.4.11: #findClassesUsedInStyleRule
+    #findClassesUsedInStyleRule(styleRule, setOfClasses) {
+      if (styleRule.selectorText === undefined) {
+        return;
+      }
+
+      const classesFound =
+        styleRule.selectorText.match(/\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g);
+
+      if( classesFound === null ) {
+        return;
+      }
+
+      classesFound.forEach((match) => {
+        setOfClasses.add(match.substring(1, match.length));
+      });
+    }
+
+    //»/////////////////////////////
+    //« §3.4.12: #getClassesUsedInSS
+    #getClassesUsedInSS(styleSheet) {
+      if (!(
+        typeof styleSheet == 'object'
+        && styleSheet instanceof CSSStyleSheet
+      )) {
+        return null;
+      }
+
+      const setOfClassesInSS = new Set();
+
+      for (let i = 0; i < styleSheet.cssRules.length; i++) {
+        if (styleSheet.cssRules.item(i) instanceof CSSStyleRule) {
+          this.#findClassesUsedInStyleRule(styleSheet.cssRules.item(i),
+            setOfClassesInSS);
+        }
+
+        if (styleSheet.cssRules.item(i) instanceof CSSMediaRule) {
+          this.#findClassesUsedInMediaRule(styleSheet.cssRules.item(i),
+            setOfClassesInSS);
+        }
+      }
+
+      return Array.from(setOfClassesInSS).toSorted().join('\n');
+    }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §3.5: Document Analysis
+
+    //»///////////////////////
+    //« §3.5.1: printDocSSList
+    printDocSSList() {
+      const docSSDetails = [];
+
+      for (let index = 0; index < document.styleSheets.length; index++) {
+        docSSDetails.push({
+          href: document.styleSheets.item(index).href,
+          tagName: document.styleSheets.item(index).ownerNode.tagName,
+          tagID: document.styleSheets.item(index).ownerNode.id,
+          innerTextHead: document.styleSheets.item(index)
+            .ownerNode.innerText.substring(0, 64),
+        });
+
+        if (docSSDetails[index].innerTextHead.length == 64) {
+          docSSDetails[index].innerTextHead += "…";
+        }
+      }
+
+      console.table( docSSDetails, [ 'href', 'tagName', 'tagID',
+        'innerTextHead' ] );
+    }
+
+    //»////////////////////////////
+    //« §3.5.2: printLinksAttrsList
+    printLinksAttrsList() {
+      console.log(this.#linksAttrsList);
+    }
+
+    //»////////////////////////////
+    //« §3.5.3: printLinkedCssFiles
+    printLinkedCssFiles() {
+      console.table( this.#linkedCssFiles, [ 'htmlId', 'section', 'ssUrl' ] );
+    }
+
+    //»////////////////////////
+    //« §3.5.4: scanForCssFiles
     scanForCssFiles() {
       const cssFileLinks = document.querySelectorAll(
         'link[rel="stylesheet"]'
@@ -608,6 +902,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       this.#linkedCssFiles = scanResults;
     }
 
+    //»//////////////////////////
+    //« §3.5.5: scanLinkedCssFile
     async scanLinkedCssFile(whichFile) {
       if (!(
         typeof whichFile === 'string'
@@ -644,6 +940,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return this.#scannedCssFile;
     }
 
+    //»///////////////////////////////////
+    //« §3.5.6: storeRefStyleSheetsLocally
     storeRefStyleSheetsLocally() {
       try {
         for(let i = 0; i < this.#referenceCssFiles.length; i++) {
@@ -665,70 +963,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       }
     }
 
-    #checkDocSSIndex(docSSIndex) {
-      if (
-        typeof docSSIndex == 'string'
-        && !Number.isNaN(parseInt(docSSIndex, 10))
-      ) {
-        docSSIndex = parseInt(docSSIndex, 10);
-      }
-
-      if (
-        typeof docSSIndex != 'number'
-        || docSSIndex < 0
-        || docSSIndex >= document.styleSheets.length
-      ) {
-        docSSIndex = null;
-      }
-
-      return docSSIndex;
-    }
-
-    #copyMediaRuleCSSToArrayBySel4rMat4g(
-      mediaRule, array, regExpNeedle
-    ) {
-      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
-      const rules = mediaRule.cssRules;
-      let results = [];
-
-      for (let i = 0; i < rules.length; i++) {
-        if (
-          rules.item(i) instanceof CSSStyleRule
-          && rules.item(i).selectorText.match(regExpNeedle)
-        ) {
-          results.push(rules.item(i).cssText);
-        }
-      }
-
-      if (results.length > 0) {
-        results = results.join('\n');
-        results = results.replace(/^(?!$)/gm, "  ");
-        results = "@media " + mediaRule.conditionText + " {\n" + results +
-          "\n}";
-
-        array.push( results );
-      }
-    }
-
-    #copyRulesCSSToArrayBySel4rMat4g(cssRules, array, regExpNeedle) {
-      // ·> TO-DO: Add an option for unminifying copied CSS text.             <·
-      for (let i = 0; i < cssRules.length; i++) {
-        if (
-          cssRules.item(i) instanceof CSSStyleRule &&
-          cssRules.item(i).selectorText.match(regExpNeedle)
-        ) {
-          array.push(cssRules.item(i).cssText);
-        }
-
-        if (
-          cssRules.item(i) instanceof CSSMediaRule
-        ) {
-          this.#copyMediaRuleCSSToArrayBySel4rMat4g(cssRules.item(i),
-            array, regExpNeedle);
-        }
-      }
-    }
-
+    //»////////////////////////////////
+    //« §3.5.7: #extractAttrsFromSsLink
     #extractAttrsFromSsLink(link, attrsSet) {
       const numAttrs = link.attributes.length;
       for (let index = 0; index < numAttrs; index++) {
@@ -736,19 +972,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       }
     }
 
-    #extractClassesUsedInPage() {
-      const cssClassSet = new Set();
-      const bodyElems = document.querySelectorAll('body, body *');
-
-      bodyElems.forEach((elem, index) => {
-        for (let index = 0; index < elem.classList.length; index++) {
-          cssClassSet.add(elem.classList.item(index));
-        }
-      });
-
-      return cssClassSet;
-    }
-
+    //»/////////////////////////////
+    //« §3.5.8: #fetchStyleSheetCode
     async #fetchStyleSheetCode(url) {
       let finalResponse = null;
 
@@ -785,35 +1010,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return finalResponse;
     }
 
-    #findClassesUsedInMediaRule(mediaRule, setOfClasses) {
-      const cssRules = mediaRule.cssRules
-      for ( let i = 0; i < cssRules.length; i++ ) {
-        if ( cssRules.item( i ) instanceof CSSStyleRule ) {
-          this.#findClassesUsedInStyleRule(
-            cssRules.item( i ),
-            setOfClasses
-          );
-        }
-      }
-    }
-
-    #findClassesUsedInStyleRule(styleRule, setOfClasses) {
-      if (styleRule.selectorText === undefined) {
-        return;
-      }
-
-      const classesFound =
-        styleRule.selectorText.match(/\.-?[_a-zA-Z]+[_a-zA-Z0-9-]*/g);
-
-      if( classesFound === null ) {
-        return;
-      }
-
-      classesFound.forEach((match) => {
-        setOfClasses.add(match.substring(1, match.length));
-      });
-    }
-
+    //»///////////////////////////////
+    //« §3.5.9: #findDocSSIndexFromURL
     #findDocSSIndexFromURL(urlOfSS) {
       let scanner = 0;
       let foundIndex = null;
@@ -829,31 +1027,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return foundIndex;
     }
 
-    #getClassesUsedInSS(styleSheet) {
-      if (!(
-        typeof styleSheet == 'object'
-        && styleSheet instanceof CSSStyleSheet
-      )) {
-        return null;
-      }
-
-      const setOfClassesInSS = new Set();
-
-      for (let i = 0; i < styleSheet.cssRules.length; i++) {
-        if (styleSheet.cssRules.item(i) instanceof CSSStyleRule) {
-          this.#findClassesUsedInStyleRule(styleSheet.cssRules.item(i),
-            setOfClassesInSS);
-        }
-
-        if (styleSheet.cssRules.item(i) instanceof CSSMediaRule) {
-          this.#findClassesUsedInMediaRule(styleSheet.cssRules.item(i),
-            setOfClassesInSS);
-        }
-      }
-
-      return Array.from(setOfClassesInSS).toSorted().join('\n');
-    }
-
+    //»////////////////////////////
+    //« §3.5.10: #recon5tCssFromDoc
     #recon5tCssFromDoc( urlOfCssSrc ) {
       let allCssText = '';
 
@@ -879,29 +1054,113 @@ const adj4rMnkyCmdLn = (function(iife) {
       return allCssText;
     }
 
-    #sortAttrsFromSsLinks(attrsSet) {
-      const attrs = [];
-      for(const attr of attrsSet) {
-        attrs.push(attr);
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §3.6: Browser Control
+
+    //»/////////////////////////////
+    //« §3.6.1: openDocSSInNewWindow
+    openDocSSInNewWindow( whichStyleSheet ) {
+      if (
+        typeof whichStyleSheet == 'string' &&
+        !Number.isNaN(parseInt(whichStyleSheet, 10))
+      ) {
+        whichStyleSheet = parseInt(whichStyleSheet, 10);
       }
 
-      return attrs.toSorted();
+      if (typeof whichStyleSheet != 'number') {
+        adj4rMnkyCmdLn.logMsg( `If you want me to open a document style sheet,
+          please give me the index of the desired style sheet in
+          «document.styleSheets». The argument you gave me was
+          «${whichStyleSheet}».` );
+        return;
+      }
+
+      if (
+        whichStyleSheet < 0 ||
+        whichStyleSheet >= document.styleSheets.length
+      ) {
+        adj4rMnkyCmdLn.logMsg( `The index you gave me for the document style
+          sheet to open of «${whichStyleSheet}» falls outside the range of
+          accepted indices.` );
+        return;
+      }
+
+      if (document.styleSheets.item( whichStyleSheet ).href === null) {
+        adj4rMnkyCmdLn.logMsg( `The index you gave me for the document style
+          sheet to open of «${whichStyleSheet}» represents an internal style
+          sheet.` );
+        return;
+      }
+
+      adj4rMnkyCmdLn.logMsg(`Opening document style sheet «${whichStyleSheet}»
+        with href «${document.styleSheets.item( whichStyleSheet ).href}» in a
+        new window.`);
+
+      window.open(
+        `${document.styleSheets.item(whichStyleSheet).href}`,
+        '_blank'
+      ).focus();
     }
   }
 
+  //>/////////////////////////////////////////////////////////////////////////--
+  //< §4: DomScanner Class Declaration
   class DomScanner {
     #adj4rMnkyCmdLn;
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §4.1: Constructor
     constructor(adj4rMnkyCmdLn) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
     }
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §4.2: Data Representation
+
+    //»///////////////////////
+    //« §4.2.1: #ele3tToString
+    #ele3tToString(ele3t) {
+      const ele3tId =
+        ele3t.id != '' ?
+        '#' + ele3t.id :
+        '';
+
+      const ele3tClassList =
+        ele3t.classList.length > 0 ?
+        '.' + [...ele3t.classList].join( '.' ) :
+        '';
+
+      return ele3t.tagName + ele3tId + ele3tClassList;
+    }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §4.3: DOM Traversal
+
+    //»////////////////////////////
+    //« §4.3.1: #getParentsForEle3t
+    #getParentsForEle3t(ele3t) {
+      const parents = [];
+      while (ele3t.parentNode !== null) {
+        parents.push(ele3t.parentNode);
+        ele3t = ele3t.parentNode;
+      }
+
+      return parents;
+    }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §4.4: Analysis of Heading Hierarchy
+
+    //»/////////////////////////////
+    //« §4.4.1: printHeadingTextTree
     printHeadingTextTree(maxLineLength = 100) {
       const h5gs = [...document.querySelectorAll('h1, h2, h3, h4, h5, h6')];
       const h5gTree = this.#createTextTreeFromH5gArray(h5gs);
       console.log(h5gTree.toString(maxLineLength));
     }
 
+    //»////////////////////////////
+    //« §4.4.2: #compareH5gsParents
     #compareH5gsParents(rootI3x, p5sRef5e, p5sCur3t) {
       let i, j;
       for (i = rootI3x; i < p5sRef5e.length; i++) {
@@ -925,6 +1184,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return rootI3x;
     }
 
+    //»////////////////////////////////////
+    //« §4.4.3: #createTextTreeFromH5gArray
     #createTextTreeFromH5gArray(h5gs) {
       if (h5gs.length == 0) {
         return null;
@@ -964,6 +1225,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return tree;
     }
 
+    //»//////////////////////////////
+    //« §4.4.4: #placeH5gUpTreeBranch
     #placeH5gUpTreeBranch(h5g, h5gLevel, tree, lastNode) {
       let parentH5gLevel;
 
@@ -990,20 +1253,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return lastNode;
     }
 
-    #ele3tToString(ele3t) {
-      const ele3tId =
-        ele3t.id != '' ?
-        '#' + ele3t.id :
-        '';
-
-      const ele3tClassList =
-        ele3t.classList.length > 0 ?
-        '.' + [...ele3t.classList].join( '.' ) :
-        '';
-
-      return ele3t.tagName + ele3tId + ele3tClassList;
-    }
-
+    //»//////////////////////////////////
+    //« §4.4.5: #findH5gsClosestRootEle3t
     #findH5gsClosestRootEle3t(h5gs) {
       const p5sRef5e = this.#getParentsForEle3t(h5gs[0]);
       let p5sCur3t, rootI3x = 0;
@@ -1015,19 +1266,14 @@ const adj4rMnkyCmdLn = (function(iife) {
 
       return p5sRef5e[rootI3x];
     }
-
-    #getParentsForEle3t(ele3t) {
-      const parents = [];
-      while (ele3t.parentNode !== null) {
-        parents.push(ele3t.parentNode);
-        ele3t = ele3t.parentNode;
-      }
-
-      return parents;
-    }
   }
 
+  //>/////////////////////////////////////////////////////////////////////////--
+  //< §5: DataTree Class Declaration
   class DataTree {
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §5.1: Constructor
     constructor(root) {
       this.root = new DataTreeNode(
         root,
@@ -1040,10 +1286,11 @@ const adj4rMnkyCmdLn = (function(iife) {
       this.lastAdded = this.root;
     }
 
-    findFirst(data) {
-      return this.root.findFirst(data);
-    }
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §5.2: Data Representation
 
+    //»/////////////////
+    //« §5.2.1: toString
     toString(maxLineLength = 100) {
       let cur4Node = this.root.children[0];
       let out3Prefix = '';
@@ -1088,6 +1335,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return ou3tString;
     }
 
+    //»/////////////////////
+    //« §5.2.2: nodeToString
     #nodeToString(cur4Node, out3Prefix, maxLineLength) {
       let ou3tString;
       let maxDataLength = maxLineLength - out3Prefix.length;
@@ -1106,6 +1355,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return ou3tString + '\n';
     }
 
+    //»/////////////////////////////
+    //« §5.2.3: #wrapStrDataAtLength
     #wrapStrDataAtLength( strData, len ) {
       // ·> Use a default line wrapping length.                               <·
       if (typeof len == 'undefined') {
@@ -1188,9 +1439,23 @@ const adj4rMnkyCmdLn = (function(iife) {
 
       return w5dStrData;
     }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §5.3: Searching the Tree
+
+    //»//////////////////
+    //« §5.3.1: findFirst
+    findFirst(data) {
+      return this.root.findFirst(data);
+    }
   }
 
+  //>/////////////////////////////////////////////////////////////////////////--
+  //< §6: DataTreeNode Class Declaration
   class DataTreeNode {
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §6.1: Constructor
     constructor(data, index, depth, parentNode, parentTree) {
       this.data = data;
       this.index = index;
@@ -1200,6 +1465,11 @@ const adj4rMnkyCmdLn = (function(iife) {
       this.children = [];
     }
 
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §6.2: Modification of Tree Structure
+
+    //»/////////////////
+    //« §6.2.1: addChild
     addChild(data) {
       const newNode = new DataTreeNode(
         data,
@@ -1215,6 +1485,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return newNode;
     }
 
+    //»///////////////////
+    //« §6.2.2: addSibling
     addSibling( data ) {
       let newNode = undefined;
 
@@ -1234,20 +1506,11 @@ const adj4rMnkyCmdLn = (function(iife) {
       return newNode;
     }
 
-    findFirst( data ) {
-      let result = undefined;
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §6.3: Tree Traversal
 
-      if (data == this.data) {
-        result = this;
-      } else if (this.children.length) {
-        for (let i = 0; !result && i < this.children.length; i++) {
-          result = this.children[i].findFirst(data);
-        }
-      }
-
-      return result;
-    }
-
+    //»///////////////////////
+    //« §6.3.1: getNextSibling
     getNextSibling() {
       let next;
 
@@ -1263,6 +1526,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return next;
     }
 
+    //»//////////////////////
+    //« §6.3.2: getPathToRoot
     getPathToRoot() {
       const path = [];
       let curNode = this.parent;
@@ -1276,6 +1541,8 @@ const adj4rMnkyCmdLn = (function(iife) {
       return path;
     }
 
+    //»///////////////////////////
+    //« §6.3.3: getPreviousSibling
     getPreviousSibling() {
       let previous;
 
@@ -1287,7 +1554,29 @@ const adj4rMnkyCmdLn = (function(iife) {
 
       return previous;
     }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §6.4: Searching the Tree
+
+    //»//////////////////
+    //« §6.4.1: findFirst
+    findFirst(data) {
+      let result = undefined;
+
+      if (data == this.data) {
+        result = this;
+      } else if (this.children.length) {
+        for (let i = 0; !result && i < this.children.length; i++) {
+          result = this.children[i].findFirst(data);
+        }
+      }
+
+      return result;
+    }
   }
+
+  //>/////////////////////////////////////////////////////////////////////////--
+  //< §7: Script Loading
 
   function retryLoadingScript(
     loadingStartTime, instCreatedMsg, instNotAddedMsg
@@ -1317,6 +1606,9 @@ const adj4rMnkyCmdLn = (function(iife) {
       adj4rMnkyCmdLn.logMsg(instNotAddedMsg);
     }
   }
+
+  //>/////////////////////////////////////////////////////////////////////////--
+  //< §8: Execution Entry Point
 
   function main() {
     const instCreatedMsg = `An AdjusterMonkey instance (v${iife.version}) for
@@ -1358,6 +1650,6 @@ const adj4rMnkyCmdLn = (function(iife) {
 
   return main();
 })({
-  version: '0.12.0->rc+0.1.0',
+  version: '0.12.0-0.2.2',
   loadWaitTime: 30000,
 });
