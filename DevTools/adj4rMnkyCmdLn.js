@@ -14,7 +14,7 @@
  *  • A DOM scanner that can quickly analyze and report properties of the page's
  *    structure, such as heading hierarchy.
  *
- * @version 0.12.0-0.3.0
+ * @version 0.12.0-0.4.0
  *
  * @author danielcrieck@gmail.com
  *  <danielcrieck@gmail.com>
@@ -42,96 +42,99 @@
 
 //>/////////////////////////////////////////////////////////////////////////////
 // TABLE OF CONTENTS:
-// §1: adj4rMnkyCmdLn Object via IIFE......................................138
-// §2: Adj4rMnkyCmdLn Class Declaration....................................143
-//   §2.1: Constructor.....................................................148
-//   §2.2: Data Representation.............................................155
-//     §2.2.1: createDataTree..............................................158
-//     §2.2.2: isUrlString.................................................164
-//   §2.3: Process Timing..................................................175
-//     §2.3.1: waitForDoc4tFocus...........................................178
-//     §2.3.2: waitForTime.................................................191
-//   §2.4: Console Messaging...............................................201
-//     §2.4.1: getLabeledMsg...............................................204
-//     §2.4.2: logMsg......................................................210
-//     §2.4.3: logErrorMsg.................................................216
-//     §2.4.4: #wrapMsgAtCharLen...........................................225
-//   §2.5: Browser Control.................................................384
-//     §2.5.1: openUrlInNewWindow..........................................387
-// §3: CssScanner Class Declaration........................................402
-//   §3.1: Constructor.....................................................413
-//   §3.2: Data Representation.............................................420
-//     §3.2.1: isUrlStringToCss............................................423
-//     §3.2.2: #copyMediaRuleCSSToArrayBySel4rMat4g........................434
-//     §3.2.3: #copyRulesCSSToArrayBySel4rMat4g............................462
-//     §3.2.4: #sortAttrsFromSsLinks.......................................483
-//   §3.3: Style Sheet References and Control..............................494
-//     §3.3.1: addRefStyleSheet............................................497
-//     §3.3.2: addRefStyleSheetFromClipboard...............................532
-//     §3.3.3: clearRefSS..................................................552
-//     §3.3.4: clearRefSSFromLocalStorage..................................561
-//     §3.3.5: getRefStyleSheet............................................580
-//     §3.3.6: matchDocSSIndexToSS.........................................601
-//     §3.3.7: restoreRefSSFromStorage.....................................623
-//   §3.4: CSS Class Analysis and Extraction...............................651
-//     §3.4.1: classesUsedInPage...........................................654
-//     §3.4.2: getClassesUsedInDocSS.......................................664
-//     §3.4.3: getClassesUsedInReferenceSS.................................674
-//     §3.4.4: getDocSSRulesBySelectorMatching.............................685
-//     §3.4.5: getRefCssText...............................................701
-//     §3.4.6: printClassesUsedInPage......................................722
-//     §3.4.7: scanForClassesUsedInPage....................................732
-//     §3.4.8: #checkDocSSIndex............................................738
-//     §3.4.9: #extractClassesUsedInPage...................................759
-//     §3.4.10: #findClassesUsedInMediaRule................................774
-//     §3.4.11: #findClassesUsedInStyleRule................................788
-//     §3.4.12: #getClassesUsedInSS........................................807
-//   §3.5: Document Analysis...............................................834
-//     §3.5.1: printDocSSList..............................................837
-//     §3.5.2: printLinksAttrsList.........................................860
-//     §3.5.3: printLinkedCssFiles.........................................866
-//     §3.5.4: scanForCssFiles.............................................872
-//     §3.5.5: scanLinkedCssFile...........................................916
-//     §3.5.6: storeRefStyleSheetsLocally..................................954
-//     §3.5.7: #extractAttrsFromSsLink.....................................977
-//     §3.5.8: #fetchStyleSheetCode........................................986
-//     §3.5.9: #findDocSSIndexFromURL.....................................1024
-//     §3.5.10: #recon5tCssFromDoc........................................1041
-//   §3.6: Browser Control................................................1068
-//     §3.6.1: openDocSSInNewWindow.......................................1071
-// §4: DomScanner Class Declaration.......................................1117
-//   §4.1: Constructor....................................................1122
-//   §4.2: Data Representation............................................1128
-//     §4.2.1: #ele3tToString.............................................1131
-//   §4.3: DOM Traversal..................................................1147
-//     §4.3.1: #getParentsForEle3t........................................1150
-//   §4.4: Analysis of Heading Hierarchy..................................1162
-//     §4.4.1: printHeadingTextTree.......................................1165
-//     §4.4.2: #compareH5gsParents........................................1173
-//     §4.4.3: #createTextTreeFromH5gArray................................1198
-//     §4.4.4: #placeH5gUpTreeBranch......................................1239
-//     §4.4.5: #findH5gsClosestRootEle3t..................................1267
-// §5: DataTree Class Declaration.........................................1282
-//   §5.1: Constructor....................................................1286
-//   §5.2: Data Representation............................................1300
-//     §5.2.1: toString...................................................1303
-//     §5.2.2: nodeToString...............................................1349
-//     §5.2.3: #wrapStrDataAtLength.......................................1369
-//   §5.3: Searching the Tree.............................................1454
-//     §5.3.1: findFirst..................................................1457
-// §6: DataTreeNode Class Declaration.....................................1464
-//   §6.1: Constructor....................................................1468
-//   §6.2: Modification of Tree Structure.................................1479
-//     §6.2.1: addChild...................................................1482
-//     §6.2.2: addSibling.................................................1499
-//   §6.3: Tree Traversal.................................................1520
-//     §6.3.1: getNextSibling.............................................1523
-//     §6.3.2: getPathToRoot..............................................1540
-//     §6.3.3: getPreviousSibling.........................................1555
-//   §6.4: Searching the Tree.............................................1569
-//     §6.4.1: findFirst..................................................1572
-// §7: Script Loading.....................................................1589
-// §8: Execution Entry Point..............................................1621
+// §1: adj4rMnkyCmdLn Object via IIFE......................................141
+// §2: Adj4rMnkyCmdLn Class Declaration....................................146
+//   §2.1: Constructor.....................................................151
+//   §2.2: Data Representation.............................................158
+//     §2.2.1: createDataTree..............................................161
+//     §2.2.2: isUrlString.................................................167
+//   §2.3: Process Timing..................................................178
+//     §2.3.1: waitForDoc4tFocus...........................................181
+//     §2.3.2: waitForTime.................................................194
+//   §2.4: Console Messaging...............................................204
+//     §2.4.1: getLabeledMsg...............................................207
+//     §2.4.2: logMsg......................................................213
+//     §2.4.3: logErrorMsg.................................................219
+//     §2.4.4: #wrapMsgAtCharLen...........................................228
+//   §2.5: Browser Control.................................................387
+//     §2.5.1: openUrlInNewWindow..........................................390
+// §3: CssScanner Class Declaration........................................405
+//   §3.1: Constructor.....................................................416
+//   §3.2: Data Representation.............................................423
+//     §3.2.1: isUrlStringToCss............................................426
+//     §3.2.2: #copyMediaRuleCSSToArrayBySel4rMat4g........................437
+//     §3.2.3: #copyRulesCSSToArrayBySel4rMat4g............................465
+//     §3.2.4: #sortAttrsFromSsLinks.......................................486
+//   §3.3: Style Sheet References and Control..............................497
+//     §3.3.1: addRefStyleSheet............................................500
+//     §3.3.2: addRefStyleSheetFromClipboard...............................535
+//     §3.3.3: clearRefSS..................................................555
+//     §3.3.4: clearRefSSFromLocalStorage..................................564
+//     §3.3.5: getRefStyleSheet............................................583
+//     §3.3.6: matchDocSSIndexToSS.........................................604
+//     §3.3.7: restoreRefSSFromStorage.....................................626
+//   §3.4: CSS Class Analysis and Extraction...............................654
+//     §3.4.1: classesUsedInPage...........................................657
+//     §3.4.2: getClassesUsedInDocSS.......................................667
+//     §3.4.3: getClassesUsedInReferenceSS.................................677
+//     §3.4.4: getDocSSRulesBySelectorMatching.............................688
+//     §3.4.5: getRefCssText...............................................704
+//     §3.4.6: printClassesUsedInPage......................................725
+//     §3.4.7: scanForClassesUsedInPage....................................735
+//     §3.4.8: #checkDocSSIndex............................................741
+//     §3.4.9: #extractClassesUsedInPage...................................762
+//     §3.4.10: #findClassesUsedInMediaRule................................777
+//     §3.4.11: #findClassesUsedInStyleRule................................791
+//     §3.4.12: #getClassesUsedInSS........................................810
+//   §3.5: Document Analysis...............................................837
+//     §3.5.1: printDocSSList..............................................840
+//     §3.5.2: printLinksAttrsList.........................................863
+//     §3.5.3: printLinkedCssFiles.........................................869
+//     §3.5.4: scanForCssFiles.............................................875
+//     §3.5.5: scanLinkedCssFile...........................................919
+//     §3.5.6: storeRefStyleSheetsLocally..................................957
+//     §3.5.7: #extractAttrsFromSsLink.....................................980
+//     §3.5.8: #fetchStyleSheetCode........................................989
+//     §3.5.9: #findDocSSIndexFromURL.....................................1027
+//     §3.5.10: #recon5tCssFromDoc........................................1044
+//   §3.6: Browser Control................................................1071
+//     §3.6.1: openDocSSInNewWindow.......................................1074
+// §4: DomScanner Class Declaration.......................................1120
+//   §4.1: Constructor....................................................1126
+//   §4.2: Data Representation............................................1157
+//     §4.2.1: #ele3tToString.............................................1160
+//   §4.3: DOM Traversal..................................................1176
+//     §4.3.1: #getParentsForEle3t........................................1179
+//   §4.4: Analysis of Heading Hierarchy..................................1191
+//     §4.4.1: printHeadingTextTree.......................................1194
+//     §4.4.2: #compareH5gsParents........................................1202
+//     §4.4.3: #createTextTreeFromH5gArray................................1227
+//     §4.4.4: #placeH5gUpTreeBranch......................................1268
+//     §4.4.5: #findH5gsClosestRootEle3t..................................1296
+//   §4.5: Analysis of Writing Composition................................1310
+//     §4.5.1: getListOfWordsUsedInDocument...............................1313
+//     §4.5.2: printUniqueWordsUsedInDocument.............................1355
+// §5: DataTree Class Declaration.........................................1383
+//   §5.1: Constructor....................................................1387
+//   §5.2: Data Representation............................................1401
+//     §5.2.1: toString...................................................1404
+//     §5.2.2: nodeToString...............................................1450
+//     §5.2.3: #wrapStrDataAtLength.......................................1470
+//   §5.3: Searching the Tree.............................................1555
+//     §5.3.1: findFirst..................................................1558
+// §6: DataTreeNode Class Declaration.....................................1565
+//   §6.1: Constructor....................................................1569
+//   §6.2: Modification of Tree Structure.................................1580
+//     §6.2.1: addChild...................................................1583
+//     §6.2.2: addSibling.................................................1600
+//   §6.3: Tree Traversal.................................................1621
+//     §6.3.1: getNextSibling.............................................1624
+//     §6.3.2: getPathToRoot..............................................1641
+//     §6.3.3: getPreviousSibling.........................................1656
+//   §6.4: Searching the Tree.............................................1670
+//     §6.4.1: findFirst..................................................1673
+// §7: Script Loading.....................................................1690
+// §8: Execution Entry Point..............................................1722
 //</////////////////////////////////////////////////////////////////////////////
 
 //>///////////////////////////////////////////////////////////////////////////--
@@ -222,7 +225,7 @@ const adj4rMnkyCmdLn = (function(iife) {
     }
 
     //»//////////////////////////
-    //« §2.4.3: #wrapMsgAtCharLen
+    //« §2.4.4: #wrapMsgAtCharLen
     #wrapMsgAtCharLen(msg, len) {
       // ·> Use a default line wrapping length.                               <·
       if (typeof len == 'undefined') {
@@ -1117,11 +1120,37 @@ const adj4rMnkyCmdLn = (function(iife) {
   //< §4: DomScanner Class Declaration
   class DomScanner {
     #adj4rMnkyCmdLn;
+    #commonWords;
 
     //>/////////////////////////////////////////////////////////////////////----
     //< §4.1: Constructor
     constructor(adj4rMnkyCmdLn) {
       this.#adj4rMnkyCmdLn = adj4rMnkyCmdLn;
+
+      this.#commonWords =
+        new Set([
+          "a", "about", "after", "ago", "all", "also", "although", "an",
+          "and", "any", "are", "as", "at", "because", "be", "before",
+          "beside", "besides", "between", "but", "by", "can", "can't",
+          "can’t", "could", "considering", "day", "despite", "did", "does",
+          "doesn't", "doesn’t", "don't", "don’t", "enough", "even", "except", "for", "from",
+          "get", "give", "given", "gives", "go", "had", "have", "has", "he", "he's",
+          "he’s", "her", "his", "how", "i", "if", "in", "into", "is", "it",
+          "it's", "it’s", "its", "just", "lest", "like", "made", "make", "may", "me",
+          "moreover", "most", "my", "new", "no", "not", "notwithstanding",
+          "now", "of", "off", "on", "once", "one", "only", "onto", "or",
+          "other", "our", "out", "over", "people", "per", "provided",
+          "providing", "save", "say", "seeing", "she", "she's", "she’s",
+          "since", "so", "such", "supposing", "than", "that", "that's",
+          "that’s", "the", "their", "theirs", "them", "there", "there's",
+          "there’s", "these", "they", "this", "though", "through",
+          "throughout", "thru", "till", "to", "two", "unless", "until",
+          "unto", "up", "upon", "us", "want", "we", "we're", "we’re", "were",
+          "what", "what's", "what’s", "when", "whenever", "where", "whereas",
+          "wherever", "which", "while", "whilst", "who", "whom", "will",
+          "with", "within", "without", "without", "would", "you", "you'll",
+          "you’ll", "you're", "you’re", "your"
+        ]);
     }
 
     //>/////////////////////////////////////////////////////////////////////----
@@ -1275,6 +1304,78 @@ const adj4rMnkyCmdLn = (function(iife) {
       }
 
       return p5sRef5e[rootI3x];
+    }
+
+    //>/////////////////////////////////////////////////////////////////////----
+    //< §4.5: Analysis of Writing Composition
+
+    //»//////////////////////////////////////
+    //« §4.5.1: getListsOfWordsUsedInDocument
+    getListsOfWordsUsedInDocument(mainSel5 = 'main') {
+      if (document.documentElement.lang !== "en" && document.documentElement.lang !== "en-US") {
+        this.#adj4rMnkyCmdLn.logErrorMsg(
+          `I am programmed to analyze the writing composition of documents written in English. The current document has a language setting of "${document.documentElement.lang}."`
+        );
+        return null;
+      }
+
+      if (typeof mainSel5 != 'string') {
+        this.#adj4rMnkyCmdLn.logErrorMsg(
+          `The selector I was given to isolate the "main" element of the page was not of the expected "string" type.`
+        );
+        return null;
+      }
+
+      const $main = document.querySelector(mainSel5);
+      if ($main === null) {
+        this.#adj4rMnkyCmdLn.logErrorMsg(
+          `I am attempting to analyze the words used in this document, but I could not find a "main" element using the selector “${mainSel5}”.`
+        );
+        return null;
+      }
+
+      const words = $main.innerText.match(
+        /\w+'\w+|\w+’\w+|\w+[-–]\w+|-\w+|\w+/g
+      );
+
+      const results = {};
+      results.allWords = words.sort();
+
+      const uniqueWords = new Set();
+      words.forEach(word => {
+        uniqueWords.add(word.toLowerCase());
+      });
+      const uniqueWordsArr2 = [...uniqueWords];
+      results.uniqueWords = uniqueWordsArr2.sort();
+
+      return results;
+    }
+
+    //»///////////////////////////////////////
+    //« §4.5.2: printUniqueWordsUsedInDocument
+    printUniqueWordsUsedInDoc4t(mainSel5 = undefined, removeCommonWords = false) {
+      const wordsUsed = this.getListsOfWordsUsedInDocument(mainSel5);
+      if (wordsUsed === null) {
+        return;
+      }
+
+      let msgOutput =
+        `I found a total of ${wordsUsed.allWords.length} words in the document that can be reduced to ${wordsUsed.uniqueWords.length} unique words`;
+      let wordsOutput;
+
+      if (!removeCommonWords) {
+        msgOutput += "as follows:";
+        wordsOutput = wordsUsed.uniqueWords.join('\n');
+      } else {
+        const wordsUsedSet = new Set(wordsUsed.uniqueWords);
+        const wordsUsedArr2 = [...wordsUsedSet.difference(this.#commonWords)];
+        wordsOutput = wordsUsedArr2.join('\n');
+        msgOutput +=
+          `. A total of ${wordsUsedArr2.length} unique words used which are not considered common are as follows:`;
+      }
+
+      this.#adj4rMnkyCmdLn.logMsg(msgOutput);
+      console.log(wordsOutput);
     }
   }
 
@@ -1660,6 +1761,6 @@ const adj4rMnkyCmdLn = (function(iife) {
 
   return main();
 })({
-  version: '0.12.0-0.3.0',
+  version: '0.12.0-0.4.0',
   loadWaitTime: 30000,
 });
