@@ -1,17 +1,34 @@
+// ==UserScript==
+// @name         AdjusterMonkey Core
+// @namespace    http://tampermonkey.net/
+// @version      0.1.0-0.7.0
+// @description  Core GUI that all AdjusterMonkey utility scripts employ to interface with the developer.
+// @author       You
+// @match        https://*.github.com/*
+// @match        https://*.wsu.edu/*
+// @exclude      https://*.doubleclick.net/*
+// @exclude      https://*.googlesyndication.com/*
+// @exclude      https://*.googletagmanager.com/*
+// @exclude      https://*.gravatar.com/*
+// @exclude      https://*.mdn.mozilla.net/*
+// @icon         https://d-c-rieck.com/dcrdc-logo_favico_modern.svg
+// @grant        none
+// ==/UserScript==
+
 /*!*****************************************************************************
  * ▓▓▓▒ AdjusterMonkey. ▄▀▀▀ ▄▀▀▄ █▀▀▄ █▀▀▀ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓
  * ▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ █    █  █ █▄▄▀ █▀▀  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓
  * ▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ▀▀▀  ▀▀  ▀  ▀▄▀▀▀▀ .js ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓
  *
  * Tampermonkey script that serves as the core GUI that all AdjusterMonkey
- *  utility scripts utilize to interface with the developer.
+ *  utility scripts employ to interface with the developer.
  *
  * Implements a GUI that serves as a foundation for each AdjusterMonkey variant
  *  to utilize in building a TamperMonkey-mediated enhancement script tailored
  *  to a target website or web app. Includes UI controls to expose core commands
  *  for web browser enhancements that are useful for work with any website.
  *
- * @version 0.1.0-0.6.0
+ * @version 0.1.0-0.7.0
  *
  * @author Daniel C. Rieck
  *  [daniel.rieck@wsu.edu]
@@ -19,7 +36,7 @@
  *
  * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/Core/AdjusterMonkey.Core.js
  *
- * @license MIT - Copyright (c) 2024 Daniel C. Rieck
+ * @license MIT - Copyright (c) 2025 Daniel C. Rieck
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *   of this software and associated documentation files (the “Software”), to
  *   deal in the Software without restriction, including without limitation the
@@ -37,7 +54,7 @@
  *   DEALINGS IN THE SOFTWARE.
  ******************************************************************************/
 
-// ·> Declare «AdjusterMonkeyGui» class.                                      <·
+// Declare «AdjusterMonkeyGui» class.
 const AdjusterMonkeyGui = (function(iife) {
   'use strict';
 
@@ -52,9 +69,10 @@ const AdjusterMonkeyGui = (function(iife) {
     elementIds = iife.elementIds;
     fieldNames = iife.fieldNames;
     logoDetails = iife.logoDetails;
+    styleRules = iife.guiStyleRules;
     targetApplication = iife.targetApplication;
     #guiEl4ts = {};
-    #parentElement;
+    #parentElement = null;
 
     constructor(guiSettings) {
       if (typeof guiSettings == 'undefined') {
@@ -130,44 +148,61 @@ const AdjusterMonkeyGui = (function(iife) {
       $gui.classList.add(this.bemCssClasses.guiBlock,
         this.bemCssClasses.guiModifiers.snapToLowerRight);
       $gui.innerHTML = this.#generateHtmlForGui();
+
       return $gui;
     }
 
     #createGuiSSElement() {
+      const $styleSheet = document.createElement('style');
+      $styleSheet.type = 'text/css';
+      $styleSheet.id = this.elementIds.styleSheet;
+      $styleSheet.innerHTML = this.styleRules;
+
+      return $styleSheet;
+    }
+
+    #findInsertionPoint() {
+      const $ins5nP3t =
+        this.#parentElement === null ?
+          document.querySelector(this.domInsertionPointSelector) :
+          this.#parentElement;
+      if (this.#parentElement === null && $ins5nP3t !== null) {
+        this.#parentElement = $ins5nP3t;
+      }
+
+      return $ins5nP3t;
     }
 
     #generateHtmlForGui() {
-      return `<header class="${this.bemCssClasses.guiElements.header}">
-        <figure class="${this.bemCssClasses.guiElements.logoPlacementArea}">
-          <img src="data:image/png;base64,${this.logoDetails.base64Enc4g}" width="${this.logoDetails.width}" height="${this.logoDetails.height}" alt="AdjusterMonkey logo." class="${this.bemCssClasses.guiElements.logo}">
-          <h2 class="${this.bemCssClasses.guiElements.title}">AdjusterMonkey: ${this.targetApplication} Enhancer (v${this.guiVersion})</h2>
-          <p class="${this.bemCssClasses.guiElements.tagline}">Enhancing the web using TamperMonkey scripts.</p>
+      const el5s = this.bemCssClasses.guiElements;
+      const logo = this.logoDetails;
+      const ids = this.elementIds;
+      return `<header class="${el5s.header}">
+        <figure class="${el5s.logoPlacementArea}">
+          <img src="data:image/png;base64,${logo.base64Enc4g}" width="${logo.width}" height="${logo.height}" alt="AdjusterMonkey logo." class="${el5s.logo}">
+          <h2 class="${el5s.title}">AdjusterMonkey: ${this.targetApplication} Enhancer (v${this.guiVersion})</h2>
+          <p class="${el5s.tagline}">Enhancing the web using TamperMonkey scripts.</p>
         </figure>
         </header>
-        <fieldset id="${this.elementIds.changeSnapButtons}" class="${this.bemCssClasses.guiElements.changeSnapButtons}">
+        <fieldset id="${ids.changeSnapButtons}" class="${el5s.changeSnapButtons}">
           <legend>Change snap position:</legend>
-          <button id="${this.elementIds.changeSnapHorizontally}" class="${this.bemCssClasses.guiElements.changeSnap} ${this.bemCssClasses.guiElements.changeSnapHorizontally}" type="button" aria-label="Swap horizontal snap position to left edge.">←</button>
-          <button id="${this.elementIds.changeSnapVertically}" class="${this.bemCssClasses.guiElements.changeSnap} ${this.bemCssClasses.guiElements.changeSnapVertically}" type="button" aria-label="Swap vertical snap position to top edge.">↑</button>
+          <button id="${ids.changeSnapHorizontally}" class="${el5s.changeSnap} ${el5s.changeSnapHorizontally}" type="button" aria-label="Swap horizontal snap position to left edge.">←</button>
+          <button id="${ids.changeSnapVertically}" class="${el5s.changeSnap} ${el5s.changeSnapVertically}" type="button" aria-label="Swap vertical snap position to top edge.">↑</button>
         </fieldset>
-        <fieldset id="${this.elementIds.commandsList}" class="${this.bemCssClasses.guiElements.commandsList}">
+        <fieldset id="${ids.commandsList}" class="${el5s.commandsList}">
           <legend>Core commands:</legend>
-          <button id="${this.elementIds.executeAboutAdjusterMonkey}" class="${this.bemCssClasses.guiElements.command}" type="button"><b>About</b> AdjusterMonkey</button>
-          <button id="${this.elementIds.executeGetReferenceToPage}" class="${this.bemCssClasses.guiElements.command}" type="button">Get a linked <b>reference</b> to current page</button>
+          <button id="${ids.executeAboutAdjusterMonkey}" class="${el5s.command}" type="button"><b>About</b> AdjusterMonkey</button>
+          <button id="${ids.executeGetReferenceToPage}" class="${el5s.command}" type="button">Get a linked <b>reference</b> to current page</button>
         </fieldset>
-        <button id="${this.elementIds.collapseGui}" class="${this.bemCssClasses.guiElements.command}" type="button" aria-label="Collapse AdjusterMonkey.">×</button>`;
-    }
-
-    #generateSSForGui() {
+        <button id="${ids.collapseGui}" class="${el5s.command}" type="button" aria-label="Collapse AdjusterMonkey.">×</button>`;
     }
 
     #insertGuiIntoDom() {
-      const $insertionPoint =
-        document.querySelector(this.domInsertionPointSelector);
+      this.#insertGuiSSIntoDom();
 
-      if ($insertionPoint === null) {
+      const $ins5nP3t = this.#findInsertionPoint();
+      if ($ins5nP3t === null) {
         return;
-      } else {
-        this.#parentElement = $insertionPoint;
       }
 
       this.#guiEl4ts.gui = this.#createGuiElement();
@@ -181,16 +216,13 @@ const AdjusterMonkeyGui = (function(iife) {
     }
 
     #insertGuiSSIntoDom() {
-      // TO-DO: Finish writing function
-      // const $insertionPoint =
-      //   document.querySelector(this.domInsertionPointSelector);
+      const $ins5nP3t = this.#findInsertionPoint();
+      if ($ins5nP3t === null) {
+        return;
+      }
 
-      // if ($insertionPoint === null) {
-      //   return;
-      // }
-
-      // this.#guiElements.gui = this.#createGuiElement();
-      // this.#parentElement.append( this.#guiElements.gui );
+      this.#guiEl4ts.styleSheet = this.#createGuiSSElement();
+      this.#parentElement.append(this.#guiEl4ts.styleSheet);
     }
 
     #isCharacterUppercase( character ) {
@@ -495,6 +527,7 @@ ${JSON.stringify(this)}`
     commandsList: undefined,
     executeAboutAdjusterMonkey: undefined,
     executeGetReferenceToPage: undefined,
+    styleSheet: undefined,
   },
   fieldNames: {
     adjusterMonkeyGui: undefined,
@@ -510,11 +543,418 @@ ${JSON.stringify(this)}`
     domInsertionPoint: 'main',
   },
   targetApplication: 'Miscellaneous Website',
+  guiStyleRules:
+`/*!*****************************************************************************
+ * ▓▓▓▒ AdjusterMonkey. ▄▀▀▀ ▄▀▀▄ █▀▀▄ █▀▀▀ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓
+ * ▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ █    █  █ █▄▄▀ █▀▀  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓
+ * ▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ▀▀▀  ▀▀  ▀  ▀▄▀▀▀▀ .less ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓▓▓
+ *
+ * Syle rules for laying out and presenting the AdjusterMonkey Core GUI.
+ *
+ * @version 0.0.0-rc.4
+ *
+ * @author Daniel C. Rieck
+ *  [daniel.rieck@wsu.edu]
+ *  (https://github.com/invokeImmediately)
+ *
+ * @link https://github.com/invokeImmediately/d-c-rieck.com/blob/main/Core/…
+ *  …AdjusterMonkey.Core.less
+ *
+ * @license MIT - Copyright (c) 2025 Daniel C. Rieck
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *   of this software and associated documentation files (the “Software”), to
+ *   deal in the Software without restriction, including without limitation the
+ *   rights to use, copy, modify, merge, publish, distribute, sublicense,
+ *   and/or sell copies of the Software, and to permit persons to whom the
+ *   Software is furnished to do so, subject to the following conditions:
+ *  The above copyright notice and this permission notice shall be included in
+ *   all copies or substantial portions of the Software.
+ *  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ *   FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+ *   DEALINGS IN THE SOFTWARE.
+ ******************************************************************************/
+/* VARIABLES: AdjusterMonkey (AM) GUI Settings */
+
+/* ANIMATION: Reveal AdjusterMonkey (AM) GUI once Loaded */
+@keyframes show-adj4r-m4y-gui {
+  0% {
+    opacity: 0;
+    rotate: -45deg;
+    scale: 0.5;
+  }
+  100% {
+    opacity: 0.5;
+    rotate: 0deg;
+    scale: none;
+  }
+}
+
+/* BLOCK: AM GUI */
+#adj5-mon3.adj5-mon3-gui {
+  animation: show-adj4r-m4y-gui 0.5s;
+  background: transparent;
+  bottom: auto;
+  left: 50%;
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  right: auto;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: left 0.333s ease, top 0.333s ease, transform 0.333s ease;
+  z-index: 2147483647;
+  /* UNMODIFIED—» Default State: Collapsed */
+  /* MODIFIED—» Expanded GUI */
+}
+
+#adj5-mon3.adj5-mon3-gui:not(:hover):not(:focus-within) {
+  opacity: 0.5;
+  transition: left 0.333s ease, opacity 0.2s ease, top 0.333s ease, transform 0.333s ease;
+}
+
+#adj5-mon3.adj5-mon3-gui :is(.adj5-mon3-gui__title, .adj5-mon3-gui__tagline, .adj5-mon3-gui__commands-list, #adj5-mon3_collapse-gui) {
+  display: none;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__header {
+  background: transparent;
+  display: block;
+  line-height: 1;
+}
+
+#adj5-mon3.adj5-mon3-gui :is(.adj5-mon3-gui__header, #adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__logo-placement-area) {
+  height: auto;
+  margin: 0;
+  padding: 0;
+  width: auto;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__logo {
+  margin: 0;
+  max-width: none;
+  padding: 0;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap-buttons {
+  border: 0;
+  color: transparent;
+  height: 100%;
+  left: 0;
+  line-height: 1;
+  margin: 0;
+  overflow: visible;
+  padding: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+#adj5-mon3.adj5-mon3-gui :is(.adj5-mon3-gui__change-snap-buttons:after, #adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap-buttons:before) {
+  content: "";
+  position: absolute;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap-buttons:after {
+  height: 14px;
+  width: 28px;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap-buttons:before {
+  height: 28px;
+  width: 14px;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap-buttons > legend {
+  display: block;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+  padding: 0;
+  width: 0;
+}
+
+#adj5-mon3.adj5-mon3-gui:not(:hover):not(:focus-within) .adj5-mon3-gui__change-snap-buttons {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap {
+  background: rgba(0, 0, 0, 0.5);
+  border: 2px outset white;
+  border-radius: 4px;
+  color: white;
+  height: 28px;
+  line-height: 1;
+  padding: 2px 4px 4px;
+  position: absolute;
+  text-shadow: 1px 1px 2px black;
+  width: 28px;
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap:hover {
+  background: rgba(128, 128, 128, 0.5);
+}
+
+#adj5-mon3.adj5-mon3-gui .adj5-mon3-gui__change-snap:active {
+  background: rgba(255, 255, 255, 0.85);
+  border: 2px inset white;
+  box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.5), 0 0 8px 2px rgba(255, 255, 255, 0.25);
+  color: black;
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-left {
+  left: 2rem;
+  top: calc(100% - 2rem);
+  transform: translate(0, -100%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-left .adj5-mon3-gui__change-snap-buttons:after {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -100%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-left .adj5-mon3-gui__change-snap-buttons:before {
+  right: 0;
+  top: 50%;
+  transform: translate(100%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-left .adj5-mon3-gui__change-snap-horizontally {
+  right: 0;
+  top: 50%;
+  transform: translate(150%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-left .adj5-mon3-gui__change-snap-vertically {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -150%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-right {
+  left: calc(100% - 2rem);
+  top: calc(100% - 2rem);
+  transform: translate(-100%, -100%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-right .adj5-mon3-gui__change-snap-buttons:after {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -100%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-right .adj5-mon3-gui__change-snap-buttons:before {
+  left: 0;
+  top: 50%;
+  transform: translate(-100%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-right .adj5-mon3-gui__change-snap-horizontally {
+  left: 0;
+  top: 50%;
+  transform: translate(-150%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-lower-right .adj5-mon3-gui__change-snap-vertically {
+  left: 50%;
+  top: 0;
+  transform: translate(-50%, -150%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-left {
+  left: 2rem;
+  top: 2rem;
+  transform: translate(0, 0);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-left .adj5-mon3-gui__change-snap-buttons:after {
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-left .adj5-mon3-gui__change-snap-buttons:before {
+  right: 0;
+  top: 50%;
+  transform: translate(100%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-left .adj5-mon3-gui__change-snap-horizontally {
+  right: 0;
+  top: 50%;
+  transform: translate(150%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-left .adj5-mon3-gui__change-snap-vertically {
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 100%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-right {
+  left: calc(100% - 2rem);
+  top: 2rem;
+  transform: translate(-100%, 0);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-right .adj5-mon3-gui__change-snap-buttons:after {
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, 0%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-right .adj5-mon3-gui__change-snap-buttons:before {
+  left: 0;
+  top: 50%;
+  transform: translate(-100%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-right .adj5-mon3-gui__change-snap-horizontally {
+  left: 0;
+  top: 50%;
+  transform: translate(-150%, -50%);
+}
+
+#adj5-mon3.adj5-mon3-gui--snap-to-upper-right .adj5-mon3-gui__change-snap-vertically {
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 100%);
+}
+
+#adj5-mon3.adj5-mon3-gui--expand {
+  background-color: #282828;
+  border-radius: 0.33em;
+  box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.25), 2px 4px 6px rgba(0, 0, 0, 0.25), -2px 4px 6px rgba(0, 0, 0, 0.25), 0 6px 12px rgba(0, 0, 0, 0.25);
+  color: white;
+  display: block;
+  font-size: 16px;
+  width: 640px;
+  padding: 1em;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand :is(.adj5-mon3-gui__title, .adj5-mon3-gui__tagline, .adj5-mon3-gui__commands-list, #adj5-mon3_collapse-gui) {
+  display: block;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand #adj5-mon3_collapse-gui.adj5-mon3-gui__command {
+  background-color: #000;
+  border: 2px outset white;
+  border-radius: 0.33em;
+  color: white;
+  font-family: monospace;
+  font-weight: 600;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand :is(#adj5-mon3_collapse-gui.adj5-mon3-gui__command:hover,  #adj5-mon3_collapse-gui.adj5-mon3-gui__command:focus) {
+  background: #505050;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.25);
+}
+
+#adj5-mon3.adj5-mon3-gui--expand #adj5-mon3_collapse-gui.adj5-mon3-gui__command:active {
+  background: #fff;
+  border: 2px inset white;
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.5);
+  color: #000;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__logo-placement-area {
+  display: grid;
+  grid-column-gap: 1.5em;
+  grid-template-columns: 96px minmax(200px, 640px);
+  grid-template-rows: 1fr 1fr;
+  margin: 0;
+  padding: 0 2em 0 0;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__logo {
+  grid-area: 1 / 1 / 3 / 2;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__title {
+  align-self: end;
+  background: transparent;
+  font-size: 1.5em;
+  float: none;
+  grid-area: 1 / 2 / 2 / 3;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__tagline {
+  font-size: 1em;
+  grid-area: 2 / 2 / 3 / 3;
+  line-height: 1.2;
+  margin: 0.5em 0 0;
+  padding: 0;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__change-snap-buttons {
+  height: auto;
+  margin-top: 1em;
+  position: static;
+  width: auto;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__change-snap-buttons > legend {
+  height: auto;
+  overflow: visible;
+  width: auto;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand:not(:hover):not(:focus-within) .adj5-mon3-gui__change-snap-buttons {
+  opacity: 1;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand :is(.adj5-mon3-gui__change-snap-buttons, .adj5-mon3-gui__commands-list) {
+  background: repeating-linear-gradient(-45deg, #000, #000 8px, #282800 8px, #282800 16px);
+  color: white;
+  border: 1px solid white;
+  border-radius: 0.333em;
+  margin-top: 1.5em;
+  padding: 1em;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand :is(.adj5-mon3-gui__change-snap-buttons > legend, .adj5-mon3-gui__commands-list > legend) {
+  font-family: monospace;
+  font-weight: 600;
+  padding: 0 0.5em;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand :is(.adj5-mon3-gui__change-snap:hover, #adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__change-snap:focus) {
+  background: #767676;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand .adj5-mon3-gui__change-snap:active {
+  background: #f0f0f0;
+  color: #000;
+}
+
+#adj5-mon3.adj5-mon3-gui--expand.adj5-mon3-gui--snap-to-lower-left :is(.adj5-mon3-gui__change-snap-horizontally, .adj5-mon3-gui__change-snap-vertically),
+#adj5-mon3.adj5-mon3-gui--expand.adj5-mon3-gui--snap-to-lower-right :is(.adj5-mon3-gui__change-snap-horizontally, .adj5-mon3-gui__change-snap-vertically),
+#adj5-mon3.adj5-mon3-gui--expand.adj5-mon3-gui--snap-to-upper-left :is(.adj5-mon3-gui__change-snap-horizontally, .adj5-mon3-gui__change-snap-vertically),
+#adj5-mon3.adj5-mon3-gui--expand.adj5-mon3-gui--snap-to-upper-right :is(.adj5-mon3-gui__change-snap-horizontally,.adj5-mon3-gui__change-snap-vertically) {
+  bottom: 0;
+  left: auto;
+  position: static;
+  right: auto;
+  top: auto;
+  transform: none;
+}`,
 } );
 
-// ·> Create an instance of the «AdjusterMonkeyGui» class to be accessed       ·
-// ·  through the «Adj4rMnkyCmdLn» object once the latter has been added to    ·
-// ·  «window» object.                                                        <·
+// ·> Create an instance of the «AdjusterMonkeyGui» class to be accessed
+// ·  through the «Adj4rMnkyCmdLn» object once the latter has been added to
+// ·< «window» object.
 (function(AdjusterMonkeyGui, iifeS6s) {
   'use strict';
 
@@ -551,7 +991,7 @@ ${JSON.stringify(this)}`
       window.adj4rMnkyCmdLn.constructor.name == 'Adj4rMnkyCmdLn'
     ) {
       window.addEventListener("keydown", (event) => {
-        if (event.key == "m" && event.ctrlKey && event.altKey) {
+        if (event.key == "M" && event.ctrlKey && event.altKey) {
           const currentTime = new Date();
           window.setTimeout(tryLoadingAdj4rM4yGui, 250, currentTime);
         }
@@ -565,3 +1005,8 @@ ${JSON.stringify(this)}`
 })(AdjusterMonkeyGui, {
   loadWaitTime: 35000,
 });
+
+// ·> TO-DO for 0.1.0-0.7.0:                                                   ·
+// ·  - Insert html for message window                                         ·
+// ·  - Set up keyboard event handlers                                         ·
+// ·  - Write handlers for current commands of about AM, get a ref to page    <·
